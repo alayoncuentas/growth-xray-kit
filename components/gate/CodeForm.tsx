@@ -8,7 +8,8 @@ import { copy } from "@/lib/config";
 export function CodeForm() {
   const [state, action, pending] = useActionState<CodeFormState, FormData>(submitCode, {});
   const g = copy.gate;
-  const error = state.error === "rate" ? g.errorRate : state.error === "format" ? g.errorShort : null;
+  const errors = { format: g.errorShort, unknown: g.errorUnknown, expired: g.errorExpired, rate: g.errorRate };
+  const error: string | null = state.error ? errors[state.error] : null;
 
   return (
     <form action={action} noValidate className="mt-[22px] grid gap-1.5">

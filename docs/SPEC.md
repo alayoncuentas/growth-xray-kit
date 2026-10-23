@@ -142,7 +142,20 @@ scores          session_id, pillars jsonb, need, potential, readiness, archetype
                 monthly_at_stake, flags text[], verdict, computed_at
 events          id, code, type (email_sent|link_opened|question_viewed|answered|phase_done|
                 booked|crm_synced), payload jsonb, at
+access_attempts id, ip_hash, at        (intentos fallidos de código; hash SHA-256 de la IP, nunca la IP)
 ```
+
+Migraciones en `supabase/migrations/`, datos de demo en `supabase/seed.sql`. RLS activado sin políticas:
+solo el servidor (clave secreta) lee y escribe.
+
+Reglas de persistencia (fase 1):
+- **Código válido** = existe en `access_codes` y `expires_at` es nulo o futuro. Formato `^[A-Z0-9-]{6,32}$`.
+- **Limitación de intentos**: máximo 10 códigos fallidos (mal formados, inexistentes o vencidos) por IP cada 15 min, contados en `access_attempts`.
+- **Sesión**: una por código y fase (`unique (code, phase)`); retomar reutiliza la misma.
+- **`link_opened`**: al ver la bienvenida en el navegador (no al renderizar en el servidor, para no contar prefetches). Crea la sesión si falta; `access_codes.status` pasa a `opened`. `payload.resumed` indica si la sesión ya existía.
+- **`answered`**: cada `POST /api/answer` válido. Upsert en `answers` (la calculadora se guarda como un objeto con los campos que el usuario movió), actualiza `last_question_id` y recalcula la fila de `scores`. La respuesta de la API nunca incluye puntajes.
+- **`phase_done`**: con el botón "See my results" (`complete: true`), si no queda ninguna pregunta visible sin responder. Una sola vez por sesión: fija `completed_at` y el estado pasa a `p1_done`. El estado nunca retrocede.
+- **Retomar**: la bienvenida lleva a la primera pregunta visible sin responder (no a la siguiente de `last_question_id`, porque el usuario pudo volver atrás); si no falta ninguna, a resultados. La calculadora cuenta como respondida cuando tiene fila guardada.
 
 ### Rutas
 ```

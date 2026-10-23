@@ -3,8 +3,12 @@
 import { MoneyAtStake } from "@/components/results/MoneyAtStake";
 import { phase1, usd } from "@/lib/config";
 import { calcValues } from "@/lib/scoring";
-import { setCalc, useDiagnostic } from "@/lib/store";
+import { getDiagnostic, setCalc, useDiagnostic } from "@/lib/store";
+import { queueSave } from "@/lib/sync";
 import type { CalculatorField, CalculatorQuestion } from "@/lib/types";
+
+// Los sliders cambian muchas veces por segundo: se guarda el último valor tras una pausa.
+const SAVE_DELAY_MS = 600;
 
 const fmt = (f: CalculatorField, x: number) => (f.unit === "USD" ? usd(x) : f.unit === "%" ? `${x}%` : String(x));
 
@@ -31,7 +35,10 @@ export function Calculator({ code, question }: { code: string; question: Calcula
               max={f.max}
               step={f.step}
               value={c[f.id]}
-              onChange={(e) => setCalc(code, f.id, Number(e.target.value))}
+              onChange={(e) => {
+                setCalc(code, f.id, Number(e.target.value));
+                queueSave(code, question.id, getDiagnostic(code).calc, SAVE_DELAY_MS);
+              }}
               className="w-full accent-accent"
             />
             {f.note && <p className="-mt-0.5 text-[13px] text-muted">{f.note}</p>}

@@ -1,14 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Insight } from "@/components/insight/InsightCard";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { StepProgress } from "@/components/ui/StepProgress";
 import { copy, getQuestion, isChoice, phase1 } from "@/lib/config";
 import { progress } from "@/lib/flow";
 import { insightFor } from "@/lib/insights";
-import { getDiagnostic, setAnswer, useDiagnostic } from "@/lib/store";
+import { getDiagnostic, setAnswer, useDiagnostic, useSaveFailed } from "@/lib/store";
+import { completePhase, queueSave } from "@/lib/sync";
 import type { Answers, Company } from "@/lib/types";
 import { Calculator } from "./Calculator";
 import { OptionList } from "./OptionList";
@@ -18,6 +19,8 @@ const AUTO_ADVANCE_MS = 380;
 export function QuestionScreen({ code, qid, company }: { code: string; qid: string; company: Company | null }) {
   const router = useRouter();
   const { answers } = useDiagnostic(code);
+  const saveFailed = useSaveFailed();
+  const [finishing, setFinishing] = useState(false);
   const q = getQuestion(qid)!;
   const p = progress(phase1, qid, company?.industry)!;
   const outside = company?.outside ?? null;
@@ -57,6 +60,7 @@ export function QuestionScreen({ code, qid, company }: { code: string; qid: stri
       next = optionId;
     }
     setAnswer(code, q.id, next);
+    queueSave(code, q.id, next);
     justSelected.current = true;
 
     // Como en el prototipo: si la respuesta no trae insight, avanza solo.
@@ -65,6 +69,14 @@ export function QuestionScreen({ code, qid, company }: { code: string; qid: stri
     if (q.type === "single" && !insightFor(phase1, q, after, outside)) {
       timer.current = setTimeout(() => router.push(nextHref), AUTO_ADVANCE_MS);
     }
+  }
+
+  // Última pregunta: guarda con `complete` (el servidor cierra la fase) y después muestra resultados.
+  async function finish() {
+    setFinishing(true);
+    const latest = getDiagnostic(code);
+    await completePhase(code, q.id, q.type === "calculator" ? latest.calc : (latest.answers[q.id] ?? ""));
+    router.push(nextHref);
   }
 
   const a = answers[q.id];
@@ -94,12 +106,19 @@ export function QuestionScreen({ code, qid, company }: { code: string; qid: stri
           <ButtonLink href={prevHref} variant="ghost">
             {p.prev ? c.back : c.backToStart}
           </ButtonLink>
-          {answered ? (
-            <ButtonLink href={nextHref}>{p.next ? c.next : c.seeResults}</ButtonLink>
+          {answered && p.next ? (
+            <ButtonLink href={nextHref}>{c.next}</ButtonLink>
           ) : (
-            <Button disabled>{p.next ? c.next : c.seeResults}</Button>
+            <Button type="button" disabled={!answered || finishing} onClick={finish}>
+              {p.next ? c.next : c.seeResults}
+            </Button>
           )}
         </div>
+        {saveFailed && (
+          <p role="status" className="mt-3 text-right text-[13px] text-bad">
+            {c.saveError}
+          </p>
+        )}
       </section>
     </>
   );

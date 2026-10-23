@@ -1,9 +1,10 @@
-import { getQuestion } from "@/lib/config";
+import { validateAnswer } from "@/lib/answers";
+import { phase1 } from "@/lib/config";
 import { checkAccess } from "@/lib/server/access";
+import { saveAnswer } from "@/lib/server/diagnostic";
 
 // POST /api/answer — guarda una respuesta y recalcula puntajes.
-// Hoy solo valida la petición; todavía no hay base de datos.
-// TODO(supabase): upsert en answers (session_id + question_id), recalcular con phase1Result y guardar en scores.
+// Body: { code, questionId, value, complete? }. Nunca devuelve puntajes: la vista del equipo es solo de /admin.
 export async function POST(request: Request) {
   let body: unknown;
   try {
@@ -11,13 +12,34 @@ export async function POST(request: Request) {
   } catch {
     return Response.json({ error: "invalid_json" }, { status: 400 });
   }
-  const { code, questionId, value } = (body ?? {}) as { code?: unknown; questionId?: unknown; value?: unknown };
-  if (typeof code !== "string" || typeof questionId !== "string" || value === undefined) {
+  const { code, questionId, value, complete } = (body ?? {}) as Record<string, unknown>;
+  if (typeof code !== "string" || typeof questionId !== "string" || value === undefined || (complete !== undefined && typeof complete !== "boolean")) {
     return Response.json({ error: "invalid_body" }, { status: 400 });
   }
-  const access = await checkAccess(code);
-  if (!access.ok) return Response.json({ error: access.reason }, { status: access.reason === "rate" ? 429 : 400 });
-  if (!getQuestion(questionId)) return Response.json({ error: "unknown_question" }, { status: 400 });
 
-  return Response.json({ error: "not_implemented", detail: "Answer storage is not connected yet." }, { status: 501 });
+  const access = await checkAccess(code);
+  if (!access.ok) {
+    return access.reason === "rate"
+      ? Response.json({ error: "rate_limited" }, { status: 429 })
+      : Response.json({ error: "invalid_code" }, { status: 404 });
+  }
+
+  const industry = access.access.company?.industry;
+  const clean = validateAnswer(phase1, questionId, value, industry);
+  if (clean === null) return Response.json({ error: "invalid_answer" }, { status: 400 });
+
+  try {
+    const { completed } = await saveAnswer({
+      code: access.access.code,
+      knownIndustry: industry,
+      questionId,
+      value: clean,
+      complete: complete === true,
+      userAgent: request.headers.get("user-agent"),
+    });
+    return Response.json({ ok: true, completed });
+  } catch (e) {
+    console.error("[api/answer]", e);
+    return Response.json({ error: "save_failed" }, { status: 500 });
+  }
 }

@@ -1,10 +1,9 @@
 "use client";
 
-// Estado del diagnóstico en memoria del navegador, por código de acceso.
-// Sobrevive a la navegación entre pantallas, no a una recarga.
-// TODO(supabase): cada cambio se guarda con POST /api/answer y se rehidrata al volver con el código.
+// Estado del diagnóstico en el navegador, por código de acceso.
+// Se siembra con lo guardado en Supabase (DiagnosticProvider) y cada cambio se envía a /api/answer (lib/sync.ts).
 
-import { useSyncExternalStore } from "react";
+import { createContext, createElement, useContext, useSyncExternalStore, type ReactNode } from "react";
 import type { Answers, CalcOverrides } from "./types";
 
 export interface DiagnosticState {
@@ -44,12 +43,45 @@ export function setCalc(code: string, field: keyof CalcOverrides, value: number)
   emit();
 }
 
-/** Estado del código. En el servidor y durante la hidratación devuelve el estado vacío. */
+// ---------- estado guardado en el servidor ----------
+
+const Initial = createContext<{ code: string; state: DiagnosticState } | null>(null);
+
+/**
+ * Entrega lo guardado en Supabase. En el navegador siembra el store la primera vez que aparece el código
+ * (p. ej. después de recargar); si ya hay estado en memoria, ese es más nuevo y se conserva.
+ * En el servidor no toca el store (es compartido entre peticiones): solo lo usa como snapshot.
+ */
+export function DiagnosticProvider({ code, initial, children }: { code: string; initial: DiagnosticState; children: ReactNode }) {
+  if (typeof window !== "undefined" && !states.has(code)) states.set(code, initial);
+  return createElement(Initial, { value: { code, state: initial } }, children);
+}
+
+/** Estado del código. En el servidor y durante la hidratación devuelve lo guardado. */
 export function useDiagnostic(code: string): DiagnosticState {
+  const init = useContext(Initial);
   return useSyncExternalStore(
     subscribe,
     () => getDiagnostic(code),
-    () => EMPTY,
+    () => (init?.code === code ? init.state : EMPTY),
+  );
+}
+
+// ---------- estado del guardado (para avisar si falla) ----------
+
+let saveFailed = false;
+
+export function setSaveFailed(v: boolean) {
+  if (saveFailed === v) return;
+  saveFailed = v;
+  emit();
+}
+
+export function useSaveFailed(): boolean {
+  return useSyncExternalStore(
+    subscribe,
+    () => saveFailed,
+    () => false,
   );
 }
 

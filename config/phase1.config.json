@@ -720,7 +720,9 @@
       "cta": "Start",
       "errorShort": "Codes have at least 6 characters. Check the email we sent you.",
       "errorRate": "Too many attempts. Wait a few minutes and try again.",
-      "demoHint": "Demo: RIVERA-7F3K loads a sample business with an outside view. Any other code of 6+ characters starts a generic diagnostic."
+      "demoHint": "Demo: RIVERA-7F3K loads a sample business with an outside view. If you've started before, the same code picks up where you left off.",
+      "errorUnknown": "We couldn't find that code. Check the email we sent you.",
+      "errorExpired": "This code has expired. Reply to our email and we'll send you a new one."
     },
     "welcome": {
       "eyebrowGeneric": "Phase 1 · About 10 minutes",
@@ -747,7 +749,15 @@
       "outsideReplyGap": "That's {replyGap} later.",
       "outsideLatestReview": "Latest review: {lastReview}.",
       "back": "Change code",
-      "cta": "Begin"
+      "cta": "Begin",
+      "resumeTitle": "Welcome back. Your answers are saved.",
+      "resumeSub": "You've answered {done} of {total} questions. Pick up right where you stopped.",
+      "resumeCta": "Pick up where I left off",
+      "resumeFromStart": "Review from the first question",
+      "doneTitle": "Welcome back. Your results are ready.",
+      "doneSub": "You finished Phase 1. Your results are saved, and you can change any answer.",
+      "doneCta": "See my results",
+      "doneReview": "Review my answers"
     },
     "question": {
       "part": "Part {n} of {total} · {label}",
@@ -755,7 +765,8 @@
       "back": "Back",
       "backToStart": "Back to start",
       "next": "Continue",
-      "seeResults": "See my results"
+      "seeResults": "See my results",
+      "saveError": "We couldn't save your last answer. Check your connection; we'll try again when you continue."
     },
     "insight": {
       "evidenceTag": "What the research says",
@@ -785,8 +796,8 @@
       "noGaps": "No major gaps in Phase 1. Your next gains are in measurement and retention, which Phase 2 covers.",
       "notYetTitle": "What you probably don't need yet",
       "redo": "Change my answers",
-      "emptyTitle": "We don't have your answers in this tab.",
-      "emptySub": "Answers aren't saved between visits yet, so a reload starts fresh. Take the diagnostic again to see your results.",
+      "emptyTitle": "We don't have any answers for this code yet.",
+      "emptySub": "Start the diagnostic and your results will show up here. Your answers save as you go.",
       "emptyCta": "Start the diagnostic"
     },
     "unlock": {
@@ -799,8 +810,8 @@
       ],
       "cta": "Continue to Phase 2",
       "later": "Save and finish later",
-      "savedTo": "Your progress is tied to code {code}.",
-      "savedMsg": "For now your answers live in this browser tab only. Saving so you can come back with code {code} is coming soon.",
+      "savedTo": "Your answers are saved to code {code}.",
+      "savedMsg": "Your answers are saved. Open your link again or enter code {code} to pick up where you left off.",
       "p2Pending": "Phase 2 isn't built yet. Soon this button will open its first block."
     },
     "theme": {
