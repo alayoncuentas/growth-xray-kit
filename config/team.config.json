@@ -1,0 +1,32 @@
+{
+  "_note": "Solo para /admin y código del servidor. Nunca importar desde componentes cliente ni rutas públicas.",
+  "title": "Team view · never shown to the prospect",
+  "axes": {
+    "need": { "label": "Need", "note": "Size of the gaps found" },
+    "potential": { "label": "Potential", "note": "Volume, deal value, spend" },
+    "readiness": { "label": "Readiness", "note": "Preliminary, confirmed in Phase 2" }
+  },
+  "verdicts": {
+    "high": "High priority. Invite to Phase 2 and offer a results review call.",
+    "nurture": "Nurture. High need and potential, readiness unclear. Phase 2 should confirm budget and decision-maker.",
+    "prepare": "Prepare first. Real problems, but volume or deal value may not justify a full build yet.",
+    "selective": "Selective optimization. Sell one targeted improvement, not a full system.",
+    "low": "Low fit for now. Keep in a light nurture sequence."
+  },
+  "flags": {
+    "unmeasured": "Doesn't measure response time",
+    "lowVolume": "Low inquiry volume",
+    "payingLeak": "Paying for leaking leads",
+    "ownerBottleneck": "Owner bottleneck",
+    "solo": "Solo operator"
+  },
+  "kv": {
+    "code": "Access code",
+    "monthly": "Monthly at stake",
+    "cautious": "cautious",
+    "ads": "Ad spend",
+    "noAds": "None",
+    "opening": "Opening line"
+  },
+  "openingLine": "“Your X-ray says {archetype}. Can I show you the one fix I'd start with?”"
+}

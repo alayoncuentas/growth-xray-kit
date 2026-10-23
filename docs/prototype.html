@@ -1,0 +1,570 @@
+<title>Growth X-Ray</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a calm single column for the interview, widening to a two-column report for results. Lab-report details (mono source lines, measured bars) carry the diagnostic feel. */
+:root{
+  --paper:#F1F5F4; --card:#FFFFFF; --ink:#132427; --muted:#56696B; --line:#D3DDDC;
+  --accent:#0E5C61; --accent-ink:#FFFFFF; --accent-soft:#DDECEA;
+  --leak:#B85E17; --leak-soft:#F7E7D7;
+  --good:#2C7A4D; --warn:#A8731A; --bad:#B0412C;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#0E1718; --card:#162224; --ink:#E4EDED; --muted:#93A6A7; --line:#2A3B3D;
+  --accent:#62B8B1; --accent-ink:#0B1A1B; --accent-soft:#1A3335;
+  --leak:#E99A57; --leak-soft:#3A2919;
+  --good:#6BC08D; --warn:#E0B25B; --bad:#E57B63; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --paper:#0E1718; --card:#162224; --ink:#E4EDED; --muted:#93A6A7; --line:#2A3B3D;
+  --accent:#62B8B1; --accent-ink:#0B1A1B; --accent-soft:#1A3335;
+  --leak:#E99A57; --leak-soft:#3A2919;
+  --good:#6BC08D; --warn:#E0B25B; --bad:#E57B63; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font:16px/1.55 var(--f-body);
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:0 48px}
+h1,h2,h3{font-family:var(--f-display);font-weight:700;line-height:1.15;text-wrap:balance;margin:0}
+p{margin:0}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.top{max-width:920px;margin:0 auto;display:flex;align-items:center;gap:12px;padding-block:18px;flex-wrap:wrap}
+.brand{font-family:var(--f-display);font-weight:700;font-size:18px;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+.brand-mark{width:22px;height:22px;border-radius:50%;border:2px solid var(--accent);position:relative}
+.brand-mark::after{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--accent)}
+.chip{font:500 11px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;padding:6px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.top .spacer{flex:1}
+.who{font-size:13px;color:var(--muted)}
+
+.wrap{max-width:680px;margin:0 auto}
+.wrap.wide{max-width:920px}
+
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-block:4px 6px}
+.step{height:4px;border-radius:2px;background:var(--line);overflow:hidden}
+.step i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.steps-meta{display:flex;justify-content:space-between;gap:12px;font:500 12px/1.4 var(--f-mono);color:var(--muted);letter-spacing:.03em;margin-bottom:28px;flex-wrap:wrap}
+
+.eyebrow{font:500 12px/1.3 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+.prompt{font-size:clamp(24px,4.6vw,32px);letter-spacing:-.015em;margin-bottom:8px}
+.sub{color:var(--muted);margin-bottom:22px}
+
+.opts{display:grid;gap:10px;margin-top:20px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:14px 16px;cursor:pointer;transition:border-color .15s, background .15s}
+.opt:hover{border-color:var(--accent)}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.opt .box{flex:none;width:18px;height:18px;margin-top:3px;border:1.5px solid var(--muted);border-radius:50%}
+.opt.multi .box{border-radius:4px}
+.opt[aria-pressed="true"] .box{border-color:var(--accent);background:var(--accent);box-shadow:inset 0 0 0 3px var(--card)}
+.opt .lbl{font-weight:500}
+.opt .hint{display:block;font-size:13px;color:var(--muted);font-weight:400}
+
+.insight{margin-top:22px;border-radius:var(--r);padding:18px 18px 16px;background:var(--card);border:1px solid var(--line);display:grid;gap:10px;animation:rise .35s ease both}
+.insight .tag{font:500 11px/1 var(--f-mono);letter-spacing:.09em;text-transform:uppercase;color:var(--accent)}
+.insight.myth{background:var(--leak-soft);border-color:transparent}
+.insight.myth .tag{color:var(--leak)}
+.insight .lead{font-weight:600}
+.insight .myth-line{font-family:var(--f-display);font-size:20px;text-decoration:line-through;text-decoration-thickness:2px;text-decoration-color:var(--leak);opacity:.85}
+.insight .src{font:400 12px/1.45 var(--f-mono);color:var(--muted);border-top:1px dashed var(--line);padding-top:8px}
+.insight .src a{color:inherit}
+.insight .note{font-size:13px;color:var(--muted)}
+@keyframes rise{from{opacity:.4;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.insight{animation:none}.step i{transition:none}}
+
+.nav{display:flex;gap:10px;justify-content:space-between;align-items:center;margin-top:26px}
+.btn{border:0;border-radius:999px;padding:12px 22px;font-weight:600;cursor:pointer;background:var(--accent);color:var(--accent-ink)}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--muted);padding-inline:8px}
+.btn.line{background:transparent;border:1.5px solid var(--line);color:var(--ink)}
+
+/* gate + welcome */
+.gate{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:clamp(20px,5vw,40px);margin-top:20px}
+.gate h1{font-size:clamp(30px,6vw,44px);letter-spacing:-.02em;margin-bottom:12px}
+.field{display:grid;gap:6px;margin-top:22px}
+.field label{font-size:13px;font-weight:600}
+.code-row{display:flex;gap:10px;flex-wrap:wrap}
+.code-row input{flex:1;min-width:0;font:500 18px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;padding:12px 14px;border:1.5px solid var(--line);border-radius:var(--r);background:var(--paper);color:var(--ink)}
+.small{font-size:13px;color:var(--muted)}
+.err{color:var(--bad);font-size:13px}
+.promise{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:22px}
+.promise div{border-top:2px solid var(--accent);padding-top:10px;font-size:14px}
+.promise b{display:block;font:600 13px/1.3 var(--f-mono);color:var(--accent);margin-bottom:4px}
+@media (max-width:560px){.promise{grid-template-columns:1fr}}
+
+.outside{margin-top:24px;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.outside-h{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:12px 16px;background:var(--accent-soft);font:500 12px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase}
+.outside-row{display:grid;grid-template-columns:120px 1fr;gap:12px;padding:14px 16px;border-top:1px solid var(--line);font-size:15px}
+.outside-row span:first-child{font:500 12px/1.5 var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.outside-row strong{color:var(--leak)}
+@media (max-width:480px){.outside-row{grid-template-columns:1fr;gap:4px}}
+
+/* calculator */
+.calc{display:grid;gap:18px;margin-top:20px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.slider{display:grid;gap:6px}
+.slider-top{display:flex;justify-content:space-between;gap:12px;font-size:14px}
+.slider-top output{font:500 15px/1.4 var(--f-mono);font-variant-numeric:tabular-nums;color:var(--accent);white-space:nowrap}
+.slider input{width:100%;accent-color:var(--accent)}
+.slider .small{margin-top:-2px}
+.calc-out{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.money{border-radius:var(--r);padding:16px;background:var(--leak-soft)}
+.money.alt{background:var(--accent-soft)}
+.money .k{font:500 11px/1.3 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.money .v{font:700 clamp(26px,5vw,34px)/1.1 var(--f-display);font-variant-numeric:tabular-nums;margin-top:6px;color:var(--leak)}
+.money.alt .v{color:var(--accent)}
+.money .d{font-size:13px;color:var(--muted);margin-top:4px}
+@media (max-width:520px){.calc-out{grid-template-columns:1fr}}
+
+/* results */
+.res-head{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end;margin-block:8px 28px}
+.res-head h1{font-size:clamp(34px,7vw,56px);letter-spacing:-.025em}
+.res-head .line{font-size:18px;color:var(--muted);margin-top:10px;max-width:52ch}
+.index{text-align:right}
+.index .n{font:700 64px/1 var(--f-display);font-variant-numeric:tabular-nums}
+.index .n small{font-size:20px;color:var(--muted);font-weight:600}
+.index .k{font:500 11px/1.3 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+@media (max-width:620px){.res-head{grid-template-columns:1fr}.index{text-align:left}}
+
+.grid2{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:20px}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+.panel h2{font-size:20px;margin-bottom:14px}
+.panel + .panel{margin-top:0}
+.stack{display:grid;gap:20px}
+
+.pillar{display:grid;grid-template-columns:150px minmax(0,1fr) 40px;gap:12px;align-items:center;padding-block:8px;border-bottom:1px solid var(--line);font-size:14px}
+.pillar:last-child{border-bottom:0}
+.bar{height:10px;border-radius:5px;background:var(--paper);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:5px}
+.pillar .s{font:500 14px/1 var(--f-mono);font-variant-numeric:tabular-nums;text-align:right}
+.pillar.locked{color:var(--muted)}
+.pillar.locked .bar{background:repeating-linear-gradient(135deg,var(--line) 0 6px,transparent 6px 12px)}
+.pillar.locked .s{font-size:11px;letter-spacing:.05em;white-space:nowrap}
+@media (max-width:440px){.pillar{grid-template-columns:110px minmax(0,1fr) 34px}}
+
+.finding{display:grid;gap:6px;padding-block:14px;border-bottom:1px solid var(--line)}
+.finding:first-of-type{padding-top:0}
+.finding:last-child{border-bottom:0;padding-bottom:0}
+.finding h3{font-size:17px}
+.finding .first{font-size:14px;background:var(--accent-soft);border-radius:8px;padding:10px 12px}
+.finding .first b{font:600 11px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:5px}
+.sev{font:500 11px/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;padding:4px 7px;border-radius:999px;justify-self:start}
+.sev.bad{color:var(--bad);border:1px solid var(--bad)}
+.sev.warn{color:var(--warn);border:1px solid var(--warn)}
+
+ul.not{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+ul.not li{padding-left:22px;position:relative;font-size:15px}
+ul.not li::before{content:"";position:absolute;left:2px;top:10px;width:10px;height:2px;background:var(--muted)}
+
+.unlock{background:var(--ink);color:var(--paper);border-radius:14px;padding:clamp(20px,4vw,32px);margin-top:20px;display:grid;gap:14px}
+.unlock h2{font-size:clamp(24px,4vw,30px)}
+.unlock ul{margin:0;padding-left:18px;display:grid;gap:6px}
+.unlock .btn{background:var(--paper);color:var(--ink);justify-self:start}
+.unlock .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.unlock .btn.line{background:transparent;color:var(--paper);border-color:color-mix(in srgb, var(--paper) 40%, transparent)}
+.unlock .small{color:color-mix(in srgb, var(--paper) 70%, transparent)}
+
+.team-toggle{margin-top:36px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.team{margin-top:14px;border:2px dashed var(--line);border-radius:14px;padding:20px;display:grid;gap:18px}
+.axes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.axis .k{font:500 11px/1.3 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.axis .n{font:700 34px/1.1 var(--f-display);font-variant-numeric:tabular-nums}
+.axis .bar{margin-top:6px}
+@media (max-width:560px){.axes{grid-template-columns:1fr}}
+.verdict{font-weight:600;padding:12px 14px;border-radius:8px;background:var(--accent-soft)}
+.flags{display:flex;gap:8px;flex-wrap:wrap}
+.flag{font:500 12px/1 var(--f-mono);padding:7px 9px;border-radius:6px;background:var(--leak-soft);color:var(--leak)}
+.kv{display:grid;grid-template-columns:140px 1fr;gap:6px 14px;font-size:14px}
+.kv span:nth-child(odd){color:var(--muted)}
+@media (max-width:480px){.kv{grid-template-columns:1fr}}
+.toast{margin-top:12px;font-size:14px;color:var(--accent);font-weight:500}
+</style>
+
+<header class="top">
+  <div class="brand"><span class="brand-mark" aria-hidden="true"></span>Growth X-Ray</div>
+  <span class="chip">Prototype · Phase 1</span>
+  <span class="spacer"></span>
+  <span class="who" id="who"></span>
+</header>
+<main id="app" class="wrap" aria-live="polite"></main>
+
+<script>
+const CFG = {"version": "0.1.0", "phase": 1, "title": "Growth X-Ray", "estimatedMinutes": 10, "pillars": [{"id": "access", "label": "First response", "phase": 1}, {"id": "pipeline", "label": "Lead tracking", "phase": 1}, {"id": "followup", "label": "Follow-up", "phase": 1}, {"id": "reputation", "label": "Reviews & proof", "phase": 1}, {"id": "owner", "label": "Owner independence", "phase": 1}, {"id": "retention", "label": "Retention & LTV", "phase": 2}, {"id": "visibility", "label": "Business visibility", "phase": 2}, {"id": "readiness", "label": "Readiness", "phase": 2}], "sections": [{"id": "s1", "label": "Your business"}, {"id": "s2", "label": "When someone reaches out"}, {"id": "s3", "label": "After the first contact"}, {"id": "s4", "label": "Your numbers"}], "evidence": {"hbr2011": {"text": "In an audit of 2,241 U.S. companies, only 37% answered a new web lead within an hour, and 23% never answered at all. Firms that responded within the hour were nearly 7 times as likely to reach a decision-maker as firms that waited longer.", "source": "Harvard Business Review, \"The Short Life of Online Sales Leads\", 2011", "kind": "academic", "url": "https://hbr.org/2011/03/the-short-life-of-online-sales-leads"}, "insidesales2013": {"text": "When InsideSales audited real response times, nearly 1 in 4 companies believed they called new leads within five minutes. Only 5% actually did. The most common real number of follow-up attempts was zero.", "source": "InsideSales ResponseAudit, 2013", "kind": "industry", "url": "https://www.marketingprofs.com/charts/2013/10870/companies-unaware-of-slow-sales-response-times"}, "drift2017": {"text": "A test of 433 companies found only 7% responded within five minutes, and 55% hadn't responded after five business days.", "source": "Drift lead response study, 2017 (433 companies)", "kind": "vendor", "url": "https://ainora.lt/blog/lead-response-time-statistics-every-study-2026"}, "locals2024": {"text": "In a test of calls to local businesses, only 37.8% were answered by a person. 24.3% got no answer and no voicemail.", "source": "411 Locals, 2024 (85 businesses, small sample)", "kind": "industry", "url": "https://getaira.io/blog/missed-business-calls-statistics"}, "brightlocal2026a": {"text": "94% of consumers are open to leaving a review when a business asks. 74% only pay attention to reviews from the last three months.", "source": "BrightLocal Local Consumer Review Survey, 2026 (1,002 U.S. adults)", "kind": "industry", "url": "https://www.brightlocal.com/research/local-consumer-review-survey/"}, "brightlocal2026b": {"text": "47% of consumers won't use a business with fewer than 20 reviews, and 89% expect the owner to respond to reviews.", "source": "BrightLocal Local Consumer Review Survey, 2026 (1,002 U.S. adults)", "kind": "industry", "url": "https://www.brightlocal.com/research/local-consumer-review-survey/"}, "reichheld": {"text": "Bain & Company's research on loyalty found that raising customer retention by 5% can raise profits by 25% to 95%.", "source": "Fred Reichheld, Bain & Company (via HBR, 2014)", "kind": "consulting", "url": "https://hbr.org/2014/10/the-value-of-keeping-the-right-customers"}}, "myths": {"callback": {"myth": "If they're really interested, they'll call back.", "reality": "Interest cools in hours, not days. The businesses that win are usually the ones that reply first and follow up on purpose.", "evidence": ["drift2017"], "note": "You may have seen \"80% of sales happen after the fifth follow-up.\" That number is credited to an association nobody has been able to find. We don't use it."}, "marketing": {"myth": "Marketing doesn't work in my industry.", "reality": "When ads \"don't work\", the cause is often what happens after the click: slow replies, no follow-up, no tracking. The ads get blamed for a system problem."}}, "questions": [{"id": "industry", "section": "s1", "type": "single", "prompt": "What kind of business do you run?", "options": [{"id": "home", "label": "Home services", "hint": "HVAC, plumbing, roofing, remodeling"}, {"id": "dental", "label": "Dental or medical practice"}, {"id": "medspa", "label": "Med spa or wellness"}, {"id": "legal", "label": "Legal services"}, {"id": "realty", "label": "Real estate or mortgage"}, {"id": "prof", "label": "Professional services", "hint": "accounting, consulting, agency"}, {"id": "other", "label": "Another local service"}]}, {"id": "team", "section": "s1", "type": "single", "prompt": "How many people work in the business, including you?", "options": [{"id": "1", "label": "Just me", "value": 1}, {"id": "2_5", "label": "2 to 5", "value": 4}, {"id": "6_15", "label": "6 to 15", "value": 10}, {"id": "16_50", "label": "16 to 50", "value": 30}, {"id": "50p", "label": "More than 50", "value": 60}]}, {"id": "channels", "section": "s1", "type": "multi", "prompt": "How do new customers reach you?", "sub": "Pick all that apply.", "options": [{"id": "phone", "label": "Phone calls"}, {"id": "text", "label": "Text messages"}, {"id": "form", "label": "Website form"}, {"id": "google", "label": "Google Business Profile"}, {"id": "social", "label": "Facebook or Instagram messages"}, {"id": "email", "label": "Email"}, {"id": "ref", "label": "Referrals and word of mouth"}, {"id": "walk", "label": "Walk-ins"}]}, {"id": "busy", "section": "s2", "type": "single", "prompt": "It's Tuesday, 10:40 a.m. You're with a client and a new prospect calls. What usually happens?", "options": [{"id": "a", "label": "Someone on the team answers and books the next step", "scores": {"access": 90}}, {"id": "b", "label": "It goes to voicemail and I call back when I'm free", "scores": {"access": 45}}, {"id": "c", "label": "It depends on who's around that day", "scores": {"access": 35}}, {"id": "d", "label": "Honestly, some of those calls never get returned", "scores": {"access": 10}}], "insight": {"kind": "evidence", "evidence": "hbr2011"}}, {"id": "speed", "section": "s2", "type": "single", "prompt": "On a normal weekday, how long does a new inquiry wait for a first reply?", "options": [{"id": "5m", "label": "Under 5 minutes", "scores": {"access": 100}}, {"id": "1h", "label": "Under an hour", "scores": {"access": 75}}, {"id": "day", "label": "Same day", "scores": {"access": 45}}, {"id": "next", "label": "Next day or later", "scores": {"access": 15}}, {"id": "dk", "label": "I don't really know", "scores": {"access": 25}, "flag": "unmeasured"}], "insight": {"kind": "evidence", "evidence": "insidesales2013"}}, {"id": "afterhours", "section": "s2", "type": "single", "prompt": "A potential customer fills out your form at 8:15 p.m. on a Saturday. What happens before Monday morning?", "options": [{"id": "book", "label": "They get a reply right away and can book", "scores": {"access": 100}}, {"id": "auto", "label": "They get an automatic reply, but can't book", "scores": {"access": 60}}, {"id": "none", "label": "Nothing until Monday", "scores": {"access": 20}}, {"id": "dk", "label": "I'm not sure anyone sees it", "scores": {"access": 10}}]}, {"id": "tracking", "section": "s3", "type": "single", "prompt": "Where does a new inquiry get written down?", "options": [{"id": "crm", "label": "In a CRM or booking system", "scores": {"pipeline": 95}}, {"id": "sheet", "label": "In a spreadsheet", "scores": {"pipeline": 60}}, {"id": "paper", "label": "On paper or a whiteboard", "scores": {"pipeline": 35}}, {"id": "inbox", "label": "It stays in my phone, inbox or DMs", "scores": {"pipeline": 15}}, {"id": "none", "label": "It doesn't, really", "scores": {"pipeline": 5}}]}, {"id": "followup", "section": "s3", "type": "single", "prompt": "Someone gets a quote and then goes quiet. What happens next?", "options": [{"id": "auto", "label": "An automatic follow-up sequence kicks in", "scores": {"followup": 100, "pipeline": 85}}, {"id": "set", "label": "We follow up a set number of times", "scores": {"followup": 75}}, {"id": "once", "label": "We follow up once, if someone remembers", "scores": {"followup": 35}}, {"id": "wait", "label": "We wait for them to come back", "scores": {"followup": 10}}], "insight": {"kind": "myth", "myth": "callback"}}, {"id": "reviews", "section": "s3", "type": "single", "prompt": "A customer finishes happy with your work. What happens next?", "options": [{"id": "process", "label": "We ask for a review every time, with a set process", "scores": {"reputation": 95}}, {"id": "some", "label": "We ask sometimes", "scores": {"reputation": 50}}, {"id": "hope", "label": "We hope they leave one", "scores": {"reputation": 20}}, {"id": "nothing", "label": "Nothing in particular", "scores": {"reputation": 10}}], "insight": {"kind": "evidence", "evidence": "brightlocal2026a"}}, {"id": "away", "section": "s3", "type": "single", "prompt": "If you took two weeks completely off, with no phone and no email, what would happen to new sales?", "options": [{"id": "flow", "label": "They'd keep coming in; the team handles it", "scores": {"owner": 95}}, {"id": "slow", "label": "They'd slow down", "scores": {"owner": 60}}, {"id": "stop", "label": "They'd mostly stop", "scores": {"owner": 25}}, {"id": "cant", "label": "I can't take two weeks off", "scores": {"owner": 10}}], "insight": {"kind": "mirror", "id": "owner"}}, {"id": "ads", "section": "s3", "type": "single", "prompt": "Do you pay for advertising or lead services right now?", "sub": "Google, Meta, Yelp, Angi, Thumbtack, and similar.", "options": [{"id": "0", "label": "Not right now", "value": 0}, {"id": "lt1", "label": "Under $1,000 a month", "value": 500}, {"id": "1_3", "label": "$1,000 to $3,000", "value": 2000}, {"id": "3_10", "label": "$3,000 to $10,000", "value": 6000}, {"id": "10p", "label": "More than $10,000", "value": 12000}], "insight": {"kind": "mirror", "id": "ads"}}, {"id": "numbers", "section": "s4", "type": "calculator", "prompt": "Let's put a number on it.", "sub": "Rough estimates are fine. You can adjust every value.", "fields": [{"id": "inquiries", "label": "New inquiries per month", "min": 5, "max": 500, "step": 5, "default": 60}, {"id": "value", "label": "Average value of a new customer", "unit": "USD", "min": 100, "max": 25000, "step": 50, "default": 1500}, {"id": "leak", "label": "Inquiries that don't get a timely reply or follow-up", "unit": "%", "min": 0, "max": 70, "step": 1, "default": "fromAnswers"}, {"id": "close", "label": "Share of followed-up inquiries that become customers", "unit": "%", "min": 5, "max": 60, "step": 1, "default": 20}]}], "archetypes": {"ready": {"name": "Ready to Scale", "line": "Your basics work. The next gains come from measuring and automating what you already do well."}, "leaky": {"name": "The Leaky Bucket", "line": "You pay to bring inquiries in, and some of them slip out before anyone follows up."}, "secret": {"name": "The Best-Kept Secret", "line": "Your customers are happy, but almost nobody else can see it."}, "bottleneck": {"name": "The Owner Bottleneck", "line": "The business grows as far as your calendar allows, and not much further."}, "silent": {"name": "The Silent Leak", "line": "Inquiries arrive, but there's no reliable path from first contact to a closed sale."}}};
+
+/* ---------- demo access codes (in production these come from the database) ---------- */
+const CODES = {
+  "RIVERA-7F3K": {
+    business: "Rivera Dental Studio", city: "Austin, TX", industry: "dental",
+    outside: {
+      date: "Tue, Oct 13",
+      text: "We texted your listed number at 8:42 p.m. asking about a cleaning appointment.",
+      reply: "First reply: next day at 11:20 a.m.", replyGap: "14 h 38 min",
+      reviews: "4.8 stars from 23 Google reviews", lastReview: "5 months ago"
+    }
+  }
+};
+
+const S = { screen: "gate", code: "", co: null, i: 0, ans: {}, calc: {}, team: false };
+const app = document.getElementById("app");
+const Q = CFG.questions;
+const E = CFG.evidence;
+const $ = (h) => { const t = document.createElement("template"); t.innerHTML = h.trim(); return t.content; };
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const usd = (n) => "$" + Math.round(n).toLocaleString("en-US");
+
+function setWho(){ document.getElementById("who").textContent = S.co ? `Prepared for ${S.co.business}` : ""; }
+
+/* ---------- gate ---------- */
+function renderGate(err){
+  app.className = "wrap";
+  app.replaceChildren($(`
+    <section class="gate">
+      <div class="eyebrow">Private diagnostic</div>
+      <h1>Find out where new customers slip away.</h1>
+      <p class="sub">Enter the access code from your email. Your answers stay private and you can pause any time.</p>
+      <form id="gf" class="field" novalidate>
+        <label for="code">Access code</label>
+        <div class="code-row">
+          <input id="code" name="code" autocomplete="off" spellcheck="false" value="${esc(S.code || "RIVERA-7F3K")}">
+          <button class="btn" type="submit">Start</button>
+        </div>
+        ${err ? `<p class="err">${esc(err)}</p>` : ""}
+        <p class="small">Prototype: <b>RIVERA-7F3K</b> loads a sample business with an outside view. Any other code of 6+ characters starts a generic diagnostic.</p>
+      </form>
+    </section>`));
+  document.getElementById("gf").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const v = document.getElementById("code").value.trim().toUpperCase();
+    if (v.length < 6) return renderGate("Codes have at least 6 characters. Check the email we sent you.");
+    S.code = v; S.co = CODES[v] || null;
+    if (S.co && S.co.industry) S.ans.industry = S.co.industry;
+    setWho(); S.screen = "welcome"; render();
+  });
+}
+
+/* ---------- welcome ---------- */
+function renderWelcome(){
+  const co = S.co, o = co && co.outside;
+  app.className = "wrap";
+  app.replaceChildren($(`
+    <section class="gate">
+      <div class="eyebrow">${co ? esc(co.business) + " · " + esc(co.city) : "Phase 1 · About 10 minutes"}</div>
+      <h1>${co ? "Your growth X-ray is ready to start." : "Let's take an X-ray of how you win customers."}</h1>
+      <p class="sub">About 10 minutes, mostly one-tap answers. You'll see what we learn as you go, and you'll get your results on the last screen.</p>
+      <div class="promise">
+        <div><b>01 · Map</b>How new customers reach you and what happens next.</div>
+        <div><b>02 · Measure</b>An estimate of what slips through, in dollars.</div>
+        <div><b>03 · Prioritize</b>The single first step that matters most for you.</div>
+      </div>
+      ${o ? `
+      <div class="outside">
+        <div class="outside-h"><span>What we saw from the outside</span><span>Sample data</span></div>
+        <div class="outside-row"><span>${esc(o.date)}</span><div>${esc(o.text)}<br><strong>${esc(o.reply)}</strong> That's ${esc(o.replyGap)} later.</div></div>
+        <div class="outside-row"><span>Reviews</span><div>${esc(o.reviews)}. <strong>Latest review: ${esc(o.lastReview)}.</strong></div></div>
+      </div>` : ""}
+      <div class="nav"><button class="btn ghost" id="back">Change code</button><button class="btn" id="go">Begin</button></div>
+    </section>`));
+  document.getElementById("back").onclick = () => { S.screen = "gate"; S.co = null; setWho(); render(); };
+  document.getElementById("go").onclick = () => { S.screen = "q"; S.i = firstIndex(); render(); };
+}
+
+/* skip industry question when the code already knows it */
+function visible(q){ return !(q.id === "industry" && S.co && S.co.industry); }
+function firstIndex(){ return Q.findIndex(visible); }
+function nextIndex(i){ for (let j = i + 1; j < Q.length; j++) if (visible(Q[j])) return j; return -1; }
+function prevIndex(i){ for (let j = i - 1; j >= 0; j--) if (visible(Q[j])) return j; return -1; }
+
+/* ---------- scoring ---------- */
+function opt(qid){ const q = Q.find(x => x.id === qid); const a = S.ans[qid]; return q && a ? q.options.find(o => o.id === a) : null; }
+function pillarScores(){
+  const acc = {};
+  Q.forEach(q => {
+    if (q.type !== "single") return;
+    const o = opt(q.id); if (!o || !o.scores) return;
+    for (const [p, v] of Object.entries(o.scores)) (acc[p] ||= []).push(v);
+  });
+  const out = {};
+  for (const [p, arr] of Object.entries(acc)) out[p] = Math.round(arr.reduce((a, b) => a + b, 0) / arr.length);
+  return out;
+}
+function leakFromAnswers(){
+  let l = { auto: 8, set: 15, once: 30, wait: 40 }[S.ans.followup] ?? 25;
+  l += { none: 8, dk: 8, auto: 3 }[S.ans.afterhours] ?? 0;
+  l += { next: 7, dk: 7, day: 3 }[S.ans.speed] ?? 0;
+  if (S.ans.busy === "d") l += 5;
+  return Math.max(5, Math.min(65, l));
+}
+function adSpend(){ const o = opt("ads"); return o ? o.value : 0; }
+function calcVals(){
+  const f = Q.find(q => q.id === "numbers").fields, v = {};
+  f.forEach(x => v[x.id] = S.calc[x.id] ?? (x.default === "fromAnswers" ? leakFromAnswers() : x.default));
+  const missed = v.inquiries * v.leak / 100;
+  const monthly = missed * (v.close / 100) * v.value;
+  return { ...v, missed, monthly, quarter: monthly * 0.25, annual: monthly * 12, adLeak: adSpend() * v.leak / 100 };
+}
+
+/* ---------- insights ---------- */
+function evidenceCard(id, lead){
+  const e = E[id];
+  return `<div class="insight"><span class="tag">What the research says</span>${lead ? `<p class="lead">${lead}</p>` : ""}<p>${esc(e.text)}</p><p class="src">Source: ${esc(e.source)} · <a href="${esc(e.url)}" target="_blank" rel="noopener">view</a></p></div>`;
+}
+function mirrorCard(text, extraEvidence){
+  return `<div class="insight"><span class="tag">What this tells us</span><p>${text}</p>${extraEvidence ? `<p class="src">Source: ${esc(E[extraEvidence].source)}</p>` : ""}</div>`;
+}
+function insightFor(q){
+  const a = S.ans[q.id]; if (!a || (Array.isArray(a) && !a.length)) return "";
+  const ins = q.insight;
+  if (q.id === "busy"){
+    const lead = a === "a" ? "You're ahead of most businesses here." : "Right now, response speed depends on who happens to be free. That's normal in an owner-led business, and it's the first thing a system fixes.";
+    return evidenceCard("hbr2011", lead);
+  }
+  if (q.id === "speed"){
+    const lead = a === "dk" ? "Not knowing is the finding. You can't fix a delay you can't see." : (a === "5m" ? "Great, if it holds up when measured. Most businesses overestimate this." : "");
+    return evidenceCard("insidesales2013", lead);
+  }
+  if (q.id === "tracking"){
+    const n = (S.ans.channels || []).length;
+    if (n >= 3 && ["paper","inbox","none"].includes(a))
+      return mirrorCard(`Inquiries reach you through <b>${n} different channels</b>, and there's no single place that holds them all. So the real picture of your pipeline lives in several apps and partly in your memory.`);
+    return "";
+  }
+  if (q.id === "followup"){
+    const m = CFG.myths[ins.myth];
+    return `<div class="insight myth"><span class="tag">Myth vs. reality</span><p class="myth-line">“${esc(m.myth)}”</p><p>${esc(m.reality)}</p><p>${esc(E[m.evidence[0]].text)}</p><p class="note">${esc(m.note)}</p><p class="src">Source: ${esc(E[m.evidence[0]].source)}</p></div>`;
+  }
+  if (q.id === "reviews"){
+    const o = S.co && S.co.outside;
+    const lead = a === "process" ? "Good. Few businesses have this running." : "Your customers probably aren't the problem. Most of them would leave a review if someone asked.";
+    let html = evidenceCard("brightlocal2026a", lead);
+    if (o && a !== "process") html = html.replace('</p><p class="src">', `</p><p class="lead">Your latest Google review is ${esc(o.lastReview)} old. For 3 in 4 people reading reviews, that's close to having none.</p><p class="src">`);
+    return html;
+  }
+  if (q.id === "away"){
+    if (a === "flow") return mirrorCard("That's rare and valuable. Your business already runs without you at the center of every sale.");
+    return mirrorCard("This isn't a discipline problem. The business was built around you, so it waits for you. A clear process, a system that handles the repetitive first steps, and a team that runs it are what give that time back.");
+  }
+  if (q.id === "ads"){
+    const spend = adSpend();
+    const weak = (pillarScores().access ?? 100) < 55 || (pillarScores().followup ?? 100) < 55;
+    if (spend > 0 && weak) return `<div class="insight myth"><span class="tag">The leaky bucket</span><p class="lead">You're paying to fill a bucket that has holes in it.</p><p>From your earlier answers, some of the inquiries those ads bring in wait too long or never get followed up. When that happens the ads usually get the blame, even though the gap is in what happens after the click.</p><p class="note">${esc(CFG.myths.marketing.reality)}</p></div>`;
+    if (spend === 0 && weak) return mirrorCard("Good timing. Fixing the system before buying traffic means every future ad dollar lands somewhere that can catch it.");
+    if (spend > 0) return mirrorCard("Your response and follow-up look solid, which means your ad spend has a real chance to pay off. Phase 2 looks at whether you can measure which ads bring customers, not just clicks.");
+    return "";
+  }
+  return "";
+}
+
+/* ---------- question screen ---------- */
+function progress(){
+  const vis = Q.filter(visible), pos = vis.indexOf(Q[S.i]);
+  const secIdx = CFG.sections.findIndex(s => s.id === Q[S.i].section);
+  const perSec = CFG.sections.map(s => { const qs = vis.filter(q => q.section === s.id); const done = qs.filter(q => vis.indexOf(q) < pos).length; return qs.length ? done / qs.length : 0; });
+  const left = Math.max(1, Math.round((vis.length - pos) * 0.75));
+  return { secIdx, perSec, left, pos, total: vis.length };
+}
+function renderQ(){
+  const q = Q[S.i];
+  if (q.type === "calculator") return renderCalc();
+  const p = progress(), sec = CFG.sections[p.secIdx];
+  const a = S.ans[q.id], multi = q.type === "multi";
+  const sel = (id) => multi ? (a || []).includes(id) : a === id;
+  app.className = "wrap";
+  app.replaceChildren($(`
+    <div class="steps">${p.perSec.map((f, k) => `<div class="step"><i style="width:${k < p.secIdx ? 100 : k === p.secIdx ? Math.max(8, f * 100) : 0}%"></i></div>`).join("")}</div>
+    <div class="steps-meta"><span>Part ${p.secIdx + 1} of 4 · ${esc(sec.label)}</span><span>About ${p.left} min left</span></div>
+    <section>
+      <h1 class="prompt">${esc(q.prompt)}</h1>
+      ${q.sub ? `<p class="sub">${esc(q.sub)}</p>` : ""}
+      <div class="opts" role="group" aria-label="${esc(q.prompt)}">
+        ${q.options.map(o => `<button class="opt ${multi ? "multi" : ""}" aria-pressed="${sel(o.id)}" data-id="${o.id}"><span class="box" aria-hidden="true"></span><span><span class="lbl">${esc(o.label)}</span>${o.hint ? `<span class="hint">${esc(o.hint)}</span>` : ""}</span></button>`).join("")}
+      </div>
+      <div id="ins">${insightFor(q)}</div>
+      <div class="nav">
+        <button class="btn ghost" id="prev">${prevIndex(S.i) < 0 ? "Back to start" : "Back"}</button>
+        <button class="btn" id="next" ${(multi ? (a || []).length : a) ? "" : "disabled"}>Continue</button>
+      </div>
+    </section>`));
+  app.querySelectorAll(".opt").forEach(b => b.onclick = () => {
+    const id = b.dataset.id;
+    if (multi){ const cur = new Set(S.ans[q.id] || []); cur.has(id) ? cur.delete(id) : cur.add(id); S.ans[q.id] = [...cur]; }
+    else S.ans[q.id] = id;
+    const hadInsight = !!insightFor(q);
+    renderQ();
+    if (!multi && !hadInsight) setTimeout(() => { if (S.screen === "q" && Q[S.i] === q) go(1); }, 380);
+    else if (hadInsight){ const el = document.getElementById("ins"); el.firstElementChild && el.firstElementChild.scrollIntoView({ block: "nearest", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); }
+  });
+  document.getElementById("prev").onclick = () => go(-1);
+  document.getElementById("next").onclick = () => go(1);
+}
+function go(d){
+  if (d > 0){ const n = nextIndex(S.i); if (n < 0){ S.screen = "results"; } else S.i = n; }
+  else { const n = prevIndex(S.i); if (n < 0) S.screen = "welcome"; else S.i = n; }
+  render(); window.scrollTo(0, 0);
+}
+
+/* ---------- calculator ---------- */
+function renderCalc(){
+  const q = Q[S.i], p = progress(), v = calcVals();
+  const fmt = (f, x) => f.unit === "USD" ? usd(x) : f.unit === "%" ? x + "%" : String(x);
+  app.className = "wrap";
+  app.replaceChildren($(`
+    <div class="steps">${p.perSec.map((f, k) => `<div class="step"><i style="width:${k < p.secIdx ? 100 : 50}%"></i></div>`).join("")}</div>
+    <div class="steps-meta"><span>Part 4 of 4 · Your numbers</span><span>About 1 min left</span></div>
+    <section>
+      <h1 class="prompt">${esc(q.prompt)}</h1>
+      <p class="sub">${esc(q.sub)} We pre-filled the follow-up gap from your answers.</p>
+      <div class="calc">
+        ${q.fields.map(f => `<div class="slider"><div class="slider-top"><label for="f_${f.id}">${esc(f.label)}</label><output id="o_${f.id}">${fmt(f, v[f.id])}</output></div><input type="range" id="f_${f.id}" min="${f.min}" max="${f.max}" step="${f.step}" value="${v[f.id]}">${f.id === "leak" ? `<p class="small">Estimated from your answers about reply speed, after-hours and follow-up.</p>` : ""}${f.id === "close" ? `<p class="small">If you don't know, 20% is a cautious starting point for many local services.</p>` : ""}</div>`).join("")}
+      </div>
+      <div class="calc-out" id="cout"></div>
+      <p class="small" style="margin-top:10px">This is an estimate, not a promise. It assumes the inquiries that slip through would close at the same rate as the ones you follow up. That's why we also show a cautious scenario where only a quarter is recovered.</p>
+      <div class="nav"><button class="btn ghost" id="prev">Back</button><button class="btn" id="next">See my results</button></div>
+    </section>`));
+  const paint = () => {
+    const c = calcVals();
+    document.getElementById("cout").innerHTML = `
+      <div class="money"><div class="k">Tied to inquiries that slip through</div><div class="v">${usd(c.monthly)}<span style="font-size:.5em"> /mo</span></div><div class="d">About ${Math.round(c.missed)} inquiries a month · ${usd(c.annual)} a year</div></div>
+      <div class="money alt"><div class="k">If you recovered just a quarter</div><div class="v">${usd(c.quarter)}<span style="font-size:.5em"> /mo</span></div><div class="d">${usd(c.quarter * 12)} a year in added revenue</div></div>`;
+  };
+  q.fields.forEach(f => {
+    const inp = document.getElementById("f_" + f.id);
+    inp.oninput = () => { S.calc[f.id] = Number(inp.value); document.getElementById("o_" + f.id).textContent = fmt(f, S.calc[f.id]); paint(); };
+  });
+  paint();
+  document.getElementById("prev").onclick = () => go(-1);
+  document.getElementById("next").onclick = () => go(1);
+}
+
+/* ---------- results ---------- */
+const FIND = {
+  access:     { t: "New inquiries wait for whoever is free.", s: "One front door: every call, text and form lands in one place, gets an instant reply, and can book a time on its own." },
+  pipeline:   { t: "Your pipeline lives in several places, and partly in your memory.", s: "One shared list of every open inquiry, with its stage and the next action. Nothing fancier than that to start." },
+  followup:   { t: "Quotes go quiet and nobody chases them on purpose.", s: "A simple follow-up sequence that runs for every quote that hasn't closed, so it doesn't depend on anyone remembering." },
+  reputation: { t: "Happy customers aren't turning into visible proof.", s: "An automatic review request after every completed job, sent to every customer while the experience is fresh." },
+  owner:      { t: "Sales depend on your personal availability.", s: "Write down who handles each first step, then let the system do the repetitive parts so the team can run them without you." }
+};
+function archetype(ps, avg){
+  if (avg >= 70) return "ready";
+  if (adSpend() > 0 && ((ps.access ?? 100) < 55 || (ps.followup ?? 100) < 55)) return "leaky";
+  const low = Object.entries(ps).sort((a, b) => a[1] - b[1])[0][0];
+  if (low === "owner") return "bottleneck";
+  if (low === "reputation") return "secret";
+  return "silent";
+}
+function color(s){ return s >= 70 ? "var(--good)" : s >= 45 ? "var(--warn)" : "var(--bad)"; }
+function teamView(ps, avg, c){
+  const need = 100 - avg;
+  let pot = (c.inquiries >= 100 ? 40 : c.inquiries >= 50 ? 30 : c.inquiries >= 20 ? 20 : 10)
+          + (c.value >= 5000 ? 35 : c.value >= 1000 ? 28 : c.value >= 300 ? 18 : 8)
+          + (adSpend() > 0 ? 15 : 0) + (S.ans.team && S.ans.team !== "1" ? 10 : 0);
+  pot = Math.min(100, pot);
+  let rdy = 40 + (adSpend() > 0 ? 20 : 0) + (["crm","sheet"].includes(S.ans.tracking) ? 15 : 0) + (S.ans.team && S.ans.team !== "1" ? 10 : 0);
+  rdy = Math.min(85, rdy);
+  let verdict;
+  if (need >= 50 && pot >= 60) verdict = rdy >= 55 ? "High priority. Invite to Phase 2 and offer a results review call." : "Nurture. High need and potential, readiness unclear. Phase 2 should confirm budget and decision-maker.";
+  else if (need >= 50) verdict = "Prepare first. Real problems, but volume or deal value may not justify a full build yet.";
+  else if (pot >= 60) verdict = "Selective optimization. Sell one targeted improvement, not a full system.";
+  else verdict = "Low fit for now. Keep in a light nurture sequence.";
+  const flags = [];
+  if (S.ans.speed === "dk") flags.push("Doesn't measure response time");
+  if (c.inquiries < 20) flags.push("Low inquiry volume");
+  if (adSpend() > 0 && ((ps.access ?? 100) < 55 || (ps.followup ?? 100) < 55)) flags.push("Paying for leaking leads");
+  if ((ps.owner ?? 100) <= 25) flags.push("Owner bottleneck");
+  if (S.ans.team === "1") flags.push("Solo operator");
+  const ax = (k, n, note) => `<div class="axis"><div class="k">${k}</div><div class="n">${n}</div><div class="bar"><i style="width:${n}%;background:var(--accent)"></i></div><p class="small">${note}</p></div>`;
+  return `
+    <div class="team">
+      <div class="eyebrow" style="margin:0">Team view · never shown to the prospect</div>
+      <div class="axes">${ax("Need", need, "Size of the gaps found")}${ax("Potential", pot, "Volume, deal value, spend")}${ax("Readiness", rdy, "Preliminary, confirmed in Phase 2")}</div>
+      <p class="verdict">${verdict}</p>
+      ${flags.length ? `<div class="flags">${flags.map(f => `<span class="flag">${esc(f)}</span>`).join("")}</div>` : ""}
+      <div class="kv">
+        <span>Access code</span><span>${esc(S.code)}</span>
+        <span>Monthly at stake</span><span>${usd(c.monthly)} (cautious: ${usd(c.quarter)})</span>
+        <span>Ad spend</span><span>${adSpend() ? usd(adSpend()) + "/mo" : "None"}</span>
+        <span>Opening line</span><span>“Your X-ray says ${esc(CFG.archetypes[archetype(ps, avg)].name.replace(/^The /, "the ").toLowerCase())}. Can I show you the one fix I'd start with?”</span>
+      </div>
+    </div>`;
+}
+function renderResults(){
+  const ps = pillarScores(), c = calcVals();
+  const vals = Object.values(ps), avg = Math.round(vals.reduce((a, b) => a + b, 0) / (vals.length || 1));
+  const arch = CFG.archetypes[archetype(ps, avg)];
+  const archId = archetype(ps, avg);
+  const focus = { leaky: ["access", "followup"], secret: ["reputation"], bottleneck: ["owner"] }[archId] || [];
+  const ranked = Object.entries(ps).filter(([, s]) => s < 70)
+    .sort((a, b) => (focus.includes(b[0]) - focus.includes(a[0])) || (a[1] - b[1])).slice(0, 3);
+  const notYet = [];
+  if ((ps.pipeline ?? 100) < 50) notYet.push("An all-in-one platform with dozens of features. Start with one shared list and one front door.");
+  if (adSpend() > 0 && archetype(ps, avg) === "leaky") notYet.push("A bigger ad budget. First close the gaps that lose the inquiries you already pay for.");
+  if (adSpend() === 0 && avg < 60) notYet.push("More advertising. Fix the system first so paid inquiries don't leak.");
+  notYet.push("A custom app, or anything that requires you to become technical.");
+  const label = avg >= 70 ? "Solid foundation" : avg >= 45 ? "Gaps worth fixing" : "Significant leaks";
+  app.className = "wrap wide";
+  app.replaceChildren($(`
+    <div class="eyebrow">Phase 1 results${S.co ? " · " + esc(S.co.business) : ""}</div>
+    <div class="res-head">
+      <div><h1>${esc(arch.name)}</h1><p class="line">${esc(arch.line)}</p></div>
+      <div class="index"><div class="k">Acquisition system index</div><div class="n">${avg}<small>/100</small></div><div class="k" style="color:${color(avg)}">${label}</div></div>
+    </div>
+    <div class="grid2">
+      <div class="stack">
+        <section class="panel">
+          <h2>Where your system stands</h2>
+          ${CFG.pillars.map(p => p.phase === 1 && ps[p.id] != null
+            ? `<div class="pillar"><span>${esc(p.label)}</span><div class="bar"><i style="width:${ps[p.id]}%;background:${color(ps[p.id])}"></i></div><span class="s">${ps[p.id]}</span></div>`
+            : `<div class="pillar locked"><span>${esc(p.label)}</span><div class="bar"></div><span class="s">PH. 2</span></div>`).join("")}
+        </section>
+        <section class="panel">
+          <h2>Money on the table</h2>
+          <div class="calc-out" style="margin-top:0">
+            <div class="money"><div class="k">Tied to slipping inquiries</div><div class="v">${usd(c.monthly)}<span style="font-size:.5em"> /mo</span></div><div class="d">${usd(c.annual)} a year</div></div>
+            <div class="money alt"><div class="k">Cautious recovery</div><div class="v">${usd(c.quarter)}<span style="font-size:.5em"> /mo</span></div><div class="d">If a quarter is recovered</div></div>
+          </div>
+          ${adSpend() ? `<p style="margin-top:14px">About <b>${usd(c.adLeak)}</b> of your monthly ad spend pays for inquiries that don't get a timely reply or follow-up.</p>` : ""}
+        </section>
+      </div>
+      <div class="stack">
+        <section class="panel">
+          <h2>What to fix, in order</h2>
+          ${ranked.length ? ranked.map(([k, s], n) => `<div class="finding"><span class="sev ${s < 45 ? "bad" : "warn"}">${s < 45 ? "High impact" : "Worth fixing"}</span><h3>${esc(FIND[k].t)}</h3>${n === 0 ? `<p class="first"><b>Your first step</b>${esc(FIND[k].s)}</p>` : ""}</div>`).join("")
+            : `<p>No major gaps in Phase 1. Your next gains are in measurement and retention, which Phase 2 covers.</p>`}
+        </section>
+        <section class="panel">
+          <h2>What you probably don't need yet</h2>
+          <ul class="not">${notYet.slice(0, 3).map(t => `<li>${esc(t)}</li>`).join("")}</ul>
+        </section>
+      </div>
+    </div>
+    <section class="unlock">
+      <div class="eyebrow" style="color:inherit;opacity:.7;margin:0">Phase 2 · About 20 minutes · Pause any time</div>
+      <h2>You know where the leak is. Phase 2 tells you exactly how to close it.</h2>
+      <ul>
+        <li>Unlocks the three gray areas: retention and customer value, business visibility, and readiness.</li>
+        <li>A step-by-step plan in three phases, with what to set up first and what can wait.</li>
+        <li>What implementation would realistically involve for a business like yours.</li>
+      </ul>
+      <div class="row"><button class="btn" id="p2">Continue to Phase 2</button><button class="btn line" id="later">Save and finish later</button></div>
+      <p class="small" id="p2msg">Your progress is tied to code ${esc(S.code)}.</p>
+    </section>
+    <div class="team-toggle"><button class="btn line" id="tt" aria-expanded="${S.team}">${S.team ? "Hide" : "Show"} team view</button><span class="small">Prototype only. Shows how your team would see this lead.</span></div>
+    <div id="teamv">${S.team ? teamView(ps, avg, c) : ""}</div>
+    <div class="nav"><button class="btn ghost" id="redo">Change my answers</button></div>`));
+  document.getElementById("p2").onclick = () => { document.getElementById("p2msg").textContent = "In the prototype, Phase 2 isn't built yet. In production this opens the first Phase 2 block."; };
+  document.getElementById("later").onclick = () => { document.getElementById("p2msg").textContent = `Saved. Come back any time with code ${S.code}. In production we'd also email you a link.`; };
+  document.getElementById("tt").onclick = () => { S.team = !S.team; renderResults(); document.getElementById("tt").scrollIntoView({ block: "start" }); };
+  document.getElementById("redo").onclick = () => { S.screen = "q"; S.i = firstIndex(); render(); window.scrollTo(0, 0); };
+}
+
+function render(){
+  if (S.screen === "gate") return renderGate();
+  if (S.screen === "welcome") return renderWelcome();
+  if (S.screen === "q") return renderQ();
+  return renderResults();
+}
+render();
+</script>

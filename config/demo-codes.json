@@ -1,0 +1,18 @@
+{
+  "_note": "Códigos de demo del prototipo. Se reemplazan por la tabla access_codes de Supabase. Solo se leen en el servidor.",
+  "codes": {
+    "RIVERA-7F3K": {
+      "business": "Rivera Dental Studio",
+      "city": "Austin, TX",
+      "industry": "dental",
+      "outside": {
+        "date": "Tue, Oct 13",
+        "text": "We texted your listed number at 8:42 p.m. asking about a cleaning appointment.",
+        "reply": "First reply: next day at 11:20 a.m.",
+        "replyGap": "14 h 38 min",
+        "reviews": "4.8 stars from 23 Google reviews",
+        "lastReview": "5 months ago"
+      }
+    }
+  }
+}

@@ -1,0 +1,823 @@
+{
+  "version": "0.1.0",
+  "phase": 1,
+  "title": "Growth X-Ray",
+  "estimatedMinutes": 10,
+  "pillars": [
+    {
+      "id": "access",
+      "label": "First response",
+      "phase": 1
+    },
+    {
+      "id": "pipeline",
+      "label": "Lead tracking",
+      "phase": 1
+    },
+    {
+      "id": "followup",
+      "label": "Follow-up",
+      "phase": 1
+    },
+    {
+      "id": "reputation",
+      "label": "Reviews & proof",
+      "phase": 1
+    },
+    {
+      "id": "owner",
+      "label": "Owner independence",
+      "phase": 1
+    },
+    {
+      "id": "retention",
+      "label": "Retention & LTV",
+      "phase": 2
+    },
+    {
+      "id": "visibility",
+      "label": "Business visibility",
+      "phase": 2
+    },
+    {
+      "id": "readiness",
+      "label": "Readiness",
+      "phase": 2
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "label": "Your business"
+    },
+    {
+      "id": "s2",
+      "label": "When someone reaches out"
+    },
+    {
+      "id": "s3",
+      "label": "After the first contact"
+    },
+    {
+      "id": "s4",
+      "label": "Your numbers"
+    }
+  ],
+  "evidence": {
+    "hbr2011": {
+      "text": "In an audit of 2,241 U.S. companies, only 37% answered a new web lead within an hour, and 23% never answered at all. Firms that responded within the hour were nearly 7 times as likely to reach a decision-maker as firms that waited longer.",
+      "source": "Harvard Business Review, \"The Short Life of Online Sales Leads\", 2011",
+      "kind": "academic",
+      "url": "https://hbr.org/2011/03/the-short-life-of-online-sales-leads"
+    },
+    "insidesales2013": {
+      "text": "When InsideSales audited real response times, nearly 1 in 4 companies believed they called new leads within five minutes. Only 5% actually did. The most common real number of follow-up attempts was zero.",
+      "source": "InsideSales ResponseAudit, 2013",
+      "kind": "industry",
+      "url": "https://www.marketingprofs.com/charts/2013/10870/companies-unaware-of-slow-sales-response-times"
+    },
+    "drift2017": {
+      "text": "A test of 433 companies found only 7% responded within five minutes, and 55% hadn't responded after five business days.",
+      "source": "Drift lead response study, 2017 (433 companies)",
+      "kind": "vendor",
+      "url": "https://ainora.lt/blog/lead-response-time-statistics-every-study-2026"
+    },
+    "locals2024": {
+      "text": "In a test of calls to local businesses, only 37.8% were answered by a person. 24.3% got no answer and no voicemail.",
+      "source": "411 Locals, 2024 (85 businesses, small sample)",
+      "kind": "industry",
+      "url": "https://getaira.io/blog/missed-business-calls-statistics"
+    },
+    "brightlocal2026a": {
+      "text": "94% of consumers are open to leaving a review when a business asks. 74% only pay attention to reviews from the last three months.",
+      "source": "BrightLocal Local Consumer Review Survey, 2026 (1,002 U.S. adults)",
+      "kind": "industry",
+      "url": "https://www.brightlocal.com/research/local-consumer-review-survey/"
+    },
+    "brightlocal2026b": {
+      "text": "47% of consumers won't use a business with fewer than 20 reviews, and 89% expect the owner to respond to reviews.",
+      "source": "BrightLocal Local Consumer Review Survey, 2026 (1,002 U.S. adults)",
+      "kind": "industry",
+      "url": "https://www.brightlocal.com/research/local-consumer-review-survey/"
+    },
+    "reichheld": {
+      "text": "Bain & Company's research on loyalty found that raising customer retention by 5% can raise profits by 25% to 95%.",
+      "source": "Fred Reichheld, Bain & Company (via HBR, 2014)",
+      "kind": "consulting",
+      "url": "https://hbr.org/2014/10/the-value-of-keeping-the-right-customers"
+    }
+  },
+  "myths": {
+    "callback": {
+      "myth": "If they're really interested, they'll call back.",
+      "reality": "Interest cools in hours, not days. The businesses that win are usually the ones that reply first and follow up on purpose.",
+      "evidence": [
+        "drift2017"
+      ],
+      "note": "You may have seen \"80% of sales happen after the fifth follow-up.\" That number is credited to an association nobody has been able to find. We don't use it."
+    },
+    "marketing": {
+      "myth": "Marketing doesn't work in my industry.",
+      "reality": "When ads \"don't work\", the cause is often what happens after the click: slow replies, no follow-up, no tracking. The ads get blamed for a system problem."
+    }
+  },
+  "questions": [
+    {
+      "id": "industry",
+      "section": "s1",
+      "type": "single",
+      "prompt": "What kind of business do you run?",
+      "options": [
+        {
+          "id": "home",
+          "label": "Home services",
+          "hint": "HVAC, plumbing, roofing, remodeling"
+        },
+        {
+          "id": "dental",
+          "label": "Dental or medical practice"
+        },
+        {
+          "id": "medspa",
+          "label": "Med spa or wellness"
+        },
+        {
+          "id": "legal",
+          "label": "Legal services"
+        },
+        {
+          "id": "realty",
+          "label": "Real estate or mortgage"
+        },
+        {
+          "id": "prof",
+          "label": "Professional services",
+          "hint": "accounting, consulting, agency"
+        },
+        {
+          "id": "other",
+          "label": "Another local service"
+        }
+      ]
+    },
+    {
+      "id": "team",
+      "section": "s1",
+      "type": "single",
+      "prompt": "How many people work in the business, including you?",
+      "options": [
+        {
+          "id": "1",
+          "label": "Just me",
+          "value": 1
+        },
+        {
+          "id": "2_5",
+          "label": "2 to 5",
+          "value": 4
+        },
+        {
+          "id": "6_15",
+          "label": "6 to 15",
+          "value": 10
+        },
+        {
+          "id": "16_50",
+          "label": "16 to 50",
+          "value": 30
+        },
+        {
+          "id": "50p",
+          "label": "More than 50",
+          "value": 60
+        }
+      ]
+    },
+    {
+      "id": "channels",
+      "section": "s1",
+      "type": "multi",
+      "prompt": "How do new customers reach you?",
+      "sub": "Pick all that apply.",
+      "options": [
+        {
+          "id": "phone",
+          "label": "Phone calls"
+        },
+        {
+          "id": "text",
+          "label": "Text messages"
+        },
+        {
+          "id": "form",
+          "label": "Website form"
+        },
+        {
+          "id": "google",
+          "label": "Google Business Profile"
+        },
+        {
+          "id": "social",
+          "label": "Facebook or Instagram messages"
+        },
+        {
+          "id": "email",
+          "label": "Email"
+        },
+        {
+          "id": "ref",
+          "label": "Referrals and word of mouth"
+        },
+        {
+          "id": "walk",
+          "label": "Walk-ins"
+        }
+      ]
+    },
+    {
+      "id": "busy",
+      "section": "s2",
+      "type": "single",
+      "prompt": "It's Tuesday, 10:40 a.m. You're with a client and a new prospect calls. What usually happens?",
+      "options": [
+        {
+          "id": "a",
+          "label": "Someone on the team answers and books the next step",
+          "scores": {
+            "access": 90
+          }
+        },
+        {
+          "id": "b",
+          "label": "It goes to voicemail and I call back when I'm free",
+          "scores": {
+            "access": 45
+          }
+        },
+        {
+          "id": "c",
+          "label": "It depends on who's around that day",
+          "scores": {
+            "access": 35
+          }
+        },
+        {
+          "id": "d",
+          "label": "Honestly, some of those calls never get returned",
+          "scores": {
+            "access": 10
+          }
+        }
+      ],
+      "insight": {
+        "kind": "evidence",
+        "evidence": "hbr2011",
+        "leads": {
+          "a": "You're ahead of most businesses here.",
+          "*": "Right now, response speed depends on who happens to be free. That's normal in an owner-led business, and it's the first thing a system fixes."
+        }
+      }
+    },
+    {
+      "id": "speed",
+      "section": "s2",
+      "type": "single",
+      "prompt": "On a normal weekday, how long does a new inquiry wait for a first reply?",
+      "options": [
+        {
+          "id": "5m",
+          "label": "Under 5 minutes",
+          "scores": {
+            "access": 100
+          }
+        },
+        {
+          "id": "1h",
+          "label": "Under an hour",
+          "scores": {
+            "access": 75
+          }
+        },
+        {
+          "id": "day",
+          "label": "Same day",
+          "scores": {
+            "access": 45
+          }
+        },
+        {
+          "id": "next",
+          "label": "Next day or later",
+          "scores": {
+            "access": 15
+          }
+        },
+        {
+          "id": "dk",
+          "label": "I don't really know",
+          "scores": {
+            "access": 25
+          },
+          "flag": "unmeasured"
+        }
+      ],
+      "insight": {
+        "kind": "evidence",
+        "evidence": "insidesales2013",
+        "leads": {
+          "dk": "Not knowing is the finding. You can't fix a delay you can't see.",
+          "5m": "Great, if it holds up when measured. Most businesses overestimate this."
+        }
+      }
+    },
+    {
+      "id": "afterhours",
+      "section": "s2",
+      "type": "single",
+      "prompt": "A potential customer fills out your form at 8:15 p.m. on a Saturday. What happens before Monday morning?",
+      "options": [
+        {
+          "id": "book",
+          "label": "They get a reply right away and can book",
+          "scores": {
+            "access": 100
+          }
+        },
+        {
+          "id": "auto",
+          "label": "They get an automatic reply, but can't book",
+          "scores": {
+            "access": 60
+          }
+        },
+        {
+          "id": "none",
+          "label": "Nothing until Monday",
+          "scores": {
+            "access": 20
+          }
+        },
+        {
+          "id": "dk",
+          "label": "I'm not sure anyone sees it",
+          "scores": {
+            "access": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "tracking",
+      "section": "s3",
+      "type": "single",
+      "prompt": "Where does a new inquiry get written down?",
+      "options": [
+        {
+          "id": "crm",
+          "label": "In a CRM or booking system",
+          "scores": {
+            "pipeline": 95
+          }
+        },
+        {
+          "id": "sheet",
+          "label": "In a spreadsheet",
+          "scores": {
+            "pipeline": 60
+          }
+        },
+        {
+          "id": "paper",
+          "label": "On paper or a whiteboard",
+          "scores": {
+            "pipeline": 35
+          }
+        },
+        {
+          "id": "inbox",
+          "label": "It stays in my phone, inbox or DMs",
+          "scores": {
+            "pipeline": 15
+          }
+        },
+        {
+          "id": "none",
+          "label": "It doesn't, really",
+          "scores": {
+            "pipeline": 5
+          }
+        }
+      ],
+      "insight": {
+        "kind": "mirror",
+        "id": "channels",
+        "when": {
+          "minChannels": 3,
+          "options": [
+            "paper",
+            "inbox",
+            "none"
+          ]
+        },
+        "text": "Inquiries reach you through **{n} different channels**, and there's no single place that holds them all. So the real picture of your pipeline lives in several apps and partly in your memory."
+      }
+    },
+    {
+      "id": "followup",
+      "section": "s3",
+      "type": "single",
+      "prompt": "Someone gets a quote and then goes quiet. What happens next?",
+      "options": [
+        {
+          "id": "auto",
+          "label": "An automatic follow-up sequence kicks in",
+          "scores": {
+            "followup": 100,
+            "pipeline": 85
+          }
+        },
+        {
+          "id": "set",
+          "label": "We follow up a set number of times",
+          "scores": {
+            "followup": 75
+          }
+        },
+        {
+          "id": "once",
+          "label": "We follow up once, if someone remembers",
+          "scores": {
+            "followup": 35
+          }
+        },
+        {
+          "id": "wait",
+          "label": "We wait for them to come back",
+          "scores": {
+            "followup": 10
+          }
+        }
+      ],
+      "insight": {
+        "kind": "myth",
+        "myth": "callback"
+      }
+    },
+    {
+      "id": "reviews",
+      "section": "s3",
+      "type": "single",
+      "prompt": "A customer finishes happy with your work. What happens next?",
+      "options": [
+        {
+          "id": "process",
+          "label": "We ask for a review every time, with a set process",
+          "scores": {
+            "reputation": 95
+          }
+        },
+        {
+          "id": "some",
+          "label": "We ask sometimes",
+          "scores": {
+            "reputation": 50
+          }
+        },
+        {
+          "id": "hope",
+          "label": "We hope they leave one",
+          "scores": {
+            "reputation": 20
+          }
+        },
+        {
+          "id": "nothing",
+          "label": "Nothing in particular",
+          "scores": {
+            "reputation": 10
+          }
+        }
+      ],
+      "insight": {
+        "kind": "evidence",
+        "evidence": "brightlocal2026a",
+        "leads": {
+          "process": "Good. Few businesses have this running.",
+          "*": "Your customers probably aren't the problem. Most of them would leave a review if someone asked."
+        },
+        "outsideLead": "Your latest Google review is {lastReview} old. For 3 in 4 people reading reviews, that's close to having none."
+      }
+    },
+    {
+      "id": "away",
+      "section": "s3",
+      "type": "single",
+      "prompt": "If you took two weeks completely off, with no phone and no email, what would happen to new sales?",
+      "options": [
+        {
+          "id": "flow",
+          "label": "They'd keep coming in; the team handles it",
+          "scores": {
+            "owner": 95
+          }
+        },
+        {
+          "id": "slow",
+          "label": "They'd slow down",
+          "scores": {
+            "owner": 60
+          }
+        },
+        {
+          "id": "stop",
+          "label": "They'd mostly stop",
+          "scores": {
+            "owner": 25
+          }
+        },
+        {
+          "id": "cant",
+          "label": "I can't take two weeks off",
+          "scores": {
+            "owner": 10
+          }
+        }
+      ],
+      "insight": {
+        "kind": "mirror",
+        "id": "owner",
+        "texts": {
+          "flow": "That's rare and valuable. Your business already runs without you at the center of every sale.",
+          "*": "This isn't a discipline problem. The business was built around you, so it waits for you. A clear process, a system that handles the repetitive first steps, and a team that runs it are what give that time back."
+        }
+      }
+    },
+    {
+      "id": "ads",
+      "section": "s3",
+      "type": "single",
+      "prompt": "Do you pay for advertising or lead services right now?",
+      "sub": "Google, Meta, Yelp, Angi, Thumbtack, and similar.",
+      "options": [
+        {
+          "id": "0",
+          "label": "Not right now",
+          "value": 0
+        },
+        {
+          "id": "lt1",
+          "label": "Under $1,000 a month",
+          "value": 500
+        },
+        {
+          "id": "1_3",
+          "label": "$1,000 to $3,000",
+          "value": 2000
+        },
+        {
+          "id": "3_10",
+          "label": "$3,000 to $10,000",
+          "value": 6000
+        },
+        {
+          "id": "10p",
+          "label": "More than $10,000",
+          "value": 12000
+        }
+      ],
+      "insight": {
+        "kind": "mirror",
+        "id": "ads",
+        "variants": {
+          "leaky": {
+            "tag": "The leaky bucket",
+            "lead": "You're paying to fill a bucket that has holes in it.",
+            "text": "From your earlier answers, some of the inquiries those ads bring in wait too long or never get followed up. When that happens the ads usually get the blame, even though the gap is in what happens after the click.",
+            "myth": "marketing"
+          },
+          "fixFirst": {
+            "text": "Good timing. Fixing the system before buying traffic means every future ad dollar lands somewhere that can catch it."
+          },
+          "solid": {
+            "text": "Your response and follow-up look solid, which means your ad spend has a real chance to pay off. Phase 2 looks at whether you can measure which ads bring customers, not just clicks."
+          }
+        }
+      }
+    },
+    {
+      "id": "numbers",
+      "section": "s4",
+      "type": "calculator",
+      "prompt": "Let's put a number on it.",
+      "sub": "Rough estimates are fine. You can adjust every value.",
+      "fields": [
+        {
+          "id": "inquiries",
+          "label": "New inquiries per month",
+          "min": 5,
+          "max": 500,
+          "step": 5,
+          "default": 60
+        },
+        {
+          "id": "value",
+          "label": "Average value of a new customer",
+          "unit": "USD",
+          "min": 100,
+          "max": 25000,
+          "step": 50,
+          "default": 1500
+        },
+        {
+          "id": "leak",
+          "label": "Inquiries that don't get a timely reply or follow-up",
+          "unit": "%",
+          "min": 0,
+          "max": 70,
+          "step": 1,
+          "default": "fromAnswers",
+          "note": "Estimated from your answers about reply speed, after-hours and follow-up."
+        },
+        {
+          "id": "close",
+          "label": "Share of followed-up inquiries that become customers",
+          "unit": "%",
+          "min": 5,
+          "max": 60,
+          "step": 1,
+          "default": 20,
+          "note": "If you don't know, 20% is a cautious starting point for many local services."
+        }
+      ],
+      "prefillNote": "We pre-filled the follow-up gap from your answers.",
+      "disclaimer": "This is an estimate, not a promise. It assumes the inquiries that slip through would close at the same rate as the ones you follow up. That's why we also show a cautious scenario where only a quarter is recovered."
+    }
+  ],
+  "archetypes": {
+    "ready": {
+      "name": "Ready to Scale",
+      "line": "Your basics work. The next gains come from measuring and automating what you already do well."
+    },
+    "leaky": {
+      "name": "The Leaky Bucket",
+      "line": "You pay to bring inquiries in, and some of them slip out before anyone follows up."
+    },
+    "secret": {
+      "name": "The Best-Kept Secret",
+      "line": "Your customers are happy, but almost nobody else can see it."
+    },
+    "bottleneck": {
+      "name": "The Owner Bottleneck",
+      "line": "The business grows as far as your calendar allows, and not much further."
+    },
+    "silent": {
+      "name": "The Silent Leak",
+      "line": "Inquiries arrive, but there's no reliable path from first contact to a closed sale."
+    }
+  },
+  "findings": {
+    "access": {
+      "title": "New inquiries wait for whoever is free.",
+      "step": "One front door: every call, text and form lands in one place, gets an instant reply, and can book a time on its own."
+    },
+    "pipeline": {
+      "title": "Your pipeline lives in several places, and partly in your memory.",
+      "step": "One shared list of every open inquiry, with its stage and the next action. Nothing fancier than that to start."
+    },
+    "followup": {
+      "title": "Quotes go quiet and nobody chases them on purpose.",
+      "step": "A simple follow-up sequence that runs for every quote that hasn't closed, so it doesn't depend on anyone remembering."
+    },
+    "reputation": {
+      "title": "Happy customers aren't turning into visible proof.",
+      "step": "An automatic review request after every completed job, sent to every customer while the experience is fresh."
+    },
+    "owner": {
+      "title": "Sales depend on your personal availability.",
+      "step": "Write down who handles each first step, then let the system do the repetitive parts so the team can run them without you."
+    }
+  },
+  "notYet": {
+    "platform": "An all-in-one platform with dozens of features. Start with one shared list and one front door.",
+    "adBudget": "A bigger ad budget. First close the gaps that lose the inquiries you already pay for.",
+    "moreAds": "More advertising. Fix the system first so paid inquiries don't leak.",
+    "customApp": "A custom app, or anything that requires you to become technical."
+  },
+  "indexBands": {
+    "solid": "Solid foundation",
+    "gaps": "Gaps worth fixing",
+    "leaks": "Significant leaks"
+  },
+  "copy": {
+    "brand": "Growth X-Ray",
+    "phaseChip": "Phase 1",
+    "preparedFor": "Prepared for {business}",
+    "gate": {
+      "eyebrow": "Private diagnostic",
+      "title": "Find out where new customers slip away.",
+      "sub": "Enter the access code from your email. Your answers stay private and you can pause any time.",
+      "label": "Access code",
+      "cta": "Start",
+      "errorShort": "Codes have at least 6 characters. Check the email we sent you.",
+      "errorRate": "Too many attempts. Wait a few minutes and try again.",
+      "demoHint": "Demo: RIVERA-7F3K loads a sample business with an outside view. Any other code of 6+ characters starts a generic diagnostic."
+    },
+    "welcome": {
+      "eyebrowGeneric": "Phase 1 · About 10 minutes",
+      "titleKnown": "Your growth X-ray is ready to start.",
+      "titleGeneric": "Let's take an X-ray of how you win customers.",
+      "sub": "About 10 minutes, mostly one-tap answers. You'll see what we learn as you go, and you'll get your results on the last screen.",
+      "promise": [
+        {
+          "k": "01 · Map",
+          "text": "How new customers reach you and what happens next."
+        },
+        {
+          "k": "02 · Measure",
+          "text": "An estimate of what slips through, in dollars."
+        },
+        {
+          "k": "03 · Prioritize",
+          "text": "The single first step that matters most for you."
+        }
+      ],
+      "outsideTitle": "What we saw from the outside",
+      "outsideBadge": "Sample data",
+      "outsideReviewsLabel": "Reviews",
+      "outsideReplyGap": "That's {replyGap} later.",
+      "outsideLatestReview": "Latest review: {lastReview}.",
+      "back": "Change code",
+      "cta": "Begin"
+    },
+    "question": {
+      "part": "Part {n} of {total} · {label}",
+      "minutesLeft": "About {n} min left",
+      "back": "Back",
+      "backToStart": "Back to start",
+      "next": "Continue",
+      "seeResults": "See my results"
+    },
+    "insight": {
+      "evidenceTag": "What the research says",
+      "mirrorTag": "What this tells us",
+      "mythTag": "Myth vs. reality",
+      "source": "Source:",
+      "view": "view"
+    },
+    "money": {
+      "monthlyLabel": "Tied to inquiries that slip through",
+      "monthlyDetail": "About {missed} inquiries a month · {annual} a year",
+      "cautiousLabel": "If you recovered just a quarter",
+      "cautiousDetail": "{annual} a year in added revenue",
+      "perMonth": "/mo",
+      "adLeak": "About {adLeak} of your monthly ad spend pays for inquiries that don't get a timely reply or follow-up."
+    },
+    "results": {
+      "eyebrow": "Phase 1 results",
+      "indexLabel": "Acquisition system index",
+      "pillarsTitle": "Where your system stands",
+      "lockedPillar": "PH. 2",
+      "moneyTitle": "Money on the table",
+      "fixTitle": "What to fix, in order",
+      "severityHigh": "High impact",
+      "severityMid": "Worth fixing",
+      "firstStep": "Your first step",
+      "noGaps": "No major gaps in Phase 1. Your next gains are in measurement and retention, which Phase 2 covers.",
+      "notYetTitle": "What you probably don't need yet",
+      "redo": "Change my answers",
+      "emptyTitle": "We don't have your answers in this tab.",
+      "emptySub": "Answers aren't saved between visits yet, so a reload starts fresh. Take the diagnostic again to see your results.",
+      "emptyCta": "Start the diagnostic"
+    },
+    "unlock": {
+      "eyebrow": "Phase 2 · About 20 minutes · Pause any time",
+      "title": "You know where the leak is. Phase 2 tells you exactly how to close it.",
+      "bullets": [
+        "Unlocks the three gray areas: retention and customer value, business visibility, and readiness.",
+        "A step-by-step plan in three phases, with what to set up first and what can wait.",
+        "What implementation would realistically involve for a business like yours."
+      ],
+      "cta": "Continue to Phase 2",
+      "later": "Save and finish later",
+      "savedTo": "Your progress is tied to code {code}.",
+      "savedMsg": "For now your answers live in this browser tab only. Saving so you can come back with code {code} is coming soon.",
+      "p2Pending": "Phase 2 isn't built yet. Soon this button will open its first block."
+    },
+    "theme": {
+      "system": "Auto",
+      "light": "Light",
+      "dark": "Dark",
+      "label": "Color theme"
+    },
+    "notFound": {
+      "title": "We couldn't find that page.",
+      "sub": "Check the link in your email, or enter your access code again.",
+      "cta": "Enter my code"
+    },
+    "report": {
+      "eyebrow": "Shared report",
+      "title": "Your full report will live here.",
+      "sub": "This read-only link will show your Phase 1 and Phase 2 results once they're saved."
+    }
+  }
+}
