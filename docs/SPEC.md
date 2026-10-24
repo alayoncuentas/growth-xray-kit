@@ -155,6 +155,11 @@ Reglas de persistencia (fase 1):
 - **`link_opened`**: al ver la bienvenida en el navegador (no al renderizar en el servidor, para no contar prefetches). Crea la sesión si falta; `access_codes.status` pasa a `opened`. `payload.resumed` indica si la sesión ya existía.
 - **`answered`**: cada `POST /api/answer` válido. Upsert en `answers` (la calculadora se guarda como un objeto con los campos que el usuario movió), actualiza `last_question_id` y recalcula la fila de `scores`. La respuesta de la API nunca incluye puntajes.
 - **`phase_done`**: con el botón "See my results" (`complete: true`), si no queda ninguna pregunta visible sin responder. Una sola vez por sesión: fija `completed_at` y el estado pasa a `p1_done`. El estado nunca retrocede.
+- **Correo del informe** (Resend): al registrar `phase_done`, una sola vez, al correo de `access_codes.email`, con el link a `/r/[code]`. Sale después de responder (no demora al prospecto). Sin correo en el código no se envía. Se registra `email_sent` con `payload.kind = "report"`.
+- **"Save and finish later"** (en cada pregunta y en el panel de la fase 2): guarda lo pendiente y envía el link `/x/[code]` al correo del código. Si el código no tiene correo, lo pide y lo guarda (nunca reemplaza uno existente). Máximo 3 por código y por hora. `email_sent` con `payload.kind = "resume"`.
+- **`/r/[code]`**: informe de solo lectura (mismo cuerpo que la pantalla de resultados, sin vista del equipo). Valida el código igual que `/x/[code]`; si la fase 1 no terminó, invita a retomar.
+- **Link con un código que no sirve** (`/x/…`, `/r/…`): pantalla clara según el motivo (`copy.codeError`): vencido ("This code has expired."), inexistente o mal formado, o demasiados intentos. Nunca una página de error técnica.
+- Sin `RESEND_API_KEY` en desarrollo, los correos se imprimen en el log del servidor; en producción es un error.
 - **Retomar**: la bienvenida lleva a la primera pregunta visible sin responder (no a la siguiente de `last_question_id`, porque el usuario pudo volver atrás); si no falta ninguna, a resultados. La calculadora cuenta como respondida cuando tiene fila guardada.
 
 ### Rutas

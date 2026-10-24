@@ -5,7 +5,10 @@ import { isSampleId, sampleState } from "@/lib/preview";
 import type { DiagnosticState } from "@/lib/store";
 import type { Access } from "./access";
 import { phase1Result, teamScores } from "@/lib/scoring";
+import { after } from "next/server";
 import { db, must } from "./db";
+import { sendReportEmail } from "./email";
+import { appOrigin } from "./origin";
 
 // Sesión de la fase 1 en Supabase: abrir, leer para retomar, guardar respuestas y recalcular puntajes.
 // Quien llama ya validó el código con checkAccess.
@@ -154,6 +157,9 @@ export async function saveAnswer(input: {
       advanceStatus(code, "p1_done"),
       logEvent(code, "phase_done", { phase: PHASE, archetype: res.archetype, index: res.avg }),
     ]);
+    // El correo con el informe sale después de responder: el prospecto no espera a Resend.
+    const origin = await appOrigin();
+    after(() => sendReportEmail(code, origin).catch((e) => console.error("[email report]", code, e)));
     return { completed: true };
   }
   return { completed: done };

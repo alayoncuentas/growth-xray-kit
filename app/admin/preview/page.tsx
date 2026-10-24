@@ -59,6 +59,7 @@ function screens(): Screen[] {
       };
     }),
     { id: "results", label: p.screens.results, part: null, src: X(preview.code, "/results", "&sample=leaky") },
+    { id: "report", label: p.screens.report, part: null, src: `/r/${preview.code}?frame=1&sample=leaky` },
   ];
 }
 

@@ -166,7 +166,8 @@
         "gate": "Code entry",
         "welcomeOutside": "Welcome · with outside view",
         "welcomePlain": "Welcome · without outside view",
-        "results": "Results"
+        "results": "Results",
+        "report": "Read-only report (/r) · link in the results email"
       },
       "partLabel": "Part {n} · {label}",
       "mapSub": "In order. Question screens use a business without a known industry, so the industry question appears too; with a code that includes the industry it's skipped.",

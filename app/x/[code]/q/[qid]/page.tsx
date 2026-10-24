@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { CodeError } from "@/components/gate/CodeError";
 import { PreviewChrome } from "@/components/preview/PreviewChrome";
 import { QuestionScreen } from "@/components/question/QuestionScreen";
 import { BusinessMarker } from "@/components/ui/BusinessMarker";
@@ -25,7 +26,7 @@ export default function QuestionPage({ params, searchParams }: PageProps<"/x/[co
 
 async function Question({ code: raw, qid, sample, frame }: { code: string; qid: string; sample: unknown; frame: boolean }) {
   const r = await checkAccess(raw);
-  if (!r.ok) notFound();
+  if (!r.ok) return <CodeError reason={r.reason} />;
   const { code, company } = r.access;
   // También descarta la pregunta de rubro cuando el código ya la trae.
   if (!progress(phase1, qid, company?.industry)) notFound();

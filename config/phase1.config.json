@@ -810,10 +810,8 @@
         "What implementation would realistically involve for a business like yours."
       ],
       "cta": "Continue to Phase 2",
-      "later": "Save and finish later",
       "savedTo": "Your answers are saved to code {code}.",
-      "savedMsg": "Your answers are saved. Open your link again or enter code {code} to pick up where you left off.",
-      "p2Pending": "Phase 2 isn't built yet. Soon this button will open its first block."
+      "p2Pending": "Phase 2 isn't open yet. Your Phase 1 answers are saved and will carry over."
     },
     "theme": {
       "system": "Auto",
@@ -821,15 +819,59 @@
       "dark": "Dark",
       "label": "Color theme"
     },
+    "codeError": {
+      "expiredTitle": "This code has expired.",
+      "expiredSub": "Reply to our email and we'll send you a new one.",
+      "unknownTitle": "We couldn't find that code.",
+      "unknownSub": "Check the link in your email, or type the code again.",
+      "rateTitle": "Too many attempts.",
+      "rateSub": "Wait a few minutes and try again.",
+      "cta": "Enter my code"
+    },
     "notFound": {
       "title": "We couldn't find that page.",
       "sub": "Check the link in your email, or enter your access code again.",
       "cta": "Enter my code"
     },
     "report": {
-      "eyebrow": "Shared report",
-      "title": "Your full report will live here.",
-      "sub": "This read-only link will show your Phase 1 and Phase 2 results once they're saved."
+      "eyebrow": "Phase 1 report",
+      "readOnly": "Read-only report. Your answers are private to your access code.",
+      "continueTitle": "Want to change an answer?",
+      "continueSub": "Open the diagnostic with the same code. Your answers are saved, and Phase 2 starts from there whenever it suits you.",
+      "continueCta": "Open my diagnostic",
+      "pendingTitle": "This report isn't ready yet.",
+      "pendingSub": "It appears once Phase 1 is finished. Your answers so far are saved.",
+      "pendingCta": "Pick up where I left off"
+    },
+    "later": {
+      "cta": "Save and finish later",
+      "sending": "Sending…",
+      "sent": "Saved. We emailed a link to {to} so you can pick up where you left off.",
+      "askEmail": "Where should we send your link?",
+      "emailLabel": "Email",
+      "submit": "Send my link",
+      "errorEmail": "Enter a valid email address.",
+      "errorRate": "We've already sent you a few links. Check your inbox, or try again in an hour.",
+      "errorSend": "We couldn't send the email just now. Your answers are still saved: come back any time with code {code}.",
+      "preview": "Preview: no email is sent."
+    },
+    "email": {
+      "signoff": "Growth X-Ray",
+      "footer": "You're getting this email because access code {code} was used on Growth X-Ray. If that wasn't you, you can ignore it.",
+      "report": {
+        "subject": "Your Growth X-Ray results",
+        "greeting": "Thanks for finishing Phase 1{forBusiness}.",
+        "body": "Your results are saved at this private link. You can come back to them any time.",
+        "cta": "View my results",
+        "after": "Phase 2 is optional. If you want to continue, you can start it from the same page whenever it suits you."
+      },
+      "resume": {
+        "subject": "Your link to finish your Growth X-Ray",
+        "greeting": "Your answers are saved{forBusiness}.",
+        "body": "Use this link to pick up where you left off. Everything you answered so far is already there.",
+        "cta": "Pick up where I left off",
+        "after": "No rush. The link stays the same until your code expires."
+      }
     }
   }
 }

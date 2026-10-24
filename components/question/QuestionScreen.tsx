@@ -13,6 +13,7 @@ import { completePhase, queueSave } from "@/lib/sync";
 import type { Answers, Company } from "@/lib/types";
 import { Calculator } from "./Calculator";
 import { OptionList } from "./OptionList";
+import { SaveForLater } from "./SaveForLater";
 
 const AUTO_ADVANCE_MS = 380;
 
@@ -113,6 +114,9 @@ export function QuestionScreen({ code, qid, company }: { code: string; qid: stri
               {p.next ? c.next : c.seeResults}
             </Button>
           )}
+        </div>
+        <div className="mt-5 text-right">
+          <SaveForLater code={code} />
         </div>
         {saveFailed && (
           <p role="status" className="mt-3 text-right text-[13px] text-bad">

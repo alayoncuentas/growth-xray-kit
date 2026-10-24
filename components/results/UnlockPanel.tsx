@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { buttonClass } from "@/components/ui/Button";
+import { SaveForLater } from "@/components/question/SaveForLater";
 import { copy, fill } from "@/lib/config";
 
 /** Bloque oscuro de invitación a la fase 2 (invierte paper/ink). */
@@ -18,13 +19,11 @@ export function UnlockPanel({ code }: { code: string }) {
         ))}
       </ul>
       <div className="flex flex-wrap items-center gap-2.5">
-        {/* TODO(fase 2): abrir el primer bloque. TODO(resend): "guardar y seguir" envía el link por correo. */}
+        {/* TODO(fase 2): abrir el primer bloque. */}
         <button type="button" onClick={() => setMsg(u.p2Pending)} className={buttonClass("primary", "bg-paper! text-ink!")}>
           {u.cta}
         </button>
-        <button type="button" onClick={() => setMsg(fill(u.savedMsg, { code }))} className={buttonClass("line", "border-paper/40! text-paper!")}>
-          {u.later}
-        </button>
+        <SaveForLater code={code} tone="inverse" />
       </div>
       <p className="text-[13px] text-paper/70" aria-live="polite">
         {msg}

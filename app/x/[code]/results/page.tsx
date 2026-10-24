@@ -1,5 +1,5 @@
-import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { CodeError } from "@/components/gate/CodeError";
 import { PreviewChrome } from "@/components/preview/PreviewChrome";
 import { ResultsView } from "@/components/results/ResultsView";
 import { BusinessMarker } from "@/components/ui/BusinessMarker";
@@ -23,7 +23,7 @@ export default function ResultsPage({ params, searchParams }: PageProps<"/x/[cod
 
 async function Results({ code: raw, sample, frame }: { code: string; sample: unknown; frame: boolean }) {
   const r = await checkAccess(raw);
-  if (!r.ok) notFound();
+  if (!r.ok) return <CodeError reason={r.reason} />;
   const { code, company } = r.access;
   return (
     <DiagnosticProvider code={code} initial={await initialState(r.access, sample)}>

@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { CodeError } from "@/components/gate/CodeError";
 import { LinkOpened } from "@/components/gate/LinkOpened";
 import { PreviewChrome } from "@/components/preview/PreviewChrome";
 import { BusinessMarker } from "@/components/ui/BusinessMarker";
@@ -30,7 +30,7 @@ export default function WelcomePage({ params, searchParams }: PageProps<"/x/[cod
 
 async function Welcome({ code: raw, frame }: { code: string; frame: boolean }) {
   const r = await checkAccess(raw);
-  if (!r.ok) notFound();
+  if (!r.ok) return <CodeError reason={r.reason} />;
   const { code, company: co } = r.access;
   const w = copy.welcome;
   const o = co?.outside;

@@ -1,19 +1,72 @@
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { CodeError } from "@/components/gate/CodeError";
+import { ResultsBody } from "@/components/results/ResultsBody";
+import { BusinessMarker } from "@/components/ui/BusinessMarker";
+import { ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Container } from "@/components/ui/Container";
-import { Eyebrow } from "@/components/ui/Eyebrow";
+import { LoadingCard } from "@/components/ui/Loading";
 import { copy } from "@/lib/config";
+import { isSampleId, sampleState } from "@/lib/preview";
+import { checkAccess } from "@/lib/server/access";
+import { loadPhase1 } from "@/lib/server/diagnostic";
 
-// Informe compartible de solo lectura. TODO(supabase): cargar puntajes guardados por código.
-// Nunca mostrar aquí Need / Potential / Readiness ni alertas: eso es solo de /admin.
-export default function SharedReportPage() {
-  const t = copy.report;
+export const metadata: Metadata = { title: "Your Growth X-Ray report", robots: { index: false, follow: false } };
+
+// Informe de solo lectura: el link del correo al terminar la fase 1. Valida el código como /x/[code]
+// (servidor, con limitación de intentos). Nunca muestra Need / Potential / Readiness ni alertas: eso es solo de /admin.
+export default function SharedReportPage({ params, searchParams }: PageProps<"/r/[code]">) {
   return (
     <Container wide>
-      <Card>
-        <Eyebrow>{t.eyebrow}</Eyebrow>
-        <h1 className="mb-3 text-[clamp(30px,6vw,44px)] tracking-[-0.02em]">{t.title}</h1>
-        <p className="text-muted">{t.sub}</p>
-      </Card>
+      <Suspense fallback={<LoadingCard />}>
+        {Promise.all([params, searchParams]).then(([{ code }, sp]) => (
+          <Report code={code} sample={sp.sample} />
+        ))}
+      </Suspense>
     </Container>
+  );
+}
+
+async function Report({ code: raw, sample }: { code: string; sample: unknown }) {
+  const r = await checkAccess(raw);
+  if (!r.ok) return <CodeError reason={r.reason} />;
+  const { code, company, preview } = r.access;
+  const t = copy.report;
+  const resumeHref = `/x/${encodeURIComponent(code)}`;
+
+  // Vista previa: una muestra (?sample=leaky), sin leer la base.
+  const state = preview
+    ? isSampleId(sample)
+      ? { ...sampleState(sample), completed: true }
+      : { answers: {}, calc: {}, completed: false }
+    : await loadPhase1(code);
+
+  if (!state.completed) {
+    return (
+      <Card>
+        <BusinessMarker business={company?.business ?? null} />
+        <h1 className="mb-3 text-[clamp(26px,5vw,36px)] tracking-[-0.02em]">{t.pendingTitle}</h1>
+        <p className="mb-[22px] text-muted">{t.pendingSub}</p>
+        <ButtonLink href={resumeHref}>{t.pendingCta}</ButtonLink>
+      </Card>
+    );
+  }
+
+  return (
+    <>
+      <BusinessMarker business={company?.business ?? null} />
+      <ResultsBody answers={state.answers} calc={state.calc} company={company} eyebrow={t.eyebrow} />
+      <section className="mt-5 grid gap-3 rounded-panel border border-line bg-card p-[clamp(20px,4vw,28px)]">
+        <h2 className="text-xl">{t.continueTitle}</h2>
+        <p className="text-muted">{t.continueSub}</p>
+        <div>
+          <ButtonLink href={resumeHref} variant="line">
+            {t.continueCta}
+          </ButtonLink>
+        </div>
+      </section>
+      <p className="mt-4 text-[13px] text-muted">{t.readOnly}</p>
+    </>
   );
 }
