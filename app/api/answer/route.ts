@@ -27,6 +27,8 @@ export async function POST(request: Request) {
   const industry = access.access.company?.industry;
   const clean = validateAnswer(phase1, questionId, value, industry);
   if (clean === null) return Response.json({ error: "invalid_answer" }, { status: 400 });
+  // Vista previa: se valida igual, pero no se guarda nada (ni answers, ni events, ni scores).
+  if (access.access.preview) return Response.json({ ok: true, completed: false, preview: true });
 
   try {
     const { completed } = await saveAnswer({

@@ -43,6 +43,12 @@ export function setCalc(code: string, field: keyof CalcOverrides, value: number)
   emit();
 }
 
+/** Reemplaza todo el estado del código (modo recorrido de la vista previa: cargar una muestra o empezar de cero). */
+export function replaceDiagnostic(code: string, state: DiagnosticState) {
+  states.set(code, { answers: { ...state.answers }, calc: { ...state.calc } });
+  emit();
+}
+
 // ---------- estado guardado en el servidor ----------
 
 const Initial = createContext<{ code: string; state: DiagnosticState } | null>(null);

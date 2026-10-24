@@ -1,6 +1,9 @@
 import "server-only";
 import { splitAnswers, unanswered, type AnswerValue, type SavedState } from "@/lib/answers";
 import { phase1 } from "@/lib/config";
+import { isSampleId, sampleState } from "@/lib/preview";
+import type { DiagnosticState } from "@/lib/store";
+import type { Access } from "./access";
 import { phase1Result, teamScores } from "@/lib/scoring";
 import { db, must } from "./db";
 
@@ -59,6 +62,20 @@ async function loadRows(sessionId: string) {
     await db().from("answers").select("question_id, value").eq("session_id", sessionId),
     "answers select",
   ) as { question_id: string; value: unknown }[];
+}
+
+export function emptyPhase1(): Phase1State {
+  return { answers: {}, calc: {}, calcSaved: false, started: false, completed: false };
+}
+
+/**
+ * Estado inicial de una pantalla: lo guardado en Supabase o, en vista previa, una muestra (?sample=leaky)
+ * o nada. La vista previa nunca toca la base.
+ */
+export async function initialState(access: Access, sample: unknown): Promise<DiagnosticState> {
+  if (access.preview) return isSampleId(sample) ? sampleState(sample) : { answers: {}, calc: {} };
+  const saved = await loadPhase1(access.code);
+  return { answers: saved.answers, calc: saved.calc };
 }
 
 /** Estado guardado para hidratar el cliente y decidir dónde retomar. No crea la sesión. */

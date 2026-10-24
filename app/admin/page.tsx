@@ -30,6 +30,9 @@ async function Dashboard() {
         </div>
         <div className="flex flex-wrap gap-2.5">
           {/* Descargas: <a> normal, no <Link>, para que el navegador guarde el archivo. */}
+          <ButtonLink href="/admin/preview" variant="line">
+            {adminCopy.preview.nav}
+          </ButtonLink>
           <a href="/admin/export?status=sent" className={buttonClass("line")}>
             {l.exportSent}
           </a>

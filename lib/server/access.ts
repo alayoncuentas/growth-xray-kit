@@ -2,12 +2,16 @@ import "server-only";
 import { createHash } from "node:crypto";
 import { headers } from "next/headers";
 import { connection } from "next/server";
+import { previewCompany, previewVariant, type PreviewVariant } from "@/lib/preview";
 import type { Company, OutsideView } from "@/lib/types";
+import { getAdmin } from "./auth";
 import { db, must } from "./db";
 
 export interface Access {
   code: string;
   company: Company | null;
+  /** Código de vista previa (solo con sesión de admin): nada se lee ni se escribe en la base. */
+  preview?: PreviewVariant;
 }
 
 export type AccessError = "format" | "unknown" | "expired" | "rate";
@@ -77,6 +81,11 @@ export async function checkAccess(raw: string): Promise<AccessResult> {
   const key = await clientKey();
   const code = normalizeCode(raw);
   const wellFormed = CODE_RE.test(code);
+
+  // Vista previa: solo existe para un admin con sesión. Para cualquier otro es un código inexistente
+  // (sigue el camino normal: no está en access_codes y cuenta como intento fallido).
+  const pv = wellFormed ? previewVariant(code) : null;
+  if (pv && (await getAdmin())) return { ok: true, access: { code, company: previewCompany(pv), preview: pv } };
 
   // En paralelo para ahorrar un viaje a la base; si la IP está bloqueada, el resultado se descarta.
   const [blocked, row] = await Promise.all([

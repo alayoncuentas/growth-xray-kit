@@ -166,6 +166,7 @@ Reglas de persistencia (fase 1):
 /x/[code]/phase-2/...  bloques de la fase 2
 /r/[code]              informe compartible (solo lectura)
 /admin                 panel interno (protegido con Supabase Auth): lista, embudo, puntajes, vista del equipo
+/admin/preview         vista previa de todas las pantallas, variantes de insights y los 5 arquetipos (solo lectura)
 /api/answer            POST: guarda respuesta y recalcula puntajes
 /api/crm-sync          webhook al CRM cuando termina una fase
 ```
@@ -179,6 +180,7 @@ Reglas de persistencia (fase 1):
 - **Regla de la FTC sobre reseñas y testimonios** (vigente desde el 21-oct-2024): nada de reseñas falsas o generadas con IA, incentivos condicionados a reseñas positivas, filtrar o suprimir reseñas negativas, ni reseñas de empleados sin divulgarlo. Las solicitudes de reseña deben enviarse a **todos** los clientes, no solo a los satisfechos.
 - Códigos: aleatorios, no adivinables (≥ 8 caracteres en base32), con vencimiento y limitación de intentos (rate limiting).
   Implementado: 10 caracteres `XXXXX-XXXXX` con el alfabeto base32 `23456789ABCDEFGHJKLMNPQRSTUVWXYZ` (sin 0, 1, I ni O), 50 bits; vencimiento de 30/60/90 días o sin vencimiento (`lib/admin.ts`).
+- Vista previa (`/admin/preview`): los códigos `PREVIEW` y `PREVIEW-PLAIN` (config/preview.json) solo existen con sesión de admin; para cualquier otro son inexistentes y cuentan como intento fallido. Con ellos no se lee ni se escribe nada en la base: `/api/answer` valida y responde sin guardar, y no se registran eventos. No pueden salir del generador de códigos porque contienen I y O.
 - `/admin`: enlace mágico de Supabase Auth, solo para los correos de `ADMIN_EMAILS`; cada página, acción y descarga verifica la sesión. En desarrollo, `npm run admin:link -- correo` imprime un enlace sin enviar correo (no corre en producción).
 - Política de privacidad visible; no pedir datos sensibles (de salud ni financieros personales) en el diagnóstico.
 - Prueba de cliente incógnito ("Lo que vimos desde afuera"): hacerla con mensajes reales y honestos (una consulta genuina), sin hacerse pasar por otra empresa.

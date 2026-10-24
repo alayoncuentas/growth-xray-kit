@@ -1,0 +1,44 @@
+{
+  "_note": "Vista previa de /admin/preview y del modo recorrido. Los códigos de vista previa solo funcionan con sesión de admin y nunca escriben en la base. Negocios y respuestas son de ejemplo.",
+  "code": "PREVIEW",
+  "plainCode": "PREVIEW-PLAIN",
+  "company": {
+    "business": "Sample Dental Studio",
+    "city": "Austin, TX",
+    "industry": "dental",
+    "outside": {
+      "date": "Tue, Oct 13",
+      "text": "We texted your listed number at 8:42 p.m. asking about a cleaning appointment.",
+      "reply": "First reply: next day at 11:20 a.m.",
+      "replyGap": "14 h 38 min",
+      "reviews": "4.8 stars from 23 Google reviews",
+      "lastReview": "5 months ago"
+    }
+  },
+  "plainCompany": {
+    "business": "Sample Home Services",
+    "city": "Denver, CO"
+  },
+  "samples": {
+    "ready": {
+      "answers": { "industry": "home", "team": "6_15", "channels": ["phone", "form", "google", "ref"], "busy": "a", "speed": "5m", "afterhours": "book", "tracking": "crm", "followup": "auto", "reviews": "process", "away": "flow", "ads": "1_3" },
+      "calc": { "inquiries": 120, "value": 2500 }
+    },
+    "leaky": {
+      "answers": { "industry": "dental", "team": "2_5", "channels": ["phone", "form", "google"], "busy": "d", "speed": "dk", "afterhours": "none", "tracking": "inbox", "followup": "wait", "reviews": "hope", "away": "cant", "ads": "1_3" },
+      "calc": { "inquiries": 100 }
+    },
+    "secret": {
+      "answers": { "industry": "prof", "team": "2_5", "channels": ["phone", "email", "ref"], "busy": "a", "speed": "1h", "afterhours": "auto", "tracking": "sheet", "followup": "set", "reviews": "nothing", "away": "slow", "ads": "0" },
+      "calc": { "inquiries": 40, "value": 3000 }
+    },
+    "bottleneck": {
+      "answers": { "industry": "legal", "team": "2_5", "channels": ["phone", "form", "ref"], "busy": "b", "speed": "1h", "afterhours": "auto", "tracking": "sheet", "followup": "set", "reviews": "some", "away": "cant", "ads": "lt1" },
+      "calc": { "inquiries": 30, "value": 5000 }
+    },
+    "silent": {
+      "answers": { "industry": "home", "team": "1", "channels": ["phone", "text"], "busy": "b", "speed": "1h", "afterhours": "auto", "tracking": "none", "followup": "set", "reviews": "some", "away": "slow", "ads": "0" },
+      "calc": { "inquiries": 15, "value": 800 }
+    }
+  }
+}

@@ -145,6 +145,54 @@
       },
       "cta": "Create and generate code",
       "errorGeneric": "Please fix the fields marked below."
+    },
+    "preview": {
+      "nav": "Preview",
+      "eyebrow": "Internal",
+      "title": "Diagnostic preview",
+      "sub": "Every Phase 1 screen exactly as a prospect sees it, at phone width (400 px). Nothing on this page or in the walkthrough is saved.",
+      "theme": "Theme",
+      "indexTitle": "On this page",
+      "sections": {
+        "walk": "Walkthrough",
+        "map": "Screen map",
+        "archetypes": "The 5 archetypes"
+      },
+      "try": "Try it as a prospect",
+      "tryPlain": "…without the outside view",
+      "trySub": "Opens the real flow with a preview code. Answers live only in that tab, are never saved, and a bar at the bottom lets you jump to any question or load sample results.",
+      "open": "Open",
+      "screens": {
+        "gate": "Code entry",
+        "welcomeOutside": "Welcome · with outside view",
+        "welcomePlain": "Welcome · without outside view",
+        "results": "Results"
+      },
+      "partLabel": "Part {n} · {label}",
+      "mapSub": "In order. Question screens use a business without a known industry, so the industry question appears too; with a code that includes the industry it's skipped.",
+      "insightsTitle": "What each answer shows",
+      "autoAdvance": "No insight → advances on its own",
+      "multiNote": "No insight · multi-select, waits for Continue",
+      "calcNote": "No insight · the dollar figure updates live as the sliders move. Shown with the Leaky Bucket sample answers.",
+      "contexts": {
+        "channels3": "With 3+ channels picked earlier",
+        "channels1": "With fewer than 3 channels",
+        "outside": "Code with an outside view",
+        "noOutside": "Code without an outside view",
+        "weak": "Weak first response or follow-up",
+        "strong": "Strong first response and follow-up"
+      },
+      "archetypesSub": "Results rendered from a sample set of answers, next to the team view the prospect never sees.",
+      "bar": {
+        "label": "Preview · nothing is saved",
+        "jump": "Jump to…",
+        "welcome": "Welcome",
+        "results": "Results",
+        "sample": "Load sample results…",
+        "reset": "Start over",
+        "back": "Preview map"
+      },
+      "sampleAnswers": "Sample answers"
     }
   }
 }

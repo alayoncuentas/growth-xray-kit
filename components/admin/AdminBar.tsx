@@ -14,6 +14,9 @@ export async function AdminBar() {
       <Link href="/admin" className="font-semibold">
         {adminCopy.brand}
       </Link>
+      <Link href="/admin/preview" className="text-muted underline underline-offset-2 hover:text-ink">
+        {adminCopy.preview.nav}
+      </Link>
       <span className="flex-1" />
       <span className="text-muted">{fill(adminCopy.signedInAs, { email: admin.email })}</span>
       <form action={signOut}>

@@ -20,6 +20,6 @@ export async function submitCode(_prev: CodeFormState, formData: FormData): Prom
  */
 export async function markLinkOpened(code: string): Promise<void> {
   const r = await checkAccess(code);
-  if (!r.ok) return;
+  if (!r.ok || r.access.preview) return; // la vista previa no crea sesión ni registra eventos
   await openLink(r.access.code, (await headers()).get("user-agent"));
 }
