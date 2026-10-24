@@ -2,9 +2,18 @@
   "_note": "Solo para /admin y código del servidor. Nunca importar desde componentes cliente ni rutas públicas.",
   "title": "Team view · never shown to the prospect",
   "axes": {
-    "need": { "label": "Need", "note": "Size of the gaps found" },
-    "potential": { "label": "Potential", "note": "Volume, deal value, spend" },
-    "readiness": { "label": "Readiness", "note": "Preliminary, confirmed in Phase 2" }
+    "need": {
+      "label": "Need",
+      "note": "Size of the gaps found"
+    },
+    "potential": {
+      "label": "Potential",
+      "note": "Volume, deal value, spend"
+    },
+    "readiness": {
+      "label": "Readiness",
+      "note": "Preliminary, confirmed in Phase 2"
+    }
   },
   "verdicts": {
     "high": "High priority. Invite to Phase 2 and offer a results review call.",
@@ -28,5 +37,114 @@
     "noAds": "None",
     "opening": "Opening line"
   },
-  "openingLine": "“Your X-ray says {archetype}. Can I show you the one fix I'd start with?”"
+  "openingLine": "“Your X-ray says {archetype}. Can I show you the one fix I'd start with?”",
+  "admin": {
+    "brand": "Team dashboard",
+    "login": {
+      "eyebrow": "Internal",
+      "title": "Team sign-in",
+      "sub": "We'll email you a one-time sign-in link. Only approved team addresses get one.",
+      "label": "Work email",
+      "cta": "Email me a link",
+      "sent": "If {email} is on the team list, a sign-in link is on its way. Open it in this browser.",
+      "errorEmail": "Enter a valid email address.",
+      "errorLink": "That sign-in link is invalid or expired. Request a new one.",
+      "errorDenied": "That account doesn't have access to this dashboard.",
+      "errorSend": "We couldn't send the link. Wait a minute and try again."
+    },
+    "signedInAs": "Signed in as {email}",
+    "signOut": "Sign out",
+    "list": {
+      "eyebrow": "Internal",
+      "title": "Leads",
+      "newCompany": "New company",
+      "exportAll": "Export CSV",
+      "exportSent": "Export not yet opened",
+      "empty": "No companies yet. Create one to get an access code.",
+      "colBusiness": "Business",
+      "colStatus": "Status",
+      "colArchetype": "Archetype",
+      "colScores": "N / P / R",
+      "colMonthly": "At stake",
+      "colFlags": "Alerts",
+      "colActivity": "Updated",
+      "expired": "expired",
+      "noScores": "No answers yet"
+    },
+    "funnel": {
+      "title": "Funnel",
+      "of": "of sent"
+    },
+    "statuses": {
+      "sent": "Sent",
+      "opened": "Opened",
+      "p1_done": "Phase 1 done",
+      "p2_done": "Phase 2 done",
+      "booked": "Booked"
+    },
+    "detail": {
+      "back": "All leads",
+      "link": "Diagnostic link",
+      "copy": "Copy",
+      "copied": "Copied",
+      "contact": "Contact",
+      "expires": "Expires",
+      "never": "Never",
+      "progress": "Phase 1",
+      "notStarted": "Not started",
+      "inProgress": "In progress · last answered: {q}",
+      "completed": "Completed {date}",
+      "answersTitle": "Answers",
+      "noAnswers": "No answers yet.",
+      "notAsked": "Skipped (known from the code)",
+      "unanswered": "—",
+      "calcDefault": "default",
+      "eventsTitle": "Activity",
+      "noEvents": "No activity yet.",
+      "companyTitle": "Company",
+      "outsideTitle": "Outside view",
+      "noOutside": "Not added",
+      "otherCodes": "Other codes for this company",
+      "newCode": "Generate another code",
+      "newCodeEmail": "Contact email (optional)",
+      "teamPending": "The team view appears once the lead answers at least one question."
+    },
+    "form": {
+      "eyebrow": "Internal",
+      "title": "New company",
+      "sub": "Creates the company and a unique access code you can send by email.",
+      "name": "Business name",
+      "city": "City",
+      "state": "State",
+      "industry": "Industry",
+      "industryUnknown": "Ask in the diagnostic",
+      "website": "Website",
+      "phone": "Phone",
+      "email": "Contact email",
+      "placeId": "Google Place ID",
+      "expires": "Code expires",
+      "expiresNever": "Never",
+      "expiresDays": "In {n} days",
+      "outsideTitle": "What we saw from the outside (optional)",
+      "outsideSub": "Shown on the welcome screen. Fill in every field or leave them all empty. Use only real, honest observations.",
+      "outside": {
+        "date": "Date of the test",
+        "text": "What we did",
+        "reply": "What happened",
+        "replyGap": "Reply gap",
+        "reviews": "Reviews summary",
+        "lastReview": "Latest review"
+      },
+      "outsidePlaceholders": {
+        "date": "Tue, Oct 13",
+        "text": "We texted your listed number at 8:42 p.m. asking about…",
+        "reply": "First reply: next day at 11:20 a.m.",
+        "replyGap": "14 h 38 min",
+        "reviews": "4.8 stars from 23 Google reviews",
+        "lastReview": "5 months ago"
+      },
+      "cta": "Create and generate code",
+      "errorGeneric": "Please fix the fields marked below."
+    }
+  }
 }

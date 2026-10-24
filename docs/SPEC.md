@@ -178,6 +178,8 @@ Reglas de persistencia (fase 1):
 - **TCPA**: si el sistema que se implemente al cliente envía SMS o llamadas automatizadas, requiere consentimiento previo del destinatario.
 - **Regla de la FTC sobre reseñas y testimonios** (vigente desde el 21-oct-2024): nada de reseñas falsas o generadas con IA, incentivos condicionados a reseñas positivas, filtrar o suprimir reseñas negativas, ni reseñas de empleados sin divulgarlo. Las solicitudes de reseña deben enviarse a **todos** los clientes, no solo a los satisfechos.
 - Códigos: aleatorios, no adivinables (≥ 8 caracteres en base32), con vencimiento y limitación de intentos (rate limiting).
+  Implementado: 10 caracteres `XXXXX-XXXXX` con el alfabeto base32 `23456789ABCDEFGHJKLMNPQRSTUVWXYZ` (sin 0, 1, I ni O), 50 bits; vencimiento de 30/60/90 días o sin vencimiento (`lib/admin.ts`).
+- `/admin`: enlace mágico de Supabase Auth, solo para los correos de `ADMIN_EMAILS`; cada página, acción y descarga verifica la sesión. En desarrollo, `npm run admin:link -- correo` imprime un enlace sin enviar correo (no corre en producción).
 - Política de privacidad visible; no pedir datos sensibles (de salud ni financieros personales) en el diagnóstico.
 - Prueba de cliente incógnito ("Lo que vimos desde afuera"): hacerla con mensajes reales y honestos (una consulta genuina), sin hacerse pasar por otra empresa.
 

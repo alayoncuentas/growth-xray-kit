@@ -1,21 +1,46 @@
-import type { Metadata } from "next";
-import { Card } from "@/components/ui/Card";
-import { Container } from "@/components/ui/Container";
+import { Suspense } from "react";
+import { Funnel } from "@/components/admin/Funnel";
+import { LeadList } from "@/components/admin/LeadList";
+import { ButtonLink, buttonClass } from "@/components/ui/Button";
 import { Eyebrow } from "@/components/ui/Eyebrow";
+import { LoadingCard } from "@/components/ui/Loading";
+import { funnel } from "@/lib/admin";
+import { listLeads } from "@/lib/server/admin-data";
+import { adminCopy } from "@/lib/server/team";
 
-export const metadata: Metadata = { robots: { index: false, follow: false } };
-
-// Panel interno. TODO(supabase): proteger con Supabase Auth ANTES de mostrar cualquier dato.
-// Aquí vivirá la vista del equipo (teamScores en lib/scoring.ts + textos de config/team.config.json).
-// Por ahora no lee ni muestra datos de leads.
 export default function AdminPage() {
   return (
-    <Container wide>
-      <Card>
-        <Eyebrow>Internal</Eyebrow>
-        <h1 className="mb-3 text-[clamp(30px,6vw,44px)] tracking-[-0.02em]">Team dashboard</h1>
-        <p className="text-muted">Not connected yet. This page will require sign-in before it shows any lead data.</p>
-      </Card>
-    </Container>
+    <main>
+      <Suspense fallback={<LoadingCard />}>
+        <Dashboard />
+      </Suspense>
+    </main>
+  );
+}
+
+async function Dashboard() {
+  const leads = await listLeads(); // exige sesión de admin
+  const l = adminCopy.list;
+  return (
+    <div className="grid gap-5">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <Eyebrow>{l.eyebrow}</Eyebrow>
+          <h1 className="text-[clamp(28px,5vw,40px)] tracking-[-0.02em]">{l.title}</h1>
+        </div>
+        <div className="flex flex-wrap gap-2.5">
+          {/* Descargas: <a> normal, no <Link>, para que el navegador guarde el archivo. */}
+          <a href="/admin/export?status=sent" className={buttonClass("line")}>
+            {l.exportSent}
+          </a>
+          <a href="/admin/export" className={buttonClass("line")}>
+            {l.exportAll}
+          </a>
+          <ButtonLink href="/admin/new">{l.newCompany}</ButtonLink>
+        </div>
+      </div>
+      <Funnel steps={funnel(leads.map((x) => x.status))} />
+      <LeadList leads={leads} />
+    </div>
   );
 }
