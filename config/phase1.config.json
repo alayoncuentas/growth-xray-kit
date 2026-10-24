@@ -720,7 +720,8 @@
       "cta": "Start",
       "errorShort": "Codes have at least 6 characters. Check the email we sent you.",
       "errorRate": "Too many attempts. Wait a few minutes and try again.",
-      "demoHint": "Demo: RIVERA-7F3K loads a sample business with an outside view. If you've started before, the same code picks up where you left off.",
+      "placeholder": "XXXXX-XXXXX",
+      "resumeHint": "Started before? The same code picks up where you left off.",
       "errorUnknown": "We couldn't find that code. Check the email we sent you.",
       "errorExpired": "This code has expired. Reply to our email and we'll send you a new one."
     },

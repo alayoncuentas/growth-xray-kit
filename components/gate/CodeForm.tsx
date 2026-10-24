@@ -21,11 +21,15 @@ export function CodeForm() {
           id="code"
           name="code"
           autoComplete="off"
+          autoCapitalize="characters"
           spellCheck={false}
-          defaultValue={state.code ?? "RIVERA-7F3K"}
+          autoFocus
+          maxLength={32}
+          placeholder={g.placeholder}
+          defaultValue={state.code ?? ""}
           aria-invalid={!!error}
           aria-describedby={error ? "code-err" : undefined}
-          className="min-w-0 flex-1 rounded-card border-[1.5px] border-line bg-paper px-3.5 py-3 font-mono text-lg leading-none font-medium tracking-[0.08em] text-ink uppercase"
+          className="min-w-0 flex-1 rounded-card border-[1.5px] border-line bg-paper px-3.5 py-3 font-mono text-lg leading-none font-medium tracking-[0.08em] text-ink uppercase placeholder:text-muted placeholder:opacity-60"
         />
         <Button type="submit" disabled={pending}>
           {g.cta}
@@ -36,7 +40,7 @@ export function CodeForm() {
           {error}
         </p>
       )}
-      <p className="text-[13px] text-muted">{g.demoHint}</p>
+      <p className="text-[13px] text-muted">{g.resumeHint}</p>
     </form>
   );
 }

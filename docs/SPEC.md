@@ -25,7 +25,7 @@ Principios no negociables:
 
 ```
 Correo de contacto (con código único)
-  → Link con código  /x/RIVERA-7F3K   (o ingreso manual del código)
+  → Link con código  /x/XXXXX-XXXXX   (o ingreso manual del código)
   → Bienvenida personalizada + "Lo que vimos desde afuera"
   → FASE 1 · ~10 min · 12 preguntas · 4 partes
       → Resultado de la fase 1 (arquetipo, índice, pilares, dinero en juego, primer paso, lo que no necesita)
@@ -145,7 +145,7 @@ events          id, code, type (email_sent|link_opened|question_viewed|answered|
 access_attempts id, ip_hash, at        (intentos fallidos de código; hash SHA-256 de la IP, nunca la IP)
 ```
 
-Migraciones en `supabase/migrations/`, datos de demo en `supabase/seed.sql`. RLS activado sin políticas:
+Migraciones en `supabase/migrations/`, datos de ejemplo **solo para desarrollo** en `supabase/seed.sql` (nunca se cargan en producción; para demos se usa `/admin/preview`). No hay códigos públicos de demo. RLS activado sin políticas:
 solo el servidor (clave secreta) lee y escribe.
 
 Reglas de persistencia (fase 1):

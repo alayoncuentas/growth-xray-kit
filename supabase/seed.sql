@@ -1,4 +1,9 @@
--- Negocio y código de demo del prototipo (RIVERA-7F3K). Se puede correr más de una vez.
+-- ============================================================================
+-- SOLO DESARROLLO. NUNCA CORRER EN PRODUCCIÓN.
+-- Datos de ejemplo para una base local (`supabase db reset` en la CLI). `supabase db push` no lo carga.
+-- En producción no hay códigos públicos de demo: las demos se muestran con /admin/preview (código PREVIEW).
+-- Se puede correr más de una vez: `on conflict do nothing` nunca reactiva un código vencido.
+-- ============================================================================
 
 insert into public.companies (id, name, city, state, industry, outside_view)
 values (
