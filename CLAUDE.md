@@ -4,6 +4,7 @@
 Diagnóstico interactivo en dos fases para calificar negocios de servicios en EE. UU. y mostrarles dónde pierden clientes.
 La especificación completa está en `docs/SPEC.md`. Léela antes de cualquier cambio de lógica.
 El prototipo de referencia (comportamiento y diseño) está en `docs/prototype.html`.
+El camino abierto (inicio sin código, datos progresivos, resultado parcial, regalos, Turnstile, UTM, privacidad y GHL) está definido en `docs/OPEN_ENTRY.md`: decisiones y textos aprobados. Léelo antes de tocar el inicio, los resultados, los regalos, `/privacy` o la integración con el CRM.
 
 ## Stack
 Next.js (App Router) + TypeScript + Tailwind · Supabase (Postgres) · Resend · Vercel.
@@ -17,6 +18,7 @@ Next.js (App Router) + TypeScript + Tailwind · Supabase (Postgres) · Resend ·
 - Las respuestas se guardan en cada paso (`/api/answer`), para que el usuario pueda retomar con su código.
 - La vista del equipo (Need / Potential / Readiness, alertas) solo existe en `/admin`; nunca se expone en rutas públicas.
 - Los códigos de acceso se validan del lado del servidor, con limitación de intentos.
+- El camino abierto va detrás de `OPEN_ENTRY_ENABLED` (apagado por defecto) y no se enciende hasta que `/privacy` esté publicada.
 
 ## Comandos
 - `npm run dev` — desarrollo

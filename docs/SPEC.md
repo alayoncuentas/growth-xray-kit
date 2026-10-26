@@ -18,7 +18,7 @@ Principios no negociables:
 
 - Solo estadísticas con fuente trazable (ver `phase1.config.json → evidence`). Nunca cifras "virales" sin origen.
 - El sistema puede recomendar *menos* (no vender, o no vender todavía).
-- El resultado de la fase 1 se entrega completo, sin retener información a cambio de nada.
+- Valor primero; resultado completo a cambio del correo: sin correo se ve un resultado parcial con valor real; el correo desbloquea los hallazgos, el primer paso, el informe y el regalo (ver `docs/OPEN_ENTRY.md`).
 - Lenguaje situacional, nunca técnico ("¿qué pasa cuando…?", no "¿usa un CRM?").
 
 ## 2. Flujo
