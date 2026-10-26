@@ -34,14 +34,18 @@ export function LeadList({ leads }: { leads: LeadRow[] }) {
                 className="grid gap-2 px-4 py-3.5 hover:bg-paper/60 min-[860px]:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1.1fr)_90px_90px_minmax(0,1.4fr)] min-[860px]:items-center min-[860px]:gap-3"
               >
                 <span className="min-w-0">
-                  <b className="block truncate">{lead.company?.name ?? "—"}</b>
-                  <span className="block truncate font-mono text-xs text-muted">
-                    {lead.code} · {[lead.company?.city, lead.company?.state].filter(Boolean).join(", ") || "—"}
-                    {/* Idioma en que respondió; si todavía no respondió, el del link. */}
-                    {" · "}
-                    <span title={lead.phase1?.lang ? fill(l.langTitle, { lang: adminCopy.langs[lead.phase1.lang] }) : adminCopy.form.lang}>
+                  <span className="flex min-w-0 items-center gap-2">
+                    <b className="truncate">{lead.company?.name ?? "—"}</b>
+                    {/* Idioma en que respondió; si todavía no respondió, el del link. Fuera del texto truncado para que siempre se vea. */}
+                    <span
+                      title={lead.phase1?.lang ? fill(l.langTitle, { lang: adminCopy.langs[lead.phase1.lang] }) : `${adminCopy.detail.codeLang}: ${adminCopy.langs[lead.lang]}`}
+                      className="flex-none rounded border border-line px-1 font-mono text-[11px] leading-[1.4] text-muted"
+                    >
                       {(lead.phase1?.lang ?? lead.lang).toUpperCase()}
                     </span>
+                  </span>
+                  <span className="block truncate font-mono text-xs text-muted">
+                    {lead.code} · {[lead.company?.city, lead.company?.state].filter(Boolean).join(", ") || "—"}
                   </span>
                 </span>
                 <span className="flex flex-wrap items-center gap-2">
