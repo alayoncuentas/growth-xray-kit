@@ -64,3 +64,50 @@ export function cleanReferrer(raw: string | null | undefined, ownHost: string | 
   if (ownHost && url.host.toLowerCase() === ownHost.toLowerCase()) return null;
   return url.toString().slice(0, MAX_REFERRER);
 }
+
+// ---------- datos del negocio (después de la pregunta de rubro) ----------
+
+export const MAX_BUSINESS_NAME = 120;
+const MAX_WEBSITE = 200;
+
+/**
+ * Web opcional, normalizada a "https://dominio[/ruta]". Acepta "ejemplo.com", "www.ejemplo.com/x" o una URL
+ * http(s) completa. null si viene vacía; "invalid" si no parece un sitio (sin punto, otro esquema, usuario y clave…).
+ */
+export function normalizeWebsite(raw: string): string | null | "invalid" {
+  const s = raw.trim();
+  if (!s) return null;
+  if (s.length > MAX_WEBSITE || /\s/.test(s)) return "invalid";
+  const withScheme = /^[a-z][a-z0-9+.-]*:/i.test(s) ? s : `https://${s}`;
+  let url: URL;
+  try {
+    url = new URL(withScheme);
+  } catch {
+    return "invalid";
+  }
+  if (url.protocol !== "http:" && url.protocol !== "https:") return "invalid";
+  if (url.username || url.password || url.port) return "invalid";
+  const host = url.hostname.toLowerCase();
+  if (!/^([a-z0-9-]+\.)+[a-z]{2,}$/.test(host) || host.split(".").some((p) => !p || p.startsWith("-") || p.endsWith("-"))) {
+    return "invalid";
+  }
+  const path = url.pathname === "/" ? "" : url.pathname.replace(/\/$/, "");
+  return `https://${host}${path}`;
+}
+
+export type BusinessForm =
+  | { ok: true; name: string; website: string | null }
+  | { ok: false; errors: { name?: true; website?: true }; name: string; website: string };
+
+/** Nombre obligatorio (espacios colapsados, hasta 120 caracteres) y web opcional. */
+export function parseBusinessForm(input: { name: unknown; website: unknown }): BusinessForm {
+  const rawName = typeof input.name === "string" ? input.name : "";
+  const rawWebsite = typeof input.website === "string" ? input.website : "";
+  const name = rawName.replace(/\s+/g, " ").trim().slice(0, MAX_BUSINESS_NAME);
+  const website = normalizeWebsite(rawWebsite);
+  const errors: { name?: true; website?: true } = {};
+  if (!name) errors.name = true;
+  if (website === "invalid") errors.website = true;
+  if (errors.name || errors.website) return { ok: false, errors, name: rawName, website: rawWebsite };
+  return { ok: true, name, website: website as string | null };
+}

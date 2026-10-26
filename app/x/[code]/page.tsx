@@ -11,7 +11,7 @@ import { Eyebrow } from "@/components/ui/Eyebrow";
 import { LoadingCard } from "@/components/ui/Loading";
 import { fill, getConfig } from "@/lib/config";
 import { answeredCount, resumeTarget } from "@/lib/answers";
-import { firstQuestion } from "@/lib/flow";
+import { businessFirst, firstQuestion, needsBusinessStep, stepHref } from "@/lib/flow";
 import { checkAccess } from "@/lib/server/access";
 import { emptyPhase1, loadPhase1 } from "@/lib/server/diagnostic";
 import { LangProvider } from "@/lib/i18n";
@@ -44,10 +44,20 @@ async function Welcome({ code: raw, frame }: { code: string; frame: boolean }) {
   const { done, total } = answeredCount(cfg, saved, co?.industry);
   const target = resumeTarget(cfg, saved, co?.industry);
   const mode = saved.completed ? "done" : done > 0 ? "resume" : "new";
-  const title = mode === "done" ? w.doneTitle : mode === "resume" ? w.resumeTitle : co ? w.titleKnown : w.titleGeneric;
+  const title = mode === "done" ? w.doneTitle : mode === "resume" ? w.resumeTitle : co?.business ? w.titleKnown : w.titleGeneric;
   const sub = mode === "done" ? w.doneSub : mode === "resume" ? fill(w.resumeSub, { done, total }) : w.sub;
+  // Camino abierto sin nombre: retomar después del rubro pasa primero por los datos del negocio.
+  const needsBusiness = needsBusinessStep({ open: r.access.open, business: co?.business });
+  const resumeQid = mode === "done" || target.kind === "results" ? null : target.qid;
   const ctaHref =
-    mode === "new" ? firstHref : mode === "done" || target.kind === "results" ? `${base}/results` : `${base}/q/${target.qid}`;
+    mode === "new"
+      ? firstHref
+      : businessFirst(cfg, resumeQid, { knownIndustry: co?.industry, needsBusiness })
+        ? stepHref(code, { kind: "business" })
+        : resumeQid
+          ? `${base}/q/${resumeQid}`
+          : `${base}/results`;
+  const named = !!co?.business; // una empresa abierta todavía sin nombre se saluda como sin empresa
 
   return (
     <LangProvider lang={lang} code={code}>
@@ -56,7 +66,7 @@ async function Welcome({ code: raw, frame }: { code: string; frame: boolean }) {
         <DiagnosticProvider code={code} initial={{ answers: saved.answers, calc: saved.calc }}>
           <BusinessMarker business={co?.business ?? null} />
         </DiagnosticProvider>
-        <Eyebrow>{co ? `${co.business} · ${co.city}` : w.eyebrowGeneric}</Eyebrow>
+        <Eyebrow>{named ? [co!.business, co!.city].filter(Boolean).join(" · ") : w.eyebrowGeneric}</Eyebrow>
         <h1 className="mb-3 text-[clamp(30px,6vw,44px)] tracking-[-0.02em]">{title}</h1>
         <p className="text-muted">{sub}</p>
 
@@ -88,7 +98,7 @@ async function Welcome({ code: raw, frame }: { code: string; frame: boolean }) {
 
         <div className="mt-[26px] flex items-center justify-between gap-2.5">
           <ButtonLink href="/" variant="ghost">
-            {w.back}
+            {r.access.open ? w.backOpen : w.back}
           </ButtonLink>
           <ButtonLink href={ctaHref}>{mode === "done" ? w.doneCta : mode === "resume" ? w.resumeCta : w.cta}</ButtonLink>
         </div>

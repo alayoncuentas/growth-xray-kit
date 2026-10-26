@@ -39,3 +39,54 @@ export function progress(cfg: Phase1Config, qid: string, knownIndustry?: string 
 export function firstQuestion(cfg: Phase1Config, knownIndustry?: string | null): Question {
   return visibleQuestions(cfg, knownIndustry)[0];
 }
+
+// ---------- camino abierto: datos del negocio después del rubro ----------
+
+export const INDUSTRY_QID = "industry";
+
+/** A dónde lleva un paso del recorrido de la fase 1. */
+export type Step = { kind: "question"; qid: string } | { kind: "business" } | { kind: "results" };
+
+/** Contexto que cambia el recorrido: el rubro que ya trae el código y si falta la pantalla de datos del negocio. */
+export interface FlowContext {
+  knownIndustry?: string | null;
+  /** Camino abierto sin nombre todavía. Ver needsBusinessStep. */
+  needsBusiness: boolean;
+}
+
+/** La pantalla de datos del negocio solo existe en el camino abierto, mientras la empresa no tenga nombre. */
+export function needsBusinessStep(c: { open: boolean; business?: string | null }): boolean {
+  return c.open && !c.business?.trim();
+}
+
+/** Después de responder `qid`: la pregunta siguiente; después del rubro, los datos del negocio si faltan; al final, resultados. */
+export function nextAfter(cfg: Phase1Config, qid: string, ctx: FlowContext): Step {
+  if (qid === INDUSTRY_QID && ctx.needsBusiness) return { kind: "business" };
+  const next = progress(cfg, qid, ctx.knownIndustry)?.next;
+  return next ? { kind: "question", qid: next.id } : { kind: "results" };
+}
+
+/**
+ * Lo que va después de la pantalla de datos del negocio: la pregunta que sigue al rubro, o la primera si el
+ * rubro ya venía con el código (entonces esa pregunta no se muestra).
+ */
+export function afterBusiness(cfg: Phase1Config, knownIndustry?: string | null): Step {
+  const vis = visibleQuestions(cfg, knownIndustry);
+  const i = vis.findIndex((q) => q.id === INDUSTRY_QID);
+  const next = i < 0 ? vis[0] : vis[i + 1];
+  return next ? { kind: "question", qid: next.id } : { kind: "results" };
+}
+
+/**
+ * Sin nombre, solo se puede estar en el rubro: cualquier pregunta posterior (o resultados) primero pide los
+ * datos del negocio. true si hay que mandar a esa pantalla antes de mostrar `qid` (null = resultados).
+ */
+export function businessFirst(cfg: Phase1Config, qid: string | null, ctx: FlowContext): boolean {
+  if (!ctx.needsBusiness) return false;
+  return qid !== INDUSTRY_QID;
+}
+
+export function stepHref(code: string, s: Step): string {
+  const base = `/x/${encodeURIComponent(code)}`;
+  return s.kind === "question" ? `${base}/q/${s.qid}` : s.kind === "business" ? `${base}/business` : `${base}/results`;
+}

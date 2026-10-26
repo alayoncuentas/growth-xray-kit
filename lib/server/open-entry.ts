@@ -92,3 +92,19 @@ export async function createOpenSession(ipHash: string, input: { lang: Lang; utm
   await Promise.all([recordStart(ipHash), startOpenSession(code, (await headers()).get("user-agent"), input.lang)]);
   return code;
 }
+
+/**
+ * Datos del negocio del camino abierto: nombre y web. Solo escribe en empresas `open` (una invitada la
+ * carga el equipo). Devuelve false si el código no tiene una empresa abierta.
+ */
+export async function saveBusinessData(code: string, data: { name: string; website: string | null }): Promise<boolean> {
+  const row = must(await db().from("access_codes").select("company_id").eq("code", code).maybeSingle(), "access_codes company") as {
+    company_id: string | null;
+  } | null;
+  if (!row?.company_id) return false;
+  const updated = must(
+    await db().from("companies").update({ name: data.name, website: data.website }).eq("id", row.company_id).eq("source", "open").select("id"),
+    "companies business",
+  ) as { id: string }[];
+  return updated.length > 0;
+}

@@ -11,7 +11,7 @@ import { flushSaves } from "@/lib/sync";
  * "Save and finish later": termina de guardar lo pendiente y envía por correo el link para retomar.
  * Si el código no tiene correo, lo pide. `tone="inverse"` es para el panel oscuro de la fase 2.
  */
-export function SaveForLater({ code, tone = "default" }: { code: string; tone?: "default" | "inverse" }) {
+export function SaveForLater({ code, tone = "default", open = false }: { code: string; tone?: "default" | "inverse"; open?: boolean }) {
   const t = useConfig().copy.later;
   const [state, action, pending] = useActionState<SaveLaterState, FormData>(async (prev, fd) => {
     await flushSaves(); // que el link lleve a la respuesta más reciente
@@ -26,7 +26,9 @@ export function SaveForLater({ code, tone = "default" }: { code: string; tone?: 
       : state.status === "rate"
         ? t.errorRate
         : state.status === "error"
-          ? fill(t.errorSend, { code })
+          ? open
+            ? t.errorSendOpen // camino abierto: el código nunca se muestra
+            : fill(t.errorSend, { code })
           : state.status === "preview"
             ? t.preview
             : null;

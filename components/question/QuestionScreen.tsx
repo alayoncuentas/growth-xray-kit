@@ -6,7 +6,7 @@ import { Insight } from "@/components/insight/InsightCard";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { StepProgress } from "@/components/ui/StepProgress";
 import { getQuestion, isChoice } from "@/lib/config";
-import { progress } from "@/lib/flow";
+import { nextAfter, progress, stepHref } from "@/lib/flow";
 import { useConfig } from "@/lib/i18n";
 import { insightFor } from "@/lib/insights";
 import { getDiagnostic, setAnswer, useDiagnostic, useSaveFailed } from "@/lib/store";
@@ -18,7 +18,21 @@ import { SaveForLater } from "./SaveForLater";
 
 const AUTO_ADVANCE_MS = 380;
 
-export function QuestionScreen({ code, qid, company }: { code: string; qid: string; company: Company | null }) {
+export function QuestionScreen({
+  code,
+  qid,
+  company,
+  needsBusiness = false,
+  open = false,
+}: {
+  code: string;
+  qid: string;
+  company: Company | null;
+  /** Camino abierto sin nombre: después del rubro va la pantalla de datos del negocio. */
+  needsBusiness?: boolean;
+  /** Camino abierto: los textos no muestran el código. */
+  open?: boolean;
+}) {
   const router = useRouter();
   const { answers } = useDiagnostic(code);
   const saveFailed = useSaveFailed();
@@ -31,7 +45,7 @@ export function QuestionScreen({ code, qid, company }: { code: string; qid: stri
 
   const base = `/x/${encodeURIComponent(code)}`;
   const prevHref = p.prev ? `${base}/q/${p.prev.id}` : base;
-  const nextHref = p.next ? `${base}/q/${p.next.id}` : `${base}/results`;
+  const nextHref = stepHref(code, nextAfter(cfg, qid, { knownIndustry: company?.industry, needsBusiness }));
 
   const insight = insightFor(cfg, q, answers, outside);
   const insightRef = useRef<HTMLDivElement>(null);
@@ -118,7 +132,7 @@ export function QuestionScreen({ code, qid, company }: { code: string; qid: stri
           )}
         </div>
         <div className="mt-5 text-right">
-          <SaveForLater code={code} />
+          <SaveForLater code={code} open={open} />
         </div>
         {saveFailed && (
           <p role="status" className="mt-3 text-right text-[13px] text-bad">

@@ -739,6 +739,18 @@
       "errorUnavailable": "Starting without a code isn't available right now. If you have an access code, use it below.",
       "errorGeneric": "Something went wrong on our side. Try again in a minute."
     },
+    "business": {
+      "title": "What's your business called?",
+      "sub": "So we can tailor your results.",
+      "nameLabel": "Business name",
+      "namePlaceholder": "e.g. Lakeview Plumbing",
+      "websiteLabel": "Website (optional)",
+      "websitePlaceholder": "example.com",
+      "cta": "Continue",
+      "errorName": "Add your business name to continue.",
+      "errorWebsite": "That website doesn't look right. Check it or leave it empty.",
+      "errorSave": "We couldn't save that just now. Try again in a minute."
+    },
     "welcome": {
       "eyebrowGeneric": "Phase 1 · About 10 minutes",
       "titleKnown": "Your growth X-ray is ready to start.",
@@ -764,6 +776,7 @@
       "outsideReplyGap": "That's {replyGap} later.",
       "outsideLatestReview": "Latest review: {lastReview}.",
       "back": "Change code",
+      "backOpen": "Back to start",
       "cta": "Begin",
       "resumeTitle": "Welcome back. Your answers are saved.",
       "resumeSub": "You've answered {done} of {total} questions. Pick up right where you stopped.",
@@ -812,6 +825,7 @@
       "notYetTitle": "What you probably don't need yet",
       "redo": "Change my answers",
       "emptyTitle": "We don't have any answers for this code yet.",
+      "emptyTitleOpen": "We don't have any answers yet.",
       "emptySub": "Start the diagnostic and your results will show up here. Your answers save as you go.",
       "emptyCta": "Start the diagnostic"
     },
@@ -825,6 +839,7 @@
       ],
       "cta": "Continue to Phase 2",
       "savedTo": "Your answers are saved to code {code}.",
+      "savedToOpen": "Your answers are saved. The private link in your email brings you back here.",
       "p2Pending": "Phase 2 isn't open yet. Your Phase 1 answers are saved and will carry over."
     },
     "lang": {
@@ -857,8 +872,10 @@
     "report": {
       "eyebrow": "Phase 1 report",
       "readOnly": "Read-only report. Your answers are private to your access code.",
+      "readOnlyOpen": "Read-only report. Your answers are private to your link.",
       "continueTitle": "Want to change an answer?",
       "continueSub": "Open the diagnostic with the same code. Your answers are saved, and Phase 2 starts from there whenever it suits you.",
+      "continueSubOpen": "Open the diagnostic from your link. Your answers are saved, and Phase 2 starts from there whenever it suits you.",
       "continueCta": "Open my diagnostic",
       "pendingTitle": "This report isn't ready yet.",
       "pendingSub": "It appears once Phase 1 is finished. Your answers so far are saved.",
@@ -874,11 +891,13 @@
       "errorEmail": "Enter a valid email address.",
       "errorRate": "We've already sent you a few links. Check your inbox, or try again in an hour.",
       "errorSend": "We couldn't send the email just now. Your answers are still saved: come back any time with code {code}.",
+      "errorSendOpen": "We couldn't send the email just now. Your answers are still saved: keep this page's link to come back.",
       "preview": "Preview: no email is sent."
     },
     "email": {
       "signoff": "Growth X-Ray",
       "footer": "You're getting this email because access code {code} was used on Growth X-Ray. If that wasn't you, you can ignore it.",
+      "footerOpen": "You're getting this email because this address was entered on Growth X-Ray. If that wasn't you, you can ignore it.",
       "forBusiness": " for {business}",
       "report": {
         "subject": "Your Growth X-Ray results",
@@ -892,7 +911,8 @@
         "greeting": "Your answers are saved{forBusiness}.",
         "body": "Use this link to pick up where you left off. Everything you answered so far is already there.",
         "cta": "Pick up where I left off",
-        "after": "No rush. The link stays the same until your code expires."
+        "after": "No rush. The link stays the same until your code expires.",
+        "afterOpen": "No rush. The link stays the same."
       }
     }
   }

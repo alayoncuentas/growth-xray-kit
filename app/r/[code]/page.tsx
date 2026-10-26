@@ -32,7 +32,7 @@ export default function SharedReportPage({ params, searchParams }: PageProps<"/r
 async function Report({ code: raw, sample }: { code: string; sample: unknown }) {
   const r = await checkAccess(raw);
   if (!r.ok) return <CodeError reason={r.reason} />;
-  const { code, company, preview, lang } = r.access;
+  const { code, company, preview, lang, open } = r.access;
   const t = getConfig(lang).copy.report;
   const resumeHref = `/x/${encodeURIComponent(code)}`;
 
@@ -62,14 +62,14 @@ async function Report({ code: raw, sample }: { code: string; sample: unknown }) 
       <ResultsBody answers={state.answers} calc={state.calc} company={company} eyebrow={t.eyebrow} />
       <section className="mt-5 grid gap-3 rounded-panel border border-line bg-card p-[clamp(20px,4vw,28px)]">
         <h2 className="text-xl">{t.continueTitle}</h2>
-        <p className="text-muted">{t.continueSub}</p>
+        <p className="text-muted">{open ? t.continueSubOpen : t.continueSub}</p>
         <div>
           <ButtonLink href={resumeHref} variant="line">
             {t.continueCta}
           </ButtonLink>
         </div>
       </section>
-      <p className="mt-4 text-[13px] text-muted">{t.readOnly}</p>
+      <p className="mt-4 text-[13px] text-muted">{open ? t.readOnlyOpen : t.readOnly}</p>
     </LangProvider>
   );
 }

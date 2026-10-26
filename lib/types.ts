@@ -147,5 +147,6 @@ export interface Company {
   business: string;
   city: string;
   industry?: string;
+  website?: string;
   outside?: OutsideView;
 }

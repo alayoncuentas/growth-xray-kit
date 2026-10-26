@@ -1,6 +1,6 @@
 # Camino abierto (sin código): decisiones aprobadas
 
-Estado: **aprobado; en construcción en `feature/open-entry`.** Hecho: el inicio (botón, Turnstile, límite por IP, UTM y referrer, empresa + código + sesión; detrás del flag) y la migración. Falta: datos del negocio, pantalla del correo, resultado parcial, regalos, panel, cron, Delete lead, `/privacy` y GHL. Este documento manda sobre `docs/SPEC.md` en todo lo que toca el camino abierto.
+Estado: **aprobado; en construcción en `feature/open-entry`.** Hecho: el inicio (botón, Turnstile, límite por IP, UTM y referrer, empresa + código + sesión; detrás del flag), la migración, los datos del negocio y el código oculto en el camino abierto. Falta: pantalla del correo, resultado parcial, regalos, panel, cron, Delete lead, `/privacy` y GHL. Este documento manda sobre `docs/SPEC.md` en todo lo que toca el camino abierto.
 Los textos de interfaz van en **inglés y en español**, con la misma estructura, en `config/phase1.config.json` y `config/phase1.config.es.json` (lo verifica `lib/config.test.ts`). Los del panel van solo en inglés, en `config/team.config.json`. Aquí se copia el inglés como referencia aprobada; el español es su traducción (neutro latinoamericano, tuteo).
 **Idioma sin código**: el elegido con el botón EN / ES (cookie); si no, el del navegador (`Accept-Language`); si no es inglés ni español, inglés. La sesión anónima nace con ese idioma (`access_codes.lang` y `sessions.lang`).
 
@@ -161,6 +161,8 @@ Button:      Continue
 Errors:      Add your business name to continue.
              That website doesn't look right. Check it or leave it empty.
 ```
+Agregado al construir (`copy.business.errorSave`): `We couldn't save that just now. Try again in a minute.`
+Variantes sin código (`…Open` en `copy.unlock`, `later`, `welcome`, `results`, `report` y `email`): mismos textos sin mencionar el código; por ejemplo, el pie del correo dice "this address was entered on Growth X-Ray".
 
 ### Correo (antes del resultado completo)
 ```

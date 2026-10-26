@@ -3,11 +3,13 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { isLang, LANG_COOKIE } from "@/lib/config";
-import { cleanReferrer, parseUtm } from "@/lib/open-entry";
+import { getConfig } from "@/lib/config";
+import { afterBusiness, stepHref } from "@/lib/flow";
+import { cleanReferrer, parseBusinessForm, parseUtm } from "@/lib/open-entry";
 import { browserLang, checkAccess, clientKey, type AccessError } from "@/lib/server/access";
 import { openLink, setSessionLang } from "@/lib/server/diagnostic";
 import { sendResumeEmail } from "@/lib/server/email";
-import { createOpenSession, openEntryEnabled, openLimitHit, verifyTurnstile } from "@/lib/server/open-entry";
+import { createOpenSession, openEntryEnabled, openLimitHit, saveBusinessData, verifyTurnstile } from "@/lib/server/open-entry";
 import { appOrigin } from "@/lib/server/origin";
 
 export type CodeFormState = { error?: AccessError; code?: string };
@@ -46,6 +48,34 @@ export async function startOpen(_prev: StartState, formData: FormData): Promise<
     return { error: "generic" };
   }
   redirect(`/x/${code}/q/industry`);
+}
+
+export type BusinessState = {
+  errors?: { name?: true; website?: true };
+  error?: "save";
+  values?: { name: string; website: string };
+};
+
+/**
+ * Datos del negocio (camino abierto, después del rubro): guarda nombre y web y sigue con la pregunta que viene.
+ * La vista previa valida igual pero no guarda nada.
+ */
+export async function saveBusiness(code: string, _prev: BusinessState, formData: FormData): Promise<BusinessState> {
+  const r = await checkAccess(code);
+  if (!r.ok) return { error: "save" };
+  const parsed = parseBusinessForm({ name: formData.get("name"), website: formData.get("website") });
+  if (!parsed.ok) return { errors: parsed.errors, values: { name: parsed.name, website: parsed.website } };
+  const values = { name: parsed.name, website: String(formData.get("website") ?? "") };
+  if (!r.access.preview) {
+    if (!r.access.open) return { error: "save" }; // una empresa invitada no se edita desde aquí
+    try {
+      if (!(await saveBusinessData(r.access.code, parsed))) return { error: "save", values };
+    } catch (e) {
+      console.error("[business]", r.access.code, e);
+      return { error: "save", values };
+    }
+  }
+  redirect(stepHref(r.access.code, afterBusiness(getConfig(r.access.lang), r.access.company?.industry)));
 }
 
 /**

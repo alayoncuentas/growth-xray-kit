@@ -13,7 +13,11 @@ interface Sent {
   dev: boolean;
 }
 
-async function send(to: string, kind: EmailKind, vars: { code: string; business: string | null; link: string; lang: Lang }): Promise<Sent> {
+async function send(
+  to: string,
+  kind: EmailKind,
+  vars: { code: string; business: string | null; link: string; lang: Lang; open: boolean },
+): Promise<Sent> {
   const { subject, text, html } = buildEmail(kind, vars);
   const key = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM;
@@ -37,12 +41,16 @@ async function send(to: string, kind: EmailKind, vars: { code: string; business:
 
 async function codeContact(code: string) {
   return must(
-    await db().from("access_codes").select("email, companies(name)").eq("code", code).maybeSingle(),
+    // companies(*): source solo existe con la migración del camino abierto; sin ella, la empresa es invitada.
+    await db().from("access_codes").select("email, companies(*)").eq("code", code).maybeSingle(),
     "access_codes contact",
-  ) as { email: string | null; companies: { name: string } | { name: string }[] | null } | null;
+  ) as { email: string | null; companies: ContactCompany | ContactCompany[] | null } | null;
 }
 
-const businessName = (c: { name: string } | { name: string }[] | null) => (Array.isArray(c) ? c[0]?.name : c?.name) ?? null;
+type ContactCompany = { name: string | null; source?: string | null };
+const one = (c: ContactCompany | ContactCompany[] | null) => (Array.isArray(c) ? (c[0] ?? null) : c);
+const businessName = (c: ContactCompany | ContactCompany[] | null) => one(c)?.name ?? null;
+const isOpen = (c: ContactCompany | ContactCompany[] | null) => one(c)?.source === "open";
 
 async function logSent(code: string, kind: EmailKind, sent: Sent, lang: Lang) {
   must(await db().from("events").insert({ code, type: "email_sent", payload: { kind, phase: 1, id: sent.id, dev: sent.dev, lang } }), "events insert");
@@ -56,7 +64,13 @@ async function logSent(code: string, kind: EmailKind, sent: Sent, lang: Lang) {
 export async function sendReportEmail(code: string, origin: string, lang: Lang): Promise<void> {
   const contact = await codeContact(code);
   if (!contact?.email) return;
-  const sent = await send(contact.email, "report", { code, business: businessName(contact.companies), link: `${origin}/r/${code}`, lang });
+  const sent = await send(contact.email, "report", {
+    code,
+    business: businessName(contact.companies),
+    link: `${origin}/r/${code}`,
+    lang,
+    open: isOpen(contact.companies),
+  });
   await logSent(code, "report", sent, lang);
 }
 
@@ -88,7 +102,13 @@ export async function sendResumeEmail(code: string, origin: string, typedEmail: 
   if (recent.error) throw new Error(`Supabase (events count): ${recent.error.message}`);
   if ((recent.count ?? 0) >= RESUME_LIMIT) return { status: "rate" };
 
-  const sent = await send(to, "resume", { code, business: businessName(contact.companies), link: `${origin}/x/${code}`, lang });
+  const sent = await send(to, "resume", {
+    code,
+    business: businessName(contact.companies),
+    link: `${origin}/x/${code}`,
+    lang,
+    open: isOpen(contact.companies),
+  });
   await logSent(code, "resume", sent, lang);
   return { status: "sent", to: maskEmail(to) };
 }

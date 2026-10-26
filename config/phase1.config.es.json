@@ -739,6 +739,18 @@
       "errorUnavailable": "Por ahora no se puede empezar sin código. Si tienes un código de acceso, úsalo abajo.",
       "errorGeneric": "Algo falló de nuestro lado. Vuelve a intentarlo en un minuto."
     },
+    "business": {
+      "title": "¿Cómo se llama tu negocio?",
+      "sub": "Así adaptamos tus resultados.",
+      "nameLabel": "Nombre del negocio",
+      "namePlaceholder": "p. ej., Plomería del Lago",
+      "websiteLabel": "Sitio web (opcional)",
+      "websitePlaceholder": "ejemplo.com",
+      "cta": "Continuar",
+      "errorName": "Agrega el nombre de tu negocio para continuar.",
+      "errorWebsite": "Ese sitio web no parece correcto. Revísalo o déjalo vacío.",
+      "errorSave": "No pudimos guardarlo en este momento. Vuelve a intentarlo en un minuto."
+    },
     "welcome": {
       "eyebrowGeneric": "Fase 1 · Unos 10 minutos",
       "titleKnown": "Tu radiografía de crecimiento está lista para empezar.",
@@ -764,6 +776,7 @@
       "outsideReplyGap": "Es decir, {replyGap} más tarde.",
       "outsideLatestReview": "Reseña más reciente: {lastReview}.",
       "back": "Cambiar código",
+      "backOpen": "Volver al inicio",
       "cta": "Empezar",
       "resumeTitle": "Hola de nuevo. Tus respuestas están guardadas.",
       "resumeSub": "Respondiste {done} de {total} preguntas. Retoma justo donde te quedaste.",
@@ -812,6 +825,7 @@
       "notYetTitle": "Lo que probablemente todavía no necesitas",
       "redo": "Cambiar mis respuestas",
       "emptyTitle": "Todavía no hay respuestas con este código.",
+      "emptyTitleOpen": "Todavía no tenemos respuestas.",
       "emptySub": "Empieza el diagnóstico y tus resultados aparecerán aquí. Tus respuestas se guardan sobre la marcha.",
       "emptyCta": "Empezar el diagnóstico"
     },
@@ -825,6 +839,7 @@
       ],
       "cta": "Continuar a la fase 2",
       "savedTo": "Tus respuestas están guardadas con el código {code}.",
+      "savedToOpen": "Tus respuestas están guardadas. El enlace privado de tu correo te trae de vuelta aquí.",
       "p2Pending": "La fase 2 todavía no está abierta. Tus respuestas de la fase 1 están guardadas y pasarán a la fase 2."
     },
     "lang": {
@@ -857,8 +872,10 @@
     "report": {
       "eyebrow": "Informe de la fase 1",
       "readOnly": "Informe de solo lectura. Tus respuestas son privadas y solo se ven con tu código de acceso.",
+      "readOnlyOpen": "Informe de solo lectura. Tus respuestas son privadas y solo se ven con tu enlace.",
       "continueTitle": "¿Quieres cambiar una respuesta?",
       "continueSub": "Abre el diagnóstico con el mismo código. Tus respuestas están guardadas, y la fase 2 empieza desde ahí cuando te convenga.",
+      "continueSubOpen": "Abre el diagnóstico desde tu enlace. Tus respuestas están guardadas, y la fase 2 empieza desde ahí cuando te convenga.",
       "continueCta": "Abrir mi diagnóstico",
       "pendingTitle": "Este informe todavía no está listo.",
       "pendingSub": "Aparece cuando termines la fase 1. Las respuestas que diste hasta ahora están guardadas.",
@@ -874,11 +891,13 @@
       "errorEmail": "Ingresa un correo electrónico válido.",
       "errorRate": "Ya te enviamos varios enlaces. Revisa tu bandeja de entrada o vuelve a intentarlo en una hora.",
       "errorSend": "No pudimos enviar el correo en este momento. Tus respuestas siguen guardadas: vuelve cuando quieras con el código {code}.",
+      "errorSendOpen": "No pudimos enviar el correo en este momento. Tus respuestas siguen guardadas: guarda el enlace de esta página para volver.",
       "preview": "Vista previa: no se envía ningún correo."
     },
     "email": {
       "signoff": "Growth X-Ray",
       "footer": "Recibes este correo porque se usó el código de acceso {code} en Growth X-Ray. Si no fuiste tú, puedes ignorarlo.",
+      "footerOpen": "Recibes este correo porque esta dirección se ingresó en Growth X-Ray. Si no fuiste tú, puedes ignorarlo.",
       "forBusiness": " de {business}",
       "report": {
         "subject": "Tus resultados de Growth X-Ray",
@@ -892,7 +911,8 @@
         "greeting": "Tus respuestas del diagnóstico{forBusiness} están guardadas.",
         "body": "Usa este enlace para retomar donde te quedaste. Todo lo que respondiste hasta ahora ya está ahí.",
         "cta": "Retomar donde me quedé",
-        "after": "Sin prisa. El enlace no cambia hasta que venza tu código."
+        "after": "Sin prisa. El enlace no cambia hasta que venza tu código.",
+        "afterOpen": "Sin prisa. El enlace no cambia."
       }
     }
   }

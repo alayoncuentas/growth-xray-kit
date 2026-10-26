@@ -41,6 +41,18 @@ describe("buildEmail", () => {
       expect(buildEmail(k, { ...v, lang: "es" }).text).not.toMatch(/tiempo limitado|no te pierdas|apúrate|oferta exclusiva|!/i);
     }
   });
+
+  it("camino abierto: el código solo aparece dentro del link, en los dos idiomas", () => {
+    for (const lang of ["en", "es"] as const) {
+      for (const kind of ["report", "resume"] as const) {
+        const link = `https://xray.example.com/${kind === "report" ? "r" : "x"}/K7MPX-4RHQ2`;
+        const e = buildEmail(kind, { ...v, lang, link, open: true });
+        expect(e.text.replaceAll(link, "")).not.toContain("K7MPX-4RHQ2");
+        expect(e.html.replaceAll(link, "")).not.toContain("K7MPX-4RHQ2");
+      }
+    }
+    expect(buildEmail("resume", { ...v, open: true }).text).toContain("No rush. The link stays the same.");
+  });
 });
 
 describe("maskEmail", () => {

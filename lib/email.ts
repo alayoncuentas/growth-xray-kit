@@ -14,14 +14,18 @@ export interface EmailContent {
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 /** Correo corto y sin lenguaje de venta: saludo, una línea, un botón, una nota y el pie. */
-export function buildEmail(kind: EmailKind, v: { code: string; business: string | null; link: string; lang: Lang }): EmailContent {
+export function buildEmail(
+  kind: EmailKind,
+  v: { code: string; business: string | null; link: string; lang: Lang; /** Camino abierto: el correo no menciona el código. */ open?: boolean },
+): EmailContent {
   const e = getConfig(v.lang).copy.email;
   const t = e[kind];
   const forBusiness = v.business ? fill(e.forBusiness, { business: v.business }) : "";
   const greeting = fill(t.greeting, { forBusiness });
-  const footer = fill(e.footer, { code: v.code });
+  const footer = v.open ? e.footerOpen : fill(e.footer, { code: v.code });
+  const after = v.open && t.afterOpen ? t.afterOpen : t.after;
 
-  const text = [greeting, "", t.body, "", `${t.cta}: ${v.link}`, "", t.after, "", `— ${e.signoff}`, "", footer].join("\n");
+  const text = [greeting, "", t.body, "", `${t.cta}: ${v.link}`, "", after, "", `— ${e.signoff}`, "", footer].join("\n");
 
   const p = (s: string, style = "") => `<p style="margin:0 0 16px;${style}">${esc(s)}</p>`;
   const html = `<!doctype html>
@@ -32,7 +36,7 @@ export function buildEmail(kind: EmailKind, v: { code: string; business: string 
 ${p(greeting, "font-weight:600")}
 ${p(t.body)}
 <p style="margin:0 0 20px"><a href="${esc(v.link)}" style="display:inline-block;background:#1f6f66;color:#ffffff;text-decoration:none;font-weight:600;padding:12px 22px;border-radius:999px">${esc(t.cta)}</a></p>
-${p(t.after, "color:#51605f;font-size:14px")}
+${p(after, "color:#51605f;font-size:14px")}
 ${p(`— ${e.signoff}`, "margin:0")}
 </td></tr></table>
 <p style="max-width:520px;margin:16px auto 0;color:#6b7978;font-size:12px">${esc(footer)}</p>

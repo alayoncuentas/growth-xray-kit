@@ -16,6 +16,8 @@ export interface Access {
    * si no eligió, el de la sesión (último idioma en que respondió o que eligió); si no, el del código.
    */
   lang: Lang;
+  /** Camino abierto (companies.source = open): la interfaz nunca muestra el código. */
+  open: boolean;
   /** Código de vista previa (solo con sesión de admin): nada se lee ni se escribe en la base. */
   preview?: PreviewVariant;
 }
@@ -82,7 +84,16 @@ interface CodeRow {
   expires_at: string | null;
   lang: string;
   sessions: { phase: number; lang: string | null }[] | null;
-  companies: { name: string | null; city: string | null; state: string | null; industry: string | null; outside_view: OutsideView | null } | null;
+  // companies(*): las columnas del camino abierto (source…) se leen si existen; sin la migración, source falta y es invitada.
+  companies: {
+    name: string | null;
+    city: string | null;
+    state: string | null;
+    industry: string | null;
+    website: string | null;
+    outside_view: OutsideView | null;
+    source?: string | null;
+  } | null;
 }
 
 function toCompany(c: NonNullable<CodeRow["companies"]>): Company {
@@ -90,6 +101,7 @@ function toCompany(c: NonNullable<CodeRow["companies"]>): Company {
     business: c.name ?? "", // camino abierto: sin nombre hasta la pantalla de datos del negocio
     city: [c.city, c.state].filter(Boolean).join(", "),
     industry: c.industry ?? undefined,
+    website: c.website ?? undefined,
     outside: c.outside_view ?? undefined,
   };
 }
@@ -109,7 +121,7 @@ export async function checkAccess(raw: string): Promise<AccessResult> {
   const pv = wellFormed ? previewVariant(code) : null;
   if (pv && (await getAdmin())) {
     const lang = (await cookieLang()) ?? DEFAULT_LANG;
-    return { ok: true, access: { code, company: previewCompany(pv, lang), preview: pv, lang } };
+    return { ok: true, access: { code, company: previewCompany(pv, lang), preview: pv, lang, open: false } };
   }
 
   // En paralelo para ahorrar un viaje a la base; si la IP está bloqueada, el resultado se descarta.
@@ -119,7 +131,7 @@ export async function checkAccess(raw: string): Promise<AccessResult> {
     wellFormed
       ? db()
           .from("access_codes")
-          .select("code, expires_at, lang, sessions(phase, lang), companies(name, city, state, industry, outside_view)")
+          .select("code, expires_at, lang, sessions(phase, lang), companies(*)")
           .eq("code", code)
           .maybeSingle<CodeRow>()
           .then((r) => must(r, "access_codes"))
@@ -138,5 +150,8 @@ export async function checkAccess(raw: string): Promise<AccessResult> {
   }
   const sessionLang = row.sessions?.find((x) => x.phase === 1)?.lang;
   const lang = chosen ?? (isLang(sessionLang) ? sessionLang : isLang(row.lang) ? row.lang : DEFAULT_LANG);
-  return { ok: true, access: { code: row.code, company: row.companies ? toCompany(row.companies) : null, lang } };
+  return {
+    ok: true,
+    access: { code: row.code, company: row.companies ? toCompany(row.companies) : null, lang, open: row.companies?.source === "open" },
+  };
 }

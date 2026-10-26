@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cleanReferrer, isOpenEntryEnabled, openLimitReached, parseUtm, turnstileOk } from "./open-entry";
+import { cleanReferrer, isOpenEntryEnabled, normalizeWebsite, openLimitReached, parseBusinessForm, parseUtm, turnstileOk } from "./open-entry";
 
 describe("flag OPEN_ENTRY_ENABLED", () => {
   const dev = { production: false, hasSalt: false };
@@ -60,5 +60,34 @@ describe("respuesta de Turnstile", () => {
     expect(turnstileOk({ ...ok, hostname: "evil.example" }, "xray.123spice.com")).toBe(false);
     expect(turnstileOk({ success: true, hostname: "xray.123spice.com" }, "xray.123spice.com")).toBe(false); // sin acción
     expect(turnstileOk({}, null)).toBe(false);
+  });
+});
+
+describe("web del negocio", () => {
+  it("normaliza a https://dominio[/ruta]", () => {
+    expect(normalizeWebsite("lakeviewplumbing.com")).toBe("https://lakeviewplumbing.com");
+    expect(normalizeWebsite("  WWW.Lakeview-Plumbing.com/  ")).toBe("https://www.lakeview-plumbing.com");
+    expect(normalizeWebsite("http://lakeview.co.uk/contact/")).toBe("https://lakeview.co.uk/contact");
+    expect(normalizeWebsite("https://plomeria.mx/es?x=1")).toBe("https://plomeria.mx/es");
+  });
+
+  it("vacía es null; lo que no es un sitio es invalid", () => {
+    expect(normalizeWebsite("   ")).toBeNull();
+    for (const v of ["lakeview", "javascript:alert(1)", "ftp://a.com", "https://user:pw@a.com", "a.com:8080", "lake view.com", "-a.com", "a..com", "a.c"]) {
+      expect(normalizeWebsite(v)).toBe("invalid");
+    }
+  });
+});
+
+describe("datos del negocio", () => {
+  it("nombre obligatorio, con espacios colapsados y hasta 120 caracteres", () => {
+    expect(parseBusinessForm({ name: "  Lakeview   Plumbing ", website: "" })).toEqual({ ok: true, name: "Lakeview Plumbing", website: null });
+    const long = parseBusinessForm({ name: "x".repeat(300), website: null });
+    expect(long.ok && long.name.length).toBe(120);
+  });
+
+  it("devuelve los errores y lo que escribió la persona", () => {
+    expect(parseBusinessForm({ name: "  ", website: "nope" })).toEqual({ ok: false, errors: { name: true, website: true }, name: "  ", website: "nope" });
+    expect(parseBusinessForm({ name: null, website: undefined })).toMatchObject({ ok: false, errors: { name: true } });
   });
 });

@@ -161,7 +161,10 @@ Reglas de persistencia (fase 1):
 - **Limitación de intentos**: máximo 10 códigos fallidos (mal formados, inexistentes o vencidos) por IP cada 15 min, contados en `access_attempts`.
 - **Sesión**: una por código y fase (`unique (code, phase)`); retomar reutiliza la misma.
 - **`link_opened`**: al ver la bienvenida en el navegador (no al renderizar en el servidor, para no contar prefetches). Crea la sesión si falta; `access_codes.status` pasa a `opened`. `payload.resumed` indica si la sesión ya existía.
-- **Inicio abierto** ("Start my X-Ray", solo con `OPEN_ENTRY_ENABLED=true`): valida Turnstile en el servidor, luego el límite por IP (5 por hora y 20 por día en `open_starts`), y crea empresa (`source = open`, UTM y referrer de la llegada a `/`), código interno (mismo generador, sin correo ni vencimiento) y sesión con el idioma sin código. Registra `link_opened` con `payload.open = true` y lleva directo a la pregunta de rubro (sin bienvenida). Con el flag apagado la acción responde error. En producción, el flag además exige `IP_HASH_SALT`, y Turnstile debe responder con el hostname de `NEXT_PUBLIC_APP_URL` y la acción `start`.
+- **Inicio abierto** ("Start my X-Ray", solo con `OPEN_ENTRY_ENABLED=true`): valida Turnstile en el servidor, luego el límite por IP (5 por hora y 20 por día en `open_starts`), y crea empresa (`source = open`, UTM y referrer de la llegada a `/`), código interno (mismo generador, sin correo ni vencimiento) y sesión con el idioma sin código. Registra `link_opened` con `payload.open = true` y lleva directo a la pregunta de rubro (sin bienvenida). Con el flag apagado la acción responde error.
+- **Datos del negocio** (camino abierto): después del rubro, `/x/[code]/business` pide nombre (obligatorio, hasta 120 caracteres) y web (opcional, normalizada a `https://dominio[/ruta]`). Mientras la empresa abierta no tenga nombre, cualquier pregunta posterior al rubro, los resultados y retomar llevan a esa pantalla (`lib/flow.ts`: `nextAfter`, `businessFirst`). Solo escribe en empresas `source = open`.
+- **El código no se muestra en el camino abierto**: va en la URL, pero los textos usan las variantes `…Open` (resultados, "Save and finish later", bienvenida, informe y correos).
+- **Inicio abierto en producción**: el flag además exige `IP_HASH_SALT`, y Turnstile debe responder con el hostname de `NEXT_PUBLIC_APP_URL` y la acción `start`.
 - **`answered`**: cada `POST /api/answer` válido. Upsert en `answers` (la calculadora se guarda como un objeto con los campos que el usuario movió), actualiza `last_question_id` y recalcula la fila de `scores`. La respuesta de la API nunca incluye puntajes.
 - **`phase_done`**: con el botón "See my results" (`complete: true`), si no queda ninguna pregunta visible sin responder. Una sola vez por sesión: fija `completed_at` y el estado pasa a `p1_done`. El estado nunca retrocede.
 - **Correo del informe** (Resend): al registrar `phase_done`, una sola vez, al correo de `access_codes.email`, con el link a `/r/[code]`. Sale después de responder (no demora al prospecto). Sin correo en el código no se envía. Se registra `email_sent` con `payload.kind = "report"`.
@@ -184,6 +187,7 @@ Reglas de persistencia (fase 1):
 /                      ingreso de código; con OPEN_ENTRY_ENABLED, además "Start my X-Ray" (docs/OPEN_ENTRY.md)
 /x/[code]              entrada directa desde el correo (valida y crea la sesión)
 /x/[code]/q/[qid]      pregunta (permite volver y retomar)
+/x/[code]/business     datos del negocio (solo camino abierto, después del rubro)
 /x/[code]/results      resultado de la fase 1
 /x/[code]/phase-2/...  bloques de la fase 2
 /r/[code]              informe compartible (solo lectura)
