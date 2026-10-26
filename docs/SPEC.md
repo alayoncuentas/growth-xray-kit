@@ -18,7 +18,7 @@ Principios no negociables:
 
 - Solo estadísticas con fuente trazable (ver `phase1.config.json → evidence`). Nunca cifras "virales" sin origen.
 - El sistema puede recomendar *menos* (no vender, o no vender todavía).
-- Valor primero; resultado completo a cambio del correo: sin correo se ve un resultado parcial con valor real; el correo desbloquea los hallazgos, el primer paso, el informe y el regalo (ver `docs/OPEN_ENTRY.md`).
+- Valor primero; resultado completo a cambio del correo **en el camino abierto**: quien empezó sin código y no dejó correo ve un resultado parcial con valor real (arquetipo, índice y dinero en juego); el correo desbloquea el desglose, los hallazgos, el primer paso, el informe y el regalo. Los invitados siempre ven el resultado completo; a los que no tienen correo se les ofrece dejarlo, con el regalo como incentivo (ver `docs/OPEN_ENTRY.md`).
 - Lenguaje situacional, nunca técnico ("¿qué pasa cuando…?", no "¿usa un CRM?").
 
 ## 2. Flujo
@@ -132,21 +132,28 @@ Reglas de la fase 2:
 
 ### Modelo de datos
 ```
-companies       id, name, city, state, industry, website, phone, google_place_id,
-                outside_view jsonb, created_at
+companies       id, name (obligatorio salvo source = open), city, state, industry, website, phone,
+                google_place_id, outside_view jsonb, source (invited|open, default invited),
+                utm jsonb (utm_source…utm_content), referrer, created_at
 access_codes    code (PK), company_id, email, status (sent|opened|p1_done|p2_done|booked),
-                expires_at, lang (en|es, default en), created_at
+                expires_at, lang (en|es, default en), email_consent_at, email_consent_version, created_at
 sessions        id, code, phase, started_at, completed_at, last_question_id, user_agent,
                 lang (en|es|null: idioma en que respondió)
 answers         session_id, question_id, value jsonb, answered_at        (PK: session_id+question_id)
 scores          session_id, pillars jsonb, need, potential, readiness, archetype,
                 monthly_at_stake, flags text[], verdict, computed_at
 events          id, code, type (email_sent|link_opened|question_viewed|answered|phase_done|
-                booked|crm_synced), payload jsonb, at
+                booked|crm_synced|email_captured|gift_offered|gift_delivered), payload jsonb, at
 access_attempts id, ip_hash, at        (intentos fallidos de código; hash SHA-256 de la IP, nunca la IP)
+open_starts     id, ip_hash, at        (sesiones abiertas creadas, para el límite por IP; mismo hash)
+gifts           code (PK), kind (A|B), offered_at, due_at, delivered_at, delivered_by
+deletion_log    id, at, admin_email, company_id, codes, crm_status (skipped|ok|failed), crm_ids
+                (constancia de "Delete lead", sin datos del prospecto)
+cleanup_expired()  función del cron diario (solo service_role): borra empresas open sin correo con más
+                de 30 días desde su creación, y access_attempts y open_starts de más de 24 h
 ```
 
-Migraciones en `supabase/migrations/`, datos de ejemplo **solo para desarrollo** en `supabase/seed.sql` (nunca se cargan en producción; para demos se usa `/admin/preview`). No hay códigos públicos de demo. RLS activado sin políticas:
+Migraciones en `supabase/migrations/` (nombre `AAAAMMDDhhmmss_nombre.sql`, 14 dígitos). Para un proyecto de desarrollo vacío, `supabase/dev-setup.sql` reúne todas las migraciones en orden más el seed (lo genera `npm run db:dev-sql`; un test avisa si quedó desactualizado). Datos de ejemplo **solo para desarrollo** en `supabase/seed.sql` (nunca se cargan en producción; para demos se usa `/admin/preview`). No hay códigos públicos de demo. RLS activado sin políticas:
 solo el servidor (clave secreta) lee y escribe.
 
 Reglas de persistencia (fase 1):
@@ -197,6 +204,7 @@ Reglas de persistencia (fase 1):
   Implementado: 10 caracteres `XXXXX-XXXXX` con el alfabeto base32 `23456789ABCDEFGHJKLMNPQRSTUVWXYZ` (sin 0, 1, I ni O), 50 bits; vencimiento de 30/60/90 días o sin vencimiento (`lib/admin.ts`).
 - Vista previa (`/admin/preview`): los códigos `PREVIEW` y `PREVIEW-PLAIN` (config/preview.json) solo existen con sesión de admin; para cualquier otro son inexistentes y cuentan como intento fallido. Con ellos no se lee ni se escribe nada en la base: `/api/answer` valida y responde sin guardar, y no se registran eventos. No pueden salir del generador de códigos porque contienen I y O.
 - `/admin`: enlace mágico de Supabase Auth, solo para los correos de `ADMIN_EMAILS`; cada página, acción y descarga verifica la sesión. En desarrollo, `npm run admin:link -- correo` imprime un enlace sin enviar correo (no corre en producción).
+- **Camino abierto** (`docs/OPEN_ENTRY.md`): Turnstile validado en el servidor; límite de sesiones nuevas por hash de IP; en producción el flag exige `IP_HASH_SALT`. El consentimiento del correo ("By continuing…", incluye tips de marketing) se guarda con fecha y versión del texto. Los anónimos sin correo se borran a los 30 días de creados; "Delete lead" borra toda la empresa y deja constancia en `deletion_log`.
 - Política de privacidad visible; no pedir datos sensibles (de salud ni financieros personales) en el diagnóstico.
 - Prueba de cliente incógnito ("Lo que vimos desde afuera"): hacerla con mensajes reales y honestos (una consulta genuina), sin hacerse pasar por otra empresa.
 

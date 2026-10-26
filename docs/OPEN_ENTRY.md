@@ -1,10 +1,23 @@
 # Camino abierto (sin código): decisiones aprobadas
 
-Estado: **aprobado; construido solo el inicio** (botón, Turnstile, límite por IP, UTM y referrer, empresa + código + sesión; detrás del flag). Falta lo demás: datos del negocio, pantalla del correo, resultado parcial, regalos, panel, cron, Delete lead, `/privacy` y GHL. Este documento manda sobre `docs/SPEC.md` en todo lo que toca el camino abierto.
+Estado: **aprobado; en construcción en `feature/open-entry`.** Hecho: el inicio (botón, Turnstile, límite por IP, UTM y referrer, empresa + código + sesión; detrás del flag) y la migración. Falta: datos del negocio, pantalla del correo, resultado parcial, regalos, panel, cron, Delete lead, `/privacy` y GHL. Este documento manda sobre `docs/SPEC.md` en todo lo que toca el camino abierto.
 Los textos de interfaz van en **inglés y en español**, con la misma estructura, en `config/phase1.config.json` y `config/phase1.config.es.json` (lo verifica `lib/config.test.ts`). Los del panel van solo en inglés, en `config/team.config.json`. Aquí se copia el inglés como referencia aprobada; el español es su traducción (neutro latinoamericano, tuteo).
 **Idioma sin código**: el elegido con el botón EN / ES (cookie); si no, el del navegador (`Accept-Language`); si no es inglés ni español, inglés. La sesión anónima nace con ese idioma (`access_codes.lang` y `sessions.lang`).
 
 El camino con código de invitación (`/x/[code]`) se mantiene igual.
+
+### Decisiones tomadas al planear la construcción (2026-10-26)
+
+1. **Base de desarrollo aparte**: las pruebas con el flag encendido van contra un proyecto de Supabase de desarrollo, creado con `supabase/dev-setup.sql`. La migración en producción la aplica el dueño después de probar.
+2. **El parcial muestra el dinero en juego** (cifra principal), además de arquetipo e índice. Quedan bloqueados: el desglose, el primer paso, "What to fix" y el regalo.
+3. **Días hábiles**: lunes a viernes, zona `America/New_York`, **sin feriados** por ahora.
+4. **Invitados sin correo ven el resultado completo.** La pantalla del correo les aparece como opcional, con el regalo como incentivo. El parcial aplica solo a empresas `source = 'open'` sin correo.
+5. **Borrado a 30 días desde la creación** de la empresa (no desde la última actividad).
+6. **Consentimiento**: "By continuing…" con el texto de los tips, registrado con fecha y versión (`access_codes.email_consent_at` / `email_consent_version`).
+7. **"Delete lead" borra toda la empresa** (todos sus códigos), con constancia en `deletion_log`.
+8. **El regalo queda fijo al ofrecerlo**, aunque después cambien las respuestas.
+9. Se acepta que el límite por IP no sea atómico (contar y luego insertar): en una carrera puede pasar uno de más.
+10. **En producción, el flag exige `IP_HASH_SALT`**: sin sal, el camino abierto queda apagado.
 
 ---
 
@@ -26,11 +39,10 @@ El camino con código de invitación (`/x/[code]`) se mantiene igual.
 
 - **Sesión anónima**: tiene su propio código interno, generado con el mismo generador (`lib/admin.ts`, `XXXXX-XXXXX`). La interfaz nunca lo muestra a quien entró por el camino abierto (por ejemplo, se oculta "Your answers are saved to code …"). El código sí va en la URL (`/x/[code]/…`): así funcionan retomar y "Save and finish later".
 - **"Save and finish later"** en el camino abierto pide el correo, como ya hace cuando el código no tiene correo.
-- **Pantalla del correo**: aparece siempre que el código no tenga correo, también para un invitado sin correo. Los invitados con correo ven el resultado completo como hoy (y también reciben regalo).
-- **Resultado parcial (sin correo)**: arquetipo e índice, con valor real suficiente para decidir si continuar. Debajo, el bloque para desbloquear con el correo. Si no deja el correo, puede seguir viendo el parcial.
-- **El correo desbloquea**: los hallazgos ("What to fix, in order"), el primer paso, el envío del informe (`/r/[code]`) y el regalo.
+- **Pantalla del correo**: aparece siempre que el código no tenga correo. En el camino abierto, "Skip" lleva al parcial; para un invitado sin correo es opcional y "Skip" lleva al resultado completo. Los invitados con correo ven el resultado completo como hoy (y también reciben regalo).
+- **Resultado parcial (sin correo, solo camino abierto)**: arquetipo, índice y dinero en juego (cifra principal), con valor real suficiente para decidir si continuar. Debajo, el bloque para desbloquear con el correo. Si no deja el correo, puede seguir viendo el parcial.
+- **El correo desbloquea**: el desglose del dinero en juego, los hallazgos ("What to fix, in order"), el primer paso, el envío del informe (`/r/[code]`) y el regalo.
 
-> Pendiente de confirmar: en la aprobación anterior el parcial también mostraba **dinero en juego**. Aquí queda "arquetipo + índice"; decidir si el dinero en juego entra en el parcial.
 
 ## 2. Regalo según calificación
 
@@ -51,12 +63,11 @@ Se calcula con la vista del equipo (`lib/scoring.ts`), pero el prospecto nunca v
 - **Cloudflare Turnstile** en el inicio abierto (widget *Managed*, hostname `xray.123spice.com`). Se valida en el servidor (`siteverify`) antes de crear la sesión.
 - **Límite de sesiones nuevas por IP**: 5 por hora y 20 por día, con el mismo hash de IP de `access_attempts`, contadas en la tabla `open_starts` (aparte de `access_attempts`, para que empezar no bloquee el ingreso con código).
 - **UTM y referrer**: primer contacto (first touch). Se capturan al llegar a `/` y se guardan en la empresa al tocar "Start my X-Ray".
-- **Migración nueva** en `companies`:
-  - `source text not null default 'invited' check (source in ('invited', 'open'))`
-  - `utm jsonb` (`utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`)
-  - `referrer text`
-  - `name` pasa a ser opcional (se completa en la pantalla de datos del negocio).
-  - Ampliar el `check` de `events.type` con `gift_offered`, `gift_delivered` y los que use la sincronización con GHL.
+- **Migración** `supabase/migrations/20261027000000_open_entry.sql` (detalle en `docs/SPEC.md` §5):
+  - `companies`: `source` (`invited` | `open`), `utm jsonb`, `referrer`; `name` opcional solo para `open`.
+  - `access_codes`: `email_consent_at`, `email_consent_version`.
+  - Tablas `gifts`, `open_starts` y `deletion_log`; función `cleanup_expired()` para el cron.
+  - `events.type` suma `email_captured`, `gift_offered` y `gift_delivered` (los de GHL se agregan con el sync).
 - **Panel**: origen (Invited / Open), UTM y referrer en el detalle y en la lista; filtro por origen.
 - **Borrado automático** (Vercel Cron, una vez por día, protegido con `CRON_SECRET`):
   - sesiones anónimas (`source = open`) **sin correo** con más de 30 días: se borra la empresa (en cascada: código, sesiones, respuestas, puntajes, eventos);
@@ -99,7 +110,7 @@ Se calcula con la vista del equipo (`lib/scoring.ts`), pero el prospecto nunca v
 ## 7. Cambio de principio en `docs/SPEC.md` §1
 
 Antes: "El resultado de la fase 1 se entrega completo, sin retener información a cambio de nada."
-Ahora: **"Valor primero; resultado completo a cambio del correo."** Sin correo se ve un resultado parcial con valor real; el correo desbloquea los hallazgos, el primer paso, el informe y el regalo.
+Ahora: **"Valor primero; resultado completo a cambio del correo"**, en el camino abierto. Sin correo se ve un resultado parcial con valor real; el correo desbloquea el desglose, los hallazgos, el primer paso, el informe y el regalo. Los invitados siempre ven el resultado completo (decisión 4).
 
 ## 8. Variables de entorno nuevas
 
