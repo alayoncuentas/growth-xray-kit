@@ -3,8 +3,8 @@ import { ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Container } from "@/components/ui/Container";
 import { LoadingCard } from "@/components/ui/Loading";
-import { DEFAULT_LANG, getConfig } from "@/lib/config";
-import { cookieLang } from "@/lib/server/access";
+import { getConfig } from "@/lib/config";
+import { browserLang } from "@/lib/server/access";
 
 export default function NotFound() {
   return (
@@ -17,7 +17,7 @@ export default function NotFound() {
 }
 
 async function Body() {
-  const t = getConfig((await cookieLang()) ?? DEFAULT_LANG).copy.notFound;
+  const t = getConfig(await browserLang()).copy.notFound;
   return (
     <Card>
       <h1 className="mb-3 text-[clamp(30px,6vw,44px)] tracking-[-0.02em]">{t.title}</h1>

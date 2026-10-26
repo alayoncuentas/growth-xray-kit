@@ -725,6 +725,20 @@
       "errorUnknown": "No encontramos ese código. Revisa el correo que te enviamos.",
       "errorExpired": "Este código venció. Responde a nuestro correo y te enviaremos uno nuevo."
     },
+    "start": {
+      "eyebrow": "Diagnóstico gratis · Unos 10 minutos",
+      "title": "Descubre dónde se te escapan los clientes nuevos.",
+      "sub": "Responde 12 preguntas rápidas sobre cómo atiendes las consultas nuevas. Verás dónde se te escapan y cuánto te cuesta, aproximadamente.",
+      "cta": "Comenzar mi X-Ray",
+      "note": "No necesitas registrarte para empezar. Tus respuestas se guardan a medida que avanzas.",
+      "codeToggle": "¿Tienes un código de acceso?",
+      "codeCta": "Continuar",
+      "verifying": "Verificando tu conexión…",
+      "errorTurnstile": "No pudimos confirmar la solicitud. Recarga la página y vuelve a intentarlo.",
+      "errorLimit": "Se iniciaron demasiados diagnósticos desde esta conexión. Inténtalo más tarde o usa el enlace de tu correo, si tienes uno.",
+      "errorUnavailable": "Por ahora no se puede empezar sin código. Si tienes un código de acceso, úsalo abajo.",
+      "errorGeneric": "Algo falló de nuestro lado. Vuelve a intentarlo en un minuto."
+    },
     "welcome": {
       "eyebrowGeneric": "Fase 1 · Unos 10 minutos",
       "titleKnown": "Tu radiografía de crecimiento está lista para empezar.",

@@ -5,14 +5,15 @@ import { submitCode, type CodeFormState } from "@/app/actions";
 import { Button } from "@/components/ui/Button";
 import { useConfig } from "@/lib/i18n";
 
-export function CodeForm() {
+/** Ingreso con código. En el inicio abierto va como opción secundaria: sin foco automático y con "Continue". */
+export function CodeForm({ secondary = false }: { secondary?: boolean }) {
   const [state, action, pending] = useActionState<CodeFormState, FormData>(submitCode, {});
-  const g = useConfig().copy.gate;
+  const { gate: g, start } = useConfig().copy;
   const errors = { format: g.errorShort, unknown: g.errorUnknown, expired: g.errorExpired, rate: g.errorRate };
   const error: string | null = state.error ? errors[state.error] : null;
 
   return (
-    <form action={action} noValidate className="mt-[22px] grid gap-1.5">
+    <form action={action} noValidate className={`${secondary ? "mt-3" : "mt-[22px]"} grid gap-1.5`}>
       <label htmlFor="code" className="text-[13px] font-semibold">
         {g.label}
       </label>
@@ -23,7 +24,7 @@ export function CodeForm() {
           autoComplete="off"
           autoCapitalize="characters"
           spellCheck={false}
-          autoFocus
+          autoFocus={!secondary}
           maxLength={32}
           placeholder={g.placeholder}
           defaultValue={state.code ?? ""}
@@ -32,7 +33,7 @@ export function CodeForm() {
           className="min-w-0 flex-1 rounded-card border-[1.5px] border-line bg-paper px-3.5 py-3 font-mono text-lg leading-none font-medium tracking-[0.08em] text-ink uppercase placeholder:text-muted placeholder:opacity-60"
         />
         <Button type="submit" disabled={pending}>
-          {g.cta}
+          {secondary ? start.codeCta : g.cta}
         </Button>
       </div>
       {error && (

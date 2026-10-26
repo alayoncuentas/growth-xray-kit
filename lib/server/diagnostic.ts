@@ -101,6 +101,12 @@ export async function openLink(code: string, userAgent: string | null) {
   await Promise.all([advanceStatus(code, "opened"), logEvent(code, "link_opened", { phase: PHASE, resumed: !created })]);
 }
 
+/** Camino abierto: la persona empieza desde el inicio. La sesión nace con el idioma de su navegador. */
+export async function startOpenSession(code: string, userAgent: string | null, lang: Lang) {
+  await getOrCreateSession(code, userAgent, lang);
+  await Promise.all([advanceStatus(code, "opened"), logEvent(code, "link_opened", { phase: PHASE, resumed: false, open: true })]);
+}
+
 async function saveScores(sessionId: string, s: SavedState) {
   const res = phase1Result(phase1, s.answers, s.calc);
   const team = teamScores(phase1, s.answers, res.pillars, res.avg, res.calc);

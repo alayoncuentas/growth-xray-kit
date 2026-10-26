@@ -725,6 +725,20 @@
       "errorUnknown": "We couldn't find that code. Check the email we sent you.",
       "errorExpired": "This code has expired. Reply to our email and we'll send you a new one."
     },
+    "start": {
+      "eyebrow": "Free diagnostic · About 10 minutes",
+      "title": "Find out where new customers slip away.",
+      "sub": "Answer 12 quick questions about how you handle new inquiries. You'll see where they slip through and roughly what it costs you.",
+      "cta": "Start my X-Ray",
+      "note": "No sign-up to start. Your answers save as you go.",
+      "codeToggle": "Have an access code?",
+      "codeCta": "Continue",
+      "verifying": "Checking your connection…",
+      "errorTurnstile": "We couldn't confirm the request. Refresh the page and try again.",
+      "errorLimit": "Too many new diagnostics from this connection. Try again later, or use the link in your email if you have one.",
+      "errorUnavailable": "Starting without a code isn't available right now. If you have an access code, use it below.",
+      "errorGeneric": "Something went wrong on our side. Try again in a minute."
+    },
     "welcome": {
       "eyebrowGeneric": "Phase 1 · About 10 minutes",
       "titleKnown": "Your growth X-ray is ready to start.",

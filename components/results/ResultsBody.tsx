@@ -23,7 +23,7 @@ export function ResultsBody({ answers, calc, company, eyebrow }: { answers: Answ
     <>
       <Eyebrow>
         {eyebrow}
-        {company ? ` · ${company.business}` : ""}
+        {company?.business ? ` · ${company.business}` : ""}
       </Eyebrow>
       <ArchetypeHeader archetype={res.archetype} avg={res.avg} band={res.band} />
 

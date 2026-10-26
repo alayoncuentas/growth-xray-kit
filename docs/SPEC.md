@@ -154,6 +154,7 @@ Reglas de persistencia (fase 1):
 - **Limitación de intentos**: máximo 10 códigos fallidos (mal formados, inexistentes o vencidos) por IP cada 15 min, contados en `access_attempts`.
 - **Sesión**: una por código y fase (`unique (code, phase)`); retomar reutiliza la misma.
 - **`link_opened`**: al ver la bienvenida en el navegador (no al renderizar en el servidor, para no contar prefetches). Crea la sesión si falta; `access_codes.status` pasa a `opened`. `payload.resumed` indica si la sesión ya existía.
+- **Inicio abierto** ("Start my X-Ray", solo con `OPEN_ENTRY_ENABLED=true`): valida Turnstile en el servidor, luego el límite por IP (5 por hora y 20 por día en `open_starts`), y crea empresa (`source = open`, UTM y referrer de la llegada a `/`), código interno (mismo generador, sin correo ni vencimiento) y sesión con el idioma sin código. Registra `link_opened` con `payload.open = true` y lleva directo a la pregunta de rubro (sin bienvenida). Con el flag apagado la acción responde error. En producción, el flag además exige `IP_HASH_SALT`, y Turnstile debe responder con el hostname de `NEXT_PUBLIC_APP_URL` y la acción `start`.
 - **`answered`**: cada `POST /api/answer` válido. Upsert en `answers` (la calculadora se guarda como un objeto con los campos que el usuario movió), actualiza `last_question_id` y recalcula la fila de `scores`. La respuesta de la API nunca incluye puntajes.
 - **`phase_done`**: con el botón "See my results" (`complete: true`), si no queda ninguna pregunta visible sin responder. Una sola vez por sesión: fija `completed_at` y el estado pasa a `p1_done`. El estado nunca retrocede.
 - **Correo del informe** (Resend): al registrar `phase_done`, una sola vez, al correo de `access_codes.email`, con el link a `/r/[code]`. Sale después de responder (no demora al prospecto). Sin correo en el código no se envía. Se registra `email_sent` con `payload.kind = "report"`.
@@ -164,7 +165,7 @@ Reglas de persistencia (fase 1):
 - **Idioma** (en / es). Textos en `config/phase1.config.json` (inglés) y `config/phase1.config.es.json` (español, neutro latinoamericano, tuteo). Los dos tienen exactamente la misma estructura (ids, opciones, puntajes, valores, evidencia con fuente y url sin traducir); solo cambian los textos. Lo verifica `lib/config.test.ts`.
   - `access_codes.lang`: lo elige el equipo al crear la empresa (por defecto `en`); un código nuevo para la misma empresa conserva el idioma. Es el idioma en que se abre el link.
   - Botón **EN / ES** en el encabezado de todas las pantallas públicas (no en `/admin`). Guarda la elección en una cookie (`gxr-lang`) y, en un link con código, en `sessions.lang`.
-  - Idioma de una pantalla con código = cookie de este navegador si eligió, si no `sessions.lang`, si no `access_codes.lang`. Sin código (inicio, página no encontrada, código que no sirve): cookie, o inglés.
+  - Idioma de una pantalla con código = cookie de este navegador si eligió, si no `sessions.lang`, si no `access_codes.lang`. Sin código (inicio, página no encontrada, código que no sirve): cookie; si no hay, el idioma del navegador (`Accept-Language`, el de mayor preferencia entre en y es); si no es ninguno de los dos, inglés. El camino abierto crea la sesión con ese idioma.
   - Cada respuesta guarda en `sessions.lang` el idioma en que se respondió. Abrir el link no lo fija (puede abrirlo alguien del equipo).
   - Correos: el del informe sale en `sessions.lang`; el de "Save and finish later", en el idioma de la pantalla. `email_sent` registra `payload.lang`. El informe `/r/[code]` sigue la misma regla que las pantallas.
   - La vista externa (`companies.outside_view`) es texto libre: el equipo la escribe en el idioma del link.
@@ -173,7 +174,7 @@ Reglas de persistencia (fase 1):
 
 ### Rutas
 ```
-/                      ingreso de código
+/                      ingreso de código; con OPEN_ENTRY_ENABLED, además "Start my X-Ray" (docs/OPEN_ENTRY.md)
 /x/[code]              entrada directa desde el correo (valida y crea la sesión)
 /x/[code]/q/[qid]      pregunta (permite volver y retomar)
 /x/[code]/results      resultado de la fase 1

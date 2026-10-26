@@ -1,14 +1,14 @@
 import { ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { getConfig, type Lang } from "@/lib/config";
-import { cookieLang, type AccessError } from "@/lib/server/access";
+import { browserLang, type AccessError } from "@/lib/server/access";
 
 /**
  * Link con un código que no sirve: dice por qué (vencido, inexistente o demasiados intentos) en vez de un 404 genérico.
- * Sin código válido no hay idioma de sesión: usa el que eligió este navegador (cookie), o inglés.
+ * Sin código válido no hay idioma de sesión: el elegido con el botón EN / ES, si no el del navegador, si no inglés.
  */
 export async function CodeError({ reason }: { reason: AccessError }) {
-  const lang: Lang = (await cookieLang()) ?? "en";
+  const lang: Lang = await browserLang();
   const t = getConfig(lang).copy.codeError;
   const [title, sub] =
     reason === "expired" ? [t.expiredTitle, t.expiredSub] : reason === "rate" ? [t.rateTitle, t.rateSub] : [t.unknownTitle, t.unknownSub];

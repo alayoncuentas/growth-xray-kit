@@ -3,9 +3,11 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { isLang, LANG_COOKIE } from "@/lib/config";
-import { checkAccess, type AccessError } from "@/lib/server/access";
+import { cleanReferrer, parseUtm } from "@/lib/open-entry";
+import { browserLang, checkAccess, clientKey, type AccessError } from "@/lib/server/access";
 import { openLink, setSessionLang } from "@/lib/server/diagnostic";
 import { sendResumeEmail } from "@/lib/server/email";
+import { createOpenSession, openEntryEnabled, openLimitHit, verifyTurnstile } from "@/lib/server/open-entry";
 import { appOrigin } from "@/lib/server/origin";
 
 export type CodeFormState = { error?: AccessError; code?: string };
@@ -15,6 +17,35 @@ export async function submitCode(_prev: CodeFormState, formData: FormData): Prom
   const r = await checkAccess(raw);
   if (!r.ok) return { error: r.reason, code: raw };
   redirect(`/x/${encodeURIComponent(r.access.code)}`);
+}
+
+export type StartState = { error?: "turnstile" | "limit" | "unavailable" | "generic" };
+
+/**
+ * "Start my X-Ray" (camino abierto): flag → Turnstile → límite por IP → empresa + código interno + sesión.
+ * Con el flag apagado responde error aunque alguien llame la acción directo. Va directo a la pregunta de rubro.
+ */
+export async function startOpen(_prev: StartState, formData: FormData): Promise<StartState> {
+  if (!openEntryEnabled()) return { error: "unavailable" };
+  if (!(await verifyTurnstile(String(formData.get("cf-turnstile-response") ?? "")))) return { error: "turnstile" };
+  let code: string;
+  try {
+    const ipHash = await clientKey();
+    if (await openLimitHit(ipHash)) return { error: "limit" };
+    const host = (await headers()).get("host");
+    code = await createOpenSession(ipHash, {
+      lang: await browserLang(),
+      utm: parseUtm((k) => {
+        const v = formData.get(k);
+        return typeof v === "string" ? v : null;
+      }),
+      referrer: cleanReferrer(String(formData.get("referrer") ?? ""), host),
+    });
+  } catch (e) {
+    console.error("[open start]", e);
+    return { error: "generic" };
+  }
+  redirect(`/x/${code}/q/industry`);
 }
 
 /**

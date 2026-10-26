@@ -2,7 +2,7 @@ import "server-only";
 import { createHash } from "node:crypto";
 import { cookies, headers } from "next/headers";
 import { connection } from "next/server";
-import { DEFAULT_LANG, isLang, LANG_COOKIE, type Lang } from "@/lib/config";
+import { DEFAULT_LANG, isLang, LANG_COOKIE, langFromAcceptLanguage, type Lang } from "@/lib/config";
 import { previewCompany, previewVariant, type PreviewVariant } from "@/lib/preview";
 import type { Company, OutsideView } from "@/lib/types";
 import { getAdmin } from "./auth";
@@ -38,8 +38,8 @@ export function normalizeCode(raw: string): string {
   return s.trim().toUpperCase();
 }
 
-/** Hash de la IP del cliente: la tabla de intentos nunca guarda la IP. */
-async function clientKey(): Promise<string> {
+/** Hash de la IP del cliente: las tablas de intentos y de inicios nunca guardan la IP. */
+export async function clientKey(): Promise<string> {
   const h = await headers();
   const ip = h.get("x-forwarded-for")?.split(",")[0].trim() || h.get("x-real-ip") || "local";
   return createHash("sha256")
@@ -69,17 +69,25 @@ export async function cookieLang(): Promise<Lang | null> {
   return isLang(v) ? v : null;
 }
 
+/**
+ * Idioma sin código (inicio, camino abierto): el que eligió este navegador con el botón EN / ES; si no eligió,
+ * el preferido del navegador (Accept-Language); si no es inglés ni español, inglés.
+ */
+export async function browserLang(): Promise<Lang> {
+  return (await cookieLang()) ?? langFromAcceptLanguage((await headers()).get("accept-language")) ?? DEFAULT_LANG;
+}
+
 interface CodeRow {
   code: string;
   expires_at: string | null;
   lang: string;
   sessions: { phase: number; lang: string | null }[] | null;
-  companies: { name: string; city: string | null; state: string | null; industry: string | null; outside_view: OutsideView | null } | null;
+  companies: { name: string | null; city: string | null; state: string | null; industry: string | null; outside_view: OutsideView | null } | null;
 }
 
 function toCompany(c: NonNullable<CodeRow["companies"]>): Company {
   return {
-    business: c.name,
+    business: c.name ?? "", // camino abierto: sin nombre hasta la pantalla de datos del negocio
     city: [c.city, c.state].filter(Boolean).join(", "),
     industry: c.industry ?? undefined,
     outside: c.outside_view ?? undefined,

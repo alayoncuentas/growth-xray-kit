@@ -41,3 +41,22 @@ export const usd = (n: number) => "$" + Math.round(n).toLocaleString("en-US");
 
 /** Cookie con el idioma elegido con el botón EN / ES (también la leen los marcos de /admin/preview). */
 export const LANG_COOKIE = "gxr-lang";
+
+/**
+ * Idioma preferido del navegador según Accept-Language ("es-MX,es;q=0.9,en;q=0.8"): el de mayor q entre los
+ * que existen (en / es). null si no trae ninguno de los dos, o si no hay encabezado.
+ */
+export function langFromAcceptLanguage(header: string | null | undefined): Lang | null {
+  if (!header) return null;
+  let best: { lang: Lang; q: number } | null = null;
+  for (const part of header.split(",")) {
+    const [tag, ...params] = part.trim().split(";");
+    const base = tag.trim().toLowerCase().split("-")[0];
+    if (!isLang(base)) continue;
+    const qp = params.map((p) => p.trim()).find((p) => p.startsWith("q="));
+    const q = qp ? Number(qp.slice(2)) : 1;
+    if (!Number.isFinite(q) || q <= 0) continue;
+    if (!best || q > best.q) best = { lang: base, q };
+  }
+  return best?.lang ?? null;
+}

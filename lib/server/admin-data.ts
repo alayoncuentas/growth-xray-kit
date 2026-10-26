@@ -20,7 +20,8 @@ export interface ScoreRow {
 
 export interface CompanyRow {
   id: string;
-  name: string;
+  /** null en el camino abierto hasta la pantalla de datos del negocio. */
+  name: string | null;
   city: string | null;
   state: string | null;
   industry: string | null;

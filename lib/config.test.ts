@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import en from "@/config/phase1.config.json";
 import es from "@/config/phase1.config.es.json";
-import { getConfig, LANGS } from "./config";
+import { getConfig, langFromAcceptLanguage, LANGS } from "./config";
 
 // Los dos idiomas deben tener exactamente la misma estructura: mismas claves, mismos ids, opciones, puntajes,
 // valores, evidencia (fuente y url) y reglas. Solo cambian los textos. Si este test falla, el config en español
@@ -80,5 +80,22 @@ describe("config en / es", () => {
 
   it("getConfig devuelve cada idioma", () => {
     for (const l of LANGS) expect(getConfig(l).questions.length).toBe(getConfig("en").questions.length);
+  });
+});
+
+describe("idioma del navegador (Accept-Language)", () => {
+  it("elige el de mayor preferencia entre en y es", () => {
+    expect(langFromAcceptLanguage("es-MX,es;q=0.9,en;q=0.8")).toBe("es");
+    expect(langFromAcceptLanguage("en-US,en;q=0.9,es;q=0.8")).toBe("en");
+    expect(langFromAcceptLanguage("fr-FR,fr;q=0.9,es;q=0.7,en;q=0.5")).toBe("es");
+    expect(langFromAcceptLanguage("en;q=0.3, ES-419;q=0.6")).toBe("es");
+  });
+
+  it("null si no trae ninguno de los dos, o no hay encabezado", () => {
+    expect(langFromAcceptLanguage("fr-FR,de;q=0.8")).toBeNull();
+    expect(langFromAcceptLanguage("es;q=0")).toBeNull();
+    expect(langFromAcceptLanguage("*")).toBeNull();
+    expect(langFromAcceptLanguage("")).toBeNull();
+    expect(langFromAcceptLanguage(null)).toBeNull();
   });
 });

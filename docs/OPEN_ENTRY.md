@@ -1,7 +1,8 @@
 # Camino abierto (sin código): decisiones aprobadas
 
-Estado: **aprobado, sin construir.** Este documento manda sobre `docs/SPEC.md` en todo lo que toca el camino abierto.
-Los textos de interfaz van en inglés y viven en `config/phase1.config.json` (y `config/team.config.json` para el panel); aquí se copian solo como referencia aprobada.
+Estado: **aprobado; construido solo el inicio** (botón, Turnstile, límite por IP, UTM y referrer, empresa + código + sesión; detrás del flag). Falta lo demás: datos del negocio, pantalla del correo, resultado parcial, regalos, panel, cron, Delete lead, `/privacy` y GHL. Este documento manda sobre `docs/SPEC.md` en todo lo que toca el camino abierto.
+Los textos de interfaz van en **inglés y en español**, con la misma estructura, en `config/phase1.config.json` y `config/phase1.config.es.json` (lo verifica `lib/config.test.ts`). Los del panel van solo en inglés, en `config/team.config.json`. Aquí se copia el inglés como referencia aprobada; el español es su traducción (neutro latinoamericano, tuteo).
+**Idioma sin código**: el elegido con el botón EN / ES (cookie); si no, el del navegador (`Accept-Language`); si no es inglés ni español, inglés. La sesión anónima nace con ese idioma (`access_codes.lang` y `sessions.lang`).
 
 El camino con código de invitación (`/x/[code]`) se mantiene igual.
 
@@ -48,7 +49,7 @@ Se calcula con la vista del equipo (`lib/scoring.ts`), pero el prospecto nunca v
 ## 3. Seguridad y datos
 
 - **Cloudflare Turnstile** en el inicio abierto (widget *Managed*, hostname `xray.123spice.com`). Se valida en el servidor (`siteverify`) antes de crear la sesión.
-- **Límite de sesiones nuevas por IP**: 5 por hora y 20 por día, con el mismo hash de IP de `access_attempts`.
+- **Límite de sesiones nuevas por IP**: 5 por hora y 20 por día, con el mismo hash de IP de `access_attempts`, contadas en la tabla `open_starts` (aparte de `access_attempts`, para que empezar no bloquee el ingreso con código).
 - **UTM y referrer**: primer contacto (first touch). Se capturan al llegar a `/` y se guardan en la empresa al tocar "Start my X-Ray".
 - **Migración nueva** en `companies`:
   - `source text not null default 'invited' check (source in ('invited', 'open'))`
@@ -130,6 +131,13 @@ Errors:
   Turnstile: We couldn't confirm the request. Refresh the page and try again.
   Limit:     Too many new diagnostics from this connection. Try again later,
              or use the link in your email if you have one.
+```
+Agregados al construir (no estaban en la aprobación; en `copy.start` de los dos configs):
+```
+Verifying:   Checking your connection…        (mientras Turnstile no da el token)
+Flag off:    Starting without a code isn't available right now. If you have an
+             access code, use it below.       (si alguien llama la acción con el flag apagado)
+Generic:     Something went wrong on our side. Try again in a minute.
 ```
 
 ### Datos del negocio (después de la pregunta de rubro)

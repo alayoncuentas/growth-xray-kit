@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { DEFAULT_LANG, getConfig, phase1 } from "@/lib/config";
-import { cookieLang } from "@/lib/server/access";
+import { browserLang } from "@/lib/server/access";
 import { Chip } from "./Chip";
 import { HeaderControls } from "./HeaderControls";
 
@@ -19,7 +19,7 @@ export function SiteHeader() {
   );
 }
 
-/** El encabezado vive en el layout: arranca con el idioma de la cookie y después sigue al de la pantalla. */
+/** El encabezado vive en el layout: arranca con el idioma del navegador (cookie o Accept-Language) y después sigue al de la pantalla. */
 async function WithCookie() {
-  return <HeaderControls cookieLang={(await cookieLang()) ?? DEFAULT_LANG} />;
+  return <HeaderControls cookieLang={await browserLang()} />;
 }
