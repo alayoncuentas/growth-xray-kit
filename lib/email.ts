@@ -1,7 +1,7 @@
 // Correos transaccionales (informe de la fase 1 y link para retomar). Funciones puras: arman asunto, texto y HTML
-// desde copy.email del config. El envío está en lib/server/email.ts.
+// desde copy.email del config, en el idioma del prospecto. El envío está en lib/server/email.ts.
 
-import { copy, fill } from "./config";
+import { fill, getConfig, type Lang } from "./config";
 
 export type EmailKind = "report" | "resume";
 
@@ -14,10 +14,10 @@ export interface EmailContent {
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 /** Correo corto y sin lenguaje de venta: saludo, una línea, un botón, una nota y el pie. */
-export function buildEmail(kind: EmailKind, v: { code: string; business: string | null; link: string }): EmailContent {
-  const e = copy.email;
+export function buildEmail(kind: EmailKind, v: { code: string; business: string | null; link: string; lang: Lang }): EmailContent {
+  const e = getConfig(v.lang).copy.email;
   const t = e[kind];
-  const forBusiness = v.business ? ` for ${v.business}` : "";
+  const forBusiness = v.business ? fill(e.forBusiness, { business: v.business }) : "";
   const greeting = fill(t.greeting, { forBusiness });
   const footer = fill(e.footer, { code: v.code });
 
@@ -25,7 +25,7 @@ export function buildEmail(kind: EmailKind, v: { code: string; business: string 
 
   const p = (s: string, style = "") => `<p style="margin:0 0 16px;${style}">${esc(s)}</p>`;
   const html = `<!doctype html>
-<html lang="en"><body style="margin:0;padding:24px 16px;background:#f1f5f4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#0e1718;font-size:16px;line-height:1.55">
+<html lang="${v.lang}"><body style="margin:0;padding:24px 16px;background:#f1f5f4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#0e1718;font-size:16px;line-height:1.55">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border:1px solid #d9e2e0;border-radius:12px">
 <tr><td style="padding:28px 24px">

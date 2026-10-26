@@ -2,14 +2,17 @@ import { Suspense } from "react";
 import { TeamView } from "@/components/admin/TeamView";
 import { Insight } from "@/components/insight/InsightCard";
 import { PhoneFrame } from "@/components/preview/PhoneFrame";
+import { PreviewLangSwitch } from "@/components/preview/PreviewLangSwitch";
 import { buttonClass } from "@/components/ui/Button";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { LoadingCard } from "@/components/ui/Loading";
 import { ThemeSwitch } from "@/components/ui/ThemeToggle";
-import { copy, fill, isChoice, phase1 } from "@/lib/config";
+import { DEFAULT_LANG, fill, getConfig, isChoice, type Lang } from "@/lib/config";
+import { LangScope } from "@/lib/i18n";
 import { progress } from "@/lib/flow";
-import { insightCases, preview, SAMPLE_IDS, sampleState } from "@/lib/preview";
+import { insightCases, preview, previewCompany, SAMPLE_IDS, sampleState } from "@/lib/preview";
 import { visibleQuestions } from "@/lib/scoring";
+import { cookieLang } from "@/lib/server/access";
 import { requireAdmin } from "@/lib/server/auth";
 import { adminCopy } from "@/lib/server/team";
 import type { ArchetypeId, Question } from "@/lib/types";
@@ -39,8 +42,9 @@ interface Screen {
   question?: Question;
 }
 
-function screens(): Screen[] {
+function screens(lang: Lang): Screen[] {
   const p = adminCopy.preview;
+  const phase1 = getConfig(lang);
   // Las preguntas usan el negocio sin rubro conocido, para que aparezca también la de rubro.
   const qs = visibleQuestions(phase1, preview.plainCompany.industry);
   return [
@@ -66,7 +70,10 @@ function screens(): Screen[] {
 async function Preview() {
   await requireAdmin();
   const p = adminCopy.preview;
-  const list = screens();
+  // Idioma de las pantallas: la cookie del botón EN / ES (los marcos son las rutas reales y la leen igual).
+  const lang = (await cookieLang()) ?? DEFAULT_LANG;
+  const phase1 = getConfig(lang);
+  const list = screens(lang);
 
   return (
     <div className="grid gap-10">
@@ -79,6 +86,9 @@ async function Preview() {
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-sm text-muted">{p.theme}</span>
           <ThemeSwitch label={p.theme} />
+          <span className="text-sm text-muted">{p.lang}</span>
+          <PreviewLangSwitch lang={lang} label={p.lang} names={p.langNames} />
+          <span className="basis-full text-[13px] text-muted">{p.langNote}</span>
         </div>
         <nav aria-label={p.indexTitle} className="rounded-panel border border-line bg-card p-4 text-sm">
           <div className="label-mono mb-2 text-[11px] text-muted">{p.indexTitle}</div>
@@ -141,8 +151,8 @@ async function Preview() {
         {list.map((s, i) => (
           <article key={s.id} id={`s-${s.id}`} className="grid scroll-mt-4 gap-3 border-t border-line pt-6">
             <ScreenHeader n={i + 1} id={s.id} part={s.part} label={s.label} src={s.src} />
-            <PhoneFrame src={s.src} title={`${s.id} · ${s.label}`} />
-            {s.question && <InsightVariants q={s.question} />}
+            <PhoneFrame key={lang} src={s.src} title={`${s.id} · ${s.label}`} />
+            {s.question && <InsightVariants q={s.question} lang={lang} />}
           </article>
         ))}
       </section>
@@ -153,7 +163,7 @@ async function Preview() {
           <p className="max-w-[640px] text-sm text-muted">{p.archetypesSub}</p>
         </div>
         {SAMPLE_IDS.map((id) => (
-          <Archetype key={id} id={id} />
+          <Archetype key={id} id={id} lang={lang} />
         ))}
       </section>
     </div>
@@ -175,10 +185,10 @@ function ScreenHeader({ n, id, part, label, src }: { n: number; id: string; part
 }
 
 /** Cada opción con el insight exacto que mostraría el flujo real (mismo insightFor, mismo componente). */
-function InsightVariants({ q }: { q: Question }) {
+function InsightVariants({ q, lang }: { q: Question; lang: Lang }) {
   const p = adminCopy.preview;
   if (!isChoice(q)) return <p className="text-sm text-muted">{p.calcNote}</p>;
-  const cases = insightCases(phase1, q, preview.company.outside?.lastReview ?? "");
+  const cases = insightCases(getConfig(lang), q, previewCompany("outside", lang).outside?.lastReview ?? "");
   return (
     <details open className="rounded-panel border border-line bg-card p-4">
       <summary className="cursor-pointer font-semibold">{p.insightsTitle}</summary>
@@ -192,7 +202,9 @@ function InsightVariants({ q }: { q: Question }) {
             </div>
             {c.view ? (
               <div className="max-w-[368px] [&>*]:mt-0">
-                <Insight view={c.view} />
+                <LangScope lang={lang}>
+                  <Insight view={c.view} />
+                </LangScope>
               </div>
             ) : (
               <p className="text-sm text-muted">{c.autoAdvance ? p.autoAdvance : p.multiNote}</p>
@@ -205,7 +217,8 @@ function InsightVariants({ q }: { q: Question }) {
 }
 
 /** Resultados con una muestra de respuestas, al lado de la vista del equipo. */
-function Archetype({ id }: { id: ArchetypeId }) {
+function Archetype({ id, lang }: { id: ArchetypeId; lang: Lang }) {
+  const phase1 = getConfig(lang);
   const s = sampleState(id);
   const src = X(preview.code, "/results", `&sample=${id}`);
   return (
@@ -218,7 +231,7 @@ function Archetype({ id }: { id: ArchetypeId }) {
         </a>
       </div>
       <div className="grid items-start gap-5 min-[920px]:grid-cols-[402px_minmax(0,1fr)]">
-        <PhoneFrame src={src} title={`${copy.results.eyebrow} · ${phase1.archetypes[id].name}`} />
+        <PhoneFrame key={lang} src={src} title={`${phase1.copy.results.eyebrow} · ${phase1.archetypes[id].name}`} />
         <div className="grid gap-4 min-[920px]:sticky min-[920px]:top-4">
           <TeamView code={preview.code} answers={s.answers} calc={s.calc} />
           <details className="rounded-panel border border-line bg-card p-4 text-sm">

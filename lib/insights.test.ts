@@ -37,7 +37,7 @@ describe("insightFor", () => {
 
   it("reviews: agrega la reseña vieja de la vista externa si no hay proceso", () => {
     const v = ins("reviews", { reviews: "hope" }, { lastReview: "5 months ago" });
-    expect(v).toMatchObject({ kind: "evidence", extraLead: expect.stringContaining("5 months ago old") });
+    expect(v).toMatchObject({ kind: "evidence", extraLead: expect.stringContaining("is from 5 months ago.") });
     expect(ins("reviews", { reviews: "process" }, { lastReview: "5 months ago" })).not.toHaveProperty("extraLead");
     expect(ins("reviews", { reviews: "hope" })).not.toHaveProperty("extraLead");
   });

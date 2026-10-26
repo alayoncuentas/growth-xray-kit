@@ -1,4 +1,5 @@
 import "server-only";
+import type { Lang } from "@/lib/config";
 import { buildEmail, maskEmail, type EmailKind } from "@/lib/email";
 import { db, must } from "./db";
 
@@ -12,7 +13,7 @@ interface Sent {
   dev: boolean;
 }
 
-async function send(to: string, kind: EmailKind, vars: { code: string; business: string | null; link: string }): Promise<Sent> {
+async function send(to: string, kind: EmailKind, vars: { code: string; business: string | null; link: string; lang: Lang }): Promise<Sent> {
   const { subject, text, html } = buildEmail(kind, vars);
   const key = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM;
@@ -43,19 +44,20 @@ async function codeContact(code: string) {
 
 const businessName = (c: { name: string } | { name: string }[] | null) => (Array.isArray(c) ? c[0]?.name : c?.name) ?? null;
 
-async function logSent(code: string, kind: EmailKind, sent: Sent) {
-  must(await db().from("events").insert({ code, type: "email_sent", payload: { kind, phase: 1, id: sent.id, dev: sent.dev } }), "events insert");
+async function logSent(code: string, kind: EmailKind, sent: Sent, lang: Lang) {
+  must(await db().from("events").insert({ code, type: "email_sent", payload: { kind, phase: 1, id: sent.id, dev: sent.dev, lang } }), "events insert");
 }
 
 /**
  * Informe de la fase 1 al correo del código. Se llama una vez, al registrar phase_done.
  * Sin correo en el código no hay a quién enviarlo: se omite (el informe sigue en /r/[code]).
+ * `lang`: el idioma en que respondió.
  */
-export async function sendReportEmail(code: string, origin: string): Promise<void> {
+export async function sendReportEmail(code: string, origin: string, lang: Lang): Promise<void> {
   const contact = await codeContact(code);
   if (!contact?.email) return;
-  const sent = await send(contact.email, "report", { code, business: businessName(contact.companies), link: `${origin}/r/${code}` });
-  await logSent(code, "report", sent);
+  const sent = await send(contact.email, "report", { code, business: businessName(contact.companies), link: `${origin}/r/${code}`, lang });
+  await logSent(code, "report", sent, lang);
 }
 
 export type ResumeResult = { status: "sent"; to: string } | { status: "needEmail" } | { status: "rate" } | { status: "error" };
@@ -65,7 +67,7 @@ export type ResumeResult = { status: "sent"; to: string } | { status: "needEmail
  * usa el que escribe el prospecto y lo guarda (solo si estaba vacío: un correo ya registrado no se reemplaza).
  * Máximo 3 por código y por hora, para que no sirva para enviar correos a terceros.
  */
-export async function sendResumeEmail(code: string, origin: string, typedEmail: string | null): Promise<ResumeResult> {
+export async function sendResumeEmail(code: string, origin: string, typedEmail: string | null, lang: Lang): Promise<ResumeResult> {
   const contact = await codeContact(code);
   if (!contact) return { status: "error" };
   let to = contact.email;
@@ -86,7 +88,7 @@ export async function sendResumeEmail(code: string, origin: string, typedEmail: 
   if (recent.error) throw new Error(`Supabase (events count): ${recent.error.message}`);
   if ((recent.count ?? 0) >= RESUME_LIMIT) return { status: "rate" };
 
-  const sent = await send(to, "resume", { code, business: businessName(contact.companies), link: `${origin}/x/${code}` });
-  await logSent(code, "resume", sent);
+  const sent = await send(to, "resume", { code, business: businessName(contact.companies), link: `${origin}/x/${code}`, lang });
+  await logSent(code, "resume", sent, lang);
   return { status: "sent", to: maskEmail(to) };
 }

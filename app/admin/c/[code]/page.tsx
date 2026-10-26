@@ -78,6 +78,10 @@ async function Lead({ code, created }: { code: string; created: boolean }) {
           <dd className="break-all">{lead.email ?? "—"}</dd>
           <dt className="text-muted">{d.expires}</dt>
           <dd>{lead.expires_at ? when(lead.expires_at) : d.never}</dd>
+          <dt className="text-muted">{d.codeLang}</dt>
+          <dd>{adminCopy.langs[lead.lang]}</dd>
+          <dt className="text-muted">{d.answeredLang}</dt>
+          <dd>{lead.phase1?.lang ? adminCopy.langs[lead.phase1.lang] : <span className="text-muted">{d.notYet}</span>}</dd>
         </dl>
       </section>
 

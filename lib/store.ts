@@ -4,6 +4,7 @@
 // Se siembra con lo guardado en Supabase (DiagnosticProvider) y cada cambio se envía a /api/answer (lib/sync.ts).
 
 import { createContext, createElement, useContext, useSyncExternalStore, type ReactNode } from "react";
+import type { Lang } from "./config";
 import type { Answers, CalcOverrides } from "./types";
 
 export interface DiagnosticState {
@@ -107,4 +108,28 @@ export function useCurrentBusiness(): string | null {
     () => currentBusiness,
     () => null,
   );
+}
+
+// ---------- idioma de la pantalla actual (para el encabezado: botón EN / ES, "Phase 1", tema) ----------
+
+let currentPage: { lang: Lang; code: string | null } | null = null;
+
+export function setCurrentPage(page: { lang: Lang; code: string | null } | null) {
+  if (currentPage?.lang === page?.lang && currentPage?.code === page?.code) return;
+  currentPage = page;
+  emit();
+}
+
+/** Idioma de la pantalla; hasta que la pantalla lo anuncia, el de la cookie (lo lee el servidor). */
+export function useCurrentLang(fallback: Lang): Lang {
+  return useSyncExternalStore(
+    subscribe,
+    () => currentPage?.lang ?? fallback,
+    () => fallback,
+  );
+}
+
+/** Código de la pantalla actual (para guardar el idioma en su sesión), o null fuera de un link con código. */
+export function getCurrentCode(): string | null {
+  return currentPage?.code ?? null;
 }

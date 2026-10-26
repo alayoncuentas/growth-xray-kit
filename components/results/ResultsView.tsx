@@ -2,7 +2,7 @@
 
 import { ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { copy, phase1 } from "@/lib/config";
+import { useConfig } from "@/lib/i18n";
 import { firstQuestion } from "@/lib/flow";
 import { useDiagnostic } from "@/lib/store";
 import type { Company } from "@/lib/types";
@@ -11,9 +11,10 @@ import { UnlockPanel } from "./UnlockPanel";
 
 export function ResultsView({ code, company }: { code: string; company: Company | null }) {
   const { answers, calc } = useDiagnostic(code);
-  const t = copy.results;
+  const cfg = useConfig();
+  const t = cfg.copy.results;
   const base = `/x/${encodeURIComponent(code)}`;
-  const firstHref = `${base}/q/${firstQuestion(phase1, company?.industry).id}`;
+  const firstHref = `${base}/q/${firstQuestion(cfg, company?.industry).id}`;
 
   // Sin respuestas en memoria (p. ej. después de recargar): no inventamos un resultado.
   if (!Object.keys(answers).length) {

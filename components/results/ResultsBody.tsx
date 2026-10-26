@@ -1,6 +1,9 @@
+"use client";
+
 import { Panel } from "@/components/ui/Card";
 import { Eyebrow } from "@/components/ui/Eyebrow";
-import { copy, fill, phase1, usd } from "@/lib/config";
+import { fill, usd } from "@/lib/config";
+import { useConfig } from "@/lib/i18n";
 import { phase1Result } from "@/lib/scoring";
 import type { Answers, CalcOverrides, Company } from "@/lib/types";
 import { ArchetypeHeader } from "./ArchetypeHeader";
@@ -13,8 +16,9 @@ import { PillarBars } from "./PillarBars";
  * Nunca incluye la vista del equipo.
  */
 export function ResultsBody({ answers, calc, company, eyebrow }: { answers: Answers; calc: CalcOverrides; company: Company | null; eyebrow: string }) {
-  const t = copy.results;
-  const res = phase1Result(phase1, answers, calc);
+  const cfg = useConfig();
+  const t = cfg.copy.results;
+  const res = phase1Result(cfg, answers, calc);
   return (
     <>
       <Eyebrow>
@@ -30,7 +34,7 @@ export function ResultsBody({ answers, calc, company, eyebrow }: { answers: Answ
           </Panel>
           <Panel title={t.moneyTitle}>
             <MoneyAtStake calc={res.calc} compact />
-            {res.spend > 0 && <p className="mt-3.5">{fill(copy.money.adLeak, { adLeak: usd(res.calc.adLeak) })}</p>}
+            {res.spend > 0 && <p className="mt-3.5">{fill(cfg.copy.money.adLeak, { adLeak: usd(res.calc.adLeak) })}</p>}
           </Panel>
         </div>
         <div className="grid content-start gap-5">

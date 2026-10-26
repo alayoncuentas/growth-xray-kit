@@ -1,7 +1,8 @@
 import "server-only";
 import { createHash } from "node:crypto";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { connection } from "next/server";
+import { DEFAULT_LANG, isLang, LANG_COOKIE, type Lang } from "@/lib/config";
 import { previewCompany, previewVariant, type PreviewVariant } from "@/lib/preview";
 import type { Company, OutsideView } from "@/lib/types";
 import { getAdmin } from "./auth";
@@ -10,6 +11,11 @@ import { db, must } from "./db";
 export interface Access {
   code: string;
   company: Company | null;
+  /**
+   * Idioma de las pantallas, correos e informe: el que eligió este navegador con el botón EN / ES (cookie);
+   * si no eligió, el de la sesión (último idioma en que respondió o que eligió); si no, el del código.
+   */
+  lang: Lang;
   /** Código de vista previa (solo con sesión de admin): nada se lee ni se escribe en la base. */
   preview?: PreviewVariant;
 }
@@ -57,9 +63,17 @@ async function recordFailure(ipHash: string): Promise<void> {
   ]);
 }
 
+/** Idioma elegido en este navegador con el botón EN / ES, si lo eligió. */
+export async function cookieLang(): Promise<Lang | null> {
+  const v = (await cookies()).get(LANG_COOKIE)?.value;
+  return isLang(v) ? v : null;
+}
+
 interface CodeRow {
   code: string;
   expires_at: string | null;
+  lang: string;
+  sessions: { phase: number; lang: string | null }[] | null;
   companies: { name: string; city: string | null; state: string | null; industry: string | null; outside_view: OutsideView | null } | null;
 }
 
@@ -85,15 +99,19 @@ export async function checkAccess(raw: string): Promise<AccessResult> {
   // Vista previa: solo existe para un admin con sesión. Para cualquier otro es un código inexistente
   // (sigue el camino normal: no está en access_codes y cuenta como intento fallido).
   const pv = wellFormed ? previewVariant(code) : null;
-  if (pv && (await getAdmin())) return { ok: true, access: { code, company: previewCompany(pv), preview: pv } };
+  if (pv && (await getAdmin())) {
+    const lang = (await cookieLang()) ?? DEFAULT_LANG;
+    return { ok: true, access: { code, company: previewCompany(pv, lang), preview: pv, lang } };
+  }
 
   // En paralelo para ahorrar un viaje a la base; si la IP está bloqueada, el resultado se descarta.
-  const [blocked, row] = await Promise.all([
+  const [blocked, chosen, row] = await Promise.all([
     isBlocked(key),
+    cookieLang(),
     wellFormed
       ? db()
           .from("access_codes")
-          .select("code, expires_at, companies(name, city, state, industry, outside_view)")
+          .select("code, expires_at, lang, sessions(phase, lang), companies(name, city, state, industry, outside_view)")
           .eq("code", code)
           .maybeSingle<CodeRow>()
           .then((r) => must(r, "access_codes"))
@@ -110,5 +128,7 @@ export async function checkAccess(raw: string): Promise<AccessResult> {
     await recordFailure(key);
     return { ok: false, reason: reason ?? "unknown" };
   }
-  return { ok: true, access: { code: row.code, company: row.companies ? toCompany(row.companies) : null } };
+  const sessionLang = row.sessions?.find((x) => x.phase === 1)?.lang;
+  const lang = chosen ?? (isLang(sessionLang) ? sessionLang : isLang(row.lang) ? row.lang : DEFAULT_LANG);
+  return { ok: true, access: { code: row.code, company: row.companies ? toCompany(row.companies) : null, lang } };
 }

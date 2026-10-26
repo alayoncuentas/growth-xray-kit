@@ -11,7 +11,17 @@ type Copy = Record<string, any>;
 
 const OUTSIDE = ["date", "text", "reply", "replyGap", "reviews", "lastReview"] as const;
 
-export function CompanyForm({ t, industries, expiryChoices }: { t: Copy; industries: { id: string; label: string }[]; expiryChoices: number[] }) {
+export function CompanyForm({
+  t,
+  industries,
+  expiryChoices,
+  langs,
+}: {
+  t: Copy;
+  industries: { id: string; label: string }[];
+  expiryChoices: number[];
+  langs: { id: string; label: string }[];
+}) {
   const [state, action, pending] = useActionState<CompanyFormState, FormData>(createCompanyAction, {});
   const e = state.errors ?? {};
   const v = state.values ?? {};
@@ -54,6 +64,18 @@ export function CompanyForm({ t, industries, expiryChoices }: { t: Copy; industr
             </option>
           ))}
         </select>
+      </Field>
+      <Field name="lang" label={t.lang}>
+        <select id="lang" name="lang" defaultValue={v.lang ?? "en"} aria-describedby="lang-note" className={inputClass}>
+          {langs.map((o) => (
+            <option key={o.id} value={o.id}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+        <p id="lang-note" className="text-[13px] text-muted">
+          {t.langNote}
+        </p>
       </Field>
       <div className="grid gap-4 min-[561px]:grid-cols-2">
         <Field name="website" label={t.website} error={e.website}>

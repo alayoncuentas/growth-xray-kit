@@ -2,7 +2,7 @@
 
 Diagnóstico interactivo de sistemas de adquisición de clientes para negocios de servicios en EE. UU.
 Este documento es la fuente de verdad para construir la versión de producción con Claude Code.
-La interfaz para el empresario va en **inglés**; este documento está en español.
+La interfaz para el empresario va en **inglés** y en **español** (botón EN / ES; ver "Idioma" en §5); el panel `/admin` va en inglés y este documento, en español.
 
 ---
 
@@ -135,8 +135,9 @@ Reglas de la fase 2:
 companies       id, name, city, state, industry, website, phone, google_place_id,
                 outside_view jsonb, created_at
 access_codes    code (PK), company_id, email, status (sent|opened|p1_done|p2_done|booked),
-                expires_at, created_at
-sessions        id, code, phase, started_at, completed_at, last_question_id, user_agent
+                expires_at, lang (en|es, default en), created_at
+sessions        id, code, phase, started_at, completed_at, last_question_id, user_agent,
+                lang (en|es|null: idioma en que respondió)
 answers         session_id, question_id, value jsonb, answered_at        (PK: session_id+question_id)
 scores          session_id, pillars jsonb, need, potential, readiness, archetype,
                 monthly_at_stake, flags text[], verdict, computed_at
@@ -160,6 +161,14 @@ Reglas de persistencia (fase 1):
 - **`/r/[code]`**: informe de solo lectura (mismo cuerpo que la pantalla de resultados, sin vista del equipo). Valida el código igual que `/x/[code]`; si la fase 1 no terminó, invita a retomar.
 - **Link con un código que no sirve** (`/x/…`, `/r/…`): pantalla clara según el motivo (`copy.codeError`): vencido ("This code has expired."), inexistente o mal formado, o demasiados intentos. Nunca una página de error técnica.
 - Sin `RESEND_API_KEY` en desarrollo, los correos se imprimen en el log del servidor; en producción es un error.
+- **Idioma** (en / es). Textos en `config/phase1.config.json` (inglés) y `config/phase1.config.es.json` (español, neutro latinoamericano, tuteo). Los dos tienen exactamente la misma estructura (ids, opciones, puntajes, valores, evidencia con fuente y url sin traducir); solo cambian los textos. Lo verifica `lib/config.test.ts`.
+  - `access_codes.lang`: lo elige el equipo al crear la empresa (por defecto `en`); un código nuevo para la misma empresa conserva el idioma. Es el idioma en que se abre el link.
+  - Botón **EN / ES** en el encabezado de todas las pantallas públicas (no en `/admin`). Guarda la elección en una cookie (`gxr-lang`) y, en un link con código, en `sessions.lang`.
+  - Idioma de una pantalla con código = cookie de este navegador si eligió, si no `sessions.lang`, si no `access_codes.lang`. Sin código (inicio, página no encontrada, código que no sirve): cookie, o inglés.
+  - Cada respuesta guarda en `sessions.lang` el idioma en que se respondió. Abrir el link no lo fija (puede abrirlo alguien del equipo).
+  - Correos: el del informe sale en `sessions.lang`; el de "Save and finish later", en el idioma de la pantalla. `email_sent` registra `payload.lang`. El informe `/r/[code]` sigue la misma regla que las pantallas.
+  - La vista externa (`companies.outside_view`) es texto libre: el equipo la escribe en el idioma del link.
+  - Panel: en inglés; muestra el idioma del link y el idioma en que respondió (lista, detalle y CSV). `/admin/preview` tiene un selector EN / ES para ver todo el mapa en los dos idiomas.
 - **Retomar**: la bienvenida lleva a la primera pregunta visible sin responder (no a la siguiente de `last_question_id`, porque el usuario pudo volver atrás); si no falta ninguna, a resultados. La calculadora cuenta como respondida cuando tiene fila guardada.
 
 ### Rutas

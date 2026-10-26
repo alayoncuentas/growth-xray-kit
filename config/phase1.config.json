@@ -505,7 +505,7 @@
           "process": "Good. Few businesses have this running.",
           "*": "Your customers probably aren't the problem. Most of them would leave a review if someone asked."
         },
-        "outsideLead": "Your latest Google review is {lastReview} old. For 3 in 4 people reading reviews, that's close to having none."
+        "outsideLead": "Your latest Google review is from {lastReview}. For 3 in 4 people reading reviews, that's close to having none."
       }
     },
     {
@@ -813,6 +813,13 @@
       "savedTo": "Your answers are saved to code {code}.",
       "p2Pending": "Phase 2 isn't open yet. Your Phase 1 answers are saved and will carry over."
     },
+    "lang": {
+      "label": "Language",
+      "names": {
+        "en": "English",
+        "es": "Español"
+      }
+    },
     "theme": {
       "system": "Auto",
       "light": "Light",
@@ -858,6 +865,7 @@
     "email": {
       "signoff": "Growth X-Ray",
       "footer": "You're getting this email because access code {code} was used on Growth X-Ray. If that wasn't you, you can ignore it.",
+      "forBusiness": " for {business}",
       "report": {
         "subject": "Your Growth X-Ray results",
         "greeting": "Thanks for finishing Phase 1{forBusiness}.",

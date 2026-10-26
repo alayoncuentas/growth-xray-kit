@@ -7,6 +7,7 @@ import { Container } from "@/components/ui/Container";
 import { LoadingCard } from "@/components/ui/Loading";
 import { checkAccess } from "@/lib/server/access";
 import { initialState } from "@/lib/server/diagnostic";
+import { LangProvider } from "@/lib/i18n";
 import { DiagnosticProvider } from "@/lib/store";
 
 export default function ResultsPage({ params, searchParams }: PageProps<"/x/[code]/results">) {
@@ -26,10 +27,12 @@ async function Results({ code: raw, sample, frame }: { code: string; sample: unk
   if (!r.ok) return <CodeError reason={r.reason} />;
   const { code, company } = r.access;
   return (
-    <DiagnosticProvider code={code} initial={await initialState(r.access, sample)}>
-      <BusinessMarker business={company?.business ?? null} />
-      <ResultsView code={code} company={company} />
-      <PreviewChrome access={r.access} frame={frame} />
-    </DiagnosticProvider>
+    <LangProvider lang={r.access.lang} code={code}>
+      <DiagnosticProvider code={code} initial={await initialState(r.access, sample)}>
+        <BusinessMarker business={company?.business ?? null} />
+        <ResultsView code={code} company={company} />
+        <PreviewChrome access={r.access} frame={frame} />
+      </DiagnosticProvider>
+    </LangProvider>
   );
 }

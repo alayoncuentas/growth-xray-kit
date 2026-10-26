@@ -1,5 +1,6 @@
 import "server-only";
 import { generateCode, type CodeStatus, type CompanyInput } from "@/lib/admin";
+import { isLang, type Lang } from "@/lib/config";
 import type { OutsideView } from "@/lib/types";
 import { requireAdmin } from "./auth";
 import { db, must } from "./db";
@@ -35,27 +36,45 @@ export interface LeadRow {
   status: CodeStatus;
   email: string | null;
   expires_at: string | null;
+  /** Idioma del link (lo elige el equipo). */
+  lang: Lang;
   /** Vencido al momento de leer. */
   expired: boolean;
   created_at: string;
   company: CompanyRow | null;
-  phase1: { started_at: string; completed_at: string | null; last_question_id: string | null; scores: ScoreRow | null } | null;
+  phase1: {
+    started_at: string;
+    completed_at: string | null;
+    last_question_id: string | null;
+    /** Idioma en que respondió (o que eligió con el botón EN / ES); null si todavía no. */
+    lang: Lang | null;
+    scores: ScoreRow | null;
+  } | null;
 }
 
 // PostgREST devuelve objeto o lista según cómo infiera la relación; se normaliza a uno.
 const one = <T,>(v: T | T[] | null | undefined): T | null => (Array.isArray(v) ? (v[0] ?? null) : (v ?? null));
 
 const LEAD_SELECT =
-  "code, status, email, expires_at, created_at, companies(*), sessions(id, phase, started_at, completed_at, last_question_id, scores(need, potential, readiness, archetype, monthly_at_stake, flags, verdict))";
+  "code, status, email, expires_at, lang, created_at, companies(*), sessions(id, phase, started_at, completed_at, last_question_id, lang, scores(need, potential, readiness, archetype, monthly_at_stake, flags, verdict))";
 
 interface RawLead {
   code: string;
   status: CodeStatus;
   email: string | null;
   expires_at: string | null;
+  lang: string;
   created_at: string;
   companies: CompanyRow | CompanyRow[] | null;
-  sessions: { id: string; phase: number; started_at: string; completed_at: string | null; last_question_id: string | null; scores: ScoreRow | ScoreRow[] | null }[];
+  sessions: {
+    id: string;
+    phase: number;
+    started_at: string;
+    completed_at: string | null;
+    last_question_id: string | null;
+    lang: string | null;
+    scores: ScoreRow | ScoreRow[] | null;
+  }[];
 }
 
 function toLead(r: RawLead): LeadRow {
@@ -65,10 +84,19 @@ function toLead(r: RawLead): LeadRow {
     status: r.status,
     email: r.email,
     expires_at: r.expires_at,
+    lang: isLang(r.lang) ? r.lang : "en",
     expired: !!r.expires_at && new Date(r.expires_at).getTime() < Date.now(),
     created_at: r.created_at,
     company: one(r.companies),
-    phase1: s ? { started_at: s.started_at, completed_at: s.completed_at, last_question_id: s.last_question_id, scores: one(s.scores) } : null,
+    phase1: s
+      ? {
+          started_at: s.started_at,
+          completed_at: s.completed_at,
+          last_question_id: s.last_question_id,
+          lang: isLang(s.lang) ? s.lang : null,
+          scores: one(s.scores),
+        }
+      : null,
   };
 }
 
@@ -110,10 +138,10 @@ function expiry(days: number | null): string | null {
 }
 
 /** Inserta un código nuevo; si choca con uno existente (improbable con 50 bits), prueba otro. */
-async function insertCode(companyId: string, email: string | null, expiresDays: number | null): Promise<string> {
+async function insertCode(companyId: string, email: string | null, expiresDays: number | null, lang: Lang): Promise<string> {
   for (let i = 0; i < 5; i++) {
     const code = generateCode();
-    const res = await db().from("access_codes").insert({ code, company_id: companyId, email, expires_at: expiry(expiresDays) });
+    const res = await db().from("access_codes").insert({ code, company_id: companyId, email, expires_at: expiry(expiresDays), lang });
     if (!res.error) return code;
     if (res.error.code !== "23505") throw new Error(`Supabase (access_codes insert): ${res.error.message}`);
   }
@@ -122,17 +150,18 @@ async function insertCode(companyId: string, email: string | null, expiresDays: 
 
 export async function createCompany(input: CompanyInput): Promise<string> {
   await requireAdmin();
-  const { email, expiresDays, ...company } = input;
+  const { email, expiresDays, lang, ...company } = input;
   const row = must(await db().from("companies").insert(company).select("id").single(), "companies insert") as { id: string };
-  return insertCode(row.id, email, expiresDays);
+  return insertCode(row.id, email, expiresDays, lang);
 }
 
-/** Otro código para una empresa existente (p. ej. otro contacto, o el anterior venció). */
+/** Otro código para una empresa existente (p. ej. otro contacto, o el anterior venció). Conserva el idioma del link. */
 export async function addCode(fromCode: string, email: string | null, expiresDays: number | null): Promise<string | null> {
   await requireAdmin();
-  const src = must(await db().from("access_codes").select("company_id").eq("code", fromCode).maybeSingle(), "access_codes") as {
+  const src = must(await db().from("access_codes").select("company_id, lang").eq("code", fromCode).maybeSingle(), "access_codes") as {
     company_id: string | null;
+    lang: string;
   } | null;
   if (!src?.company_id) return null;
-  return insertCode(src.company_id, email, expiresDays);
+  return insertCode(src.company_id, email, expiresDays, isLang(src.lang) ? src.lang : "en");
 }

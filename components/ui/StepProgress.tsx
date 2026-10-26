@@ -1,8 +1,12 @@
-import { copy, fill } from "@/lib/config";
+"use client";
+
+import { fill } from "@/lib/config";
+import { useConfig } from "@/lib/i18n";
 import type { Progress } from "@/lib/flow";
 
 /** Barra de 4 partes + "Part n of 4 · …  About n min left". */
 export function StepProgress({ p }: { p: Progress }) {
+  const { copy } = useConfig();
   return (
     <>
       <div className="mt-1 mb-1.5 grid gap-1.5" style={{ gridTemplateColumns: `repeat(${p.perSection.length}, 1fr)` }}>

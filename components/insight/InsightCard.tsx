@@ -1,4 +1,6 @@
-import { copy, phase1 } from "@/lib/config";
+"use client";
+
+import { useConfig } from "@/lib/i18n";
 import type { InsightView } from "@/lib/insights";
 
 /** Texto con **negritas** simples, como los espejos del config. */
@@ -16,7 +18,8 @@ function Shell({ tag, myth = false, children }: { tag: string; myth?: boolean; c
 }
 
 function Source({ id, link = true }: { id: string; link?: boolean }) {
-  const e = phase1.evidence[id];
+  const { evidence, copy } = useConfig();
+  const e = evidence[id];
   return (
     <p className="border-t border-dashed border-line pt-2 font-mono text-xs break-words text-muted">
       {copy.insight.source} {e.source}
@@ -33,10 +36,11 @@ function Source({ id, link = true }: { id: string; link?: boolean }) {
 }
 
 export function EvidenceCard({ id, lead, extraLead }: { id: string; lead?: string; extraLead?: string }) {
+  const { evidence, copy } = useConfig();
   return (
     <Shell tag={copy.insight.evidenceTag}>
       {lead && <p className="font-semibold">{lead}</p>}
-      <p>{phase1.evidence[id].text}</p>
+      <p>{evidence[id].text}</p>
       {extraLead && <p className="font-semibold">{extraLead}</p>}
       <Source id={id} />
     </Shell>
@@ -44,6 +48,7 @@ export function EvidenceCard({ id, lead, extraLead }: { id: string; lead?: strin
 }
 
 export function MirrorCard({ text }: { text: string }) {
+  const { copy } = useConfig();
   return (
     <Shell tag={copy.insight.mirrorTag}>
       <p>
@@ -54,13 +59,14 @@ export function MirrorCard({ text }: { text: string }) {
 }
 
 export function MythCard({ id }: { id: string }) {
-  const m = phase1.myths[id];
+  const { myths, evidence, copy } = useConfig();
+  const m = myths[id];
   const ev = m.evidence?.[0];
   return (
     <Shell tag={copy.insight.mythTag} myth>
       <p className="font-display text-xl line-through decoration-leak decoration-2 opacity-85">“{m.myth}”</p>
       <p>{m.reality}</p>
-      {ev && <p>{phase1.evidence[ev].text}</p>}
+      {ev && <p>{evidence[ev].text}</p>}
       {m.note && <p className="text-[13px] text-muted">{m.note}</p>}
       {ev && <Source id={ev} link={false} />}
     </Shell>

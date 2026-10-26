@@ -3,12 +3,15 @@
 import { useState } from "react";
 import { buttonClass } from "@/components/ui/Button";
 import { SaveForLater } from "@/components/question/SaveForLater";
-import { copy, fill } from "@/lib/config";
+import { fill } from "@/lib/config";
+import { useConfig } from "@/lib/i18n";
 
 /** Bloque oscuro de invitación a la fase 2 (invierte paper/ink). */
 export function UnlockPanel({ code }: { code: string }) {
-  const u = copy.unlock;
-  const [msg, setMsg] = useState<string>(fill(u.savedTo, { code }));
+  const u = useConfig().copy.unlock;
+  // Mensaje de la fase 2 después del clic; antes, a qué código quedaron guardadas las respuestas.
+  const [pending, setPending] = useState(false);
+  const msg = pending ? u.p2Pending : fill(u.savedTo, { code });
   return (
     <section className="mt-5 grid gap-3.5 rounded-panel bg-ink p-[clamp(20px,4vw,32px)] text-paper">
       <div className="label-mono text-xs opacity-70">{u.eyebrow}</div>
@@ -20,7 +23,7 @@ export function UnlockPanel({ code }: { code: string }) {
       </ul>
       <div className="flex flex-wrap items-center gap-2.5">
         {/* TODO(fase 2): abrir el primer bloque. */}
-        <button type="button" onClick={() => setMsg(u.p2Pending)} className={buttonClass("primary", "bg-paper! text-ink!")}>
+        <button type="button" onClick={() => setPending(true)} className={buttonClass("primary", "bg-paper! text-ink!")}>
           {u.cta}
         </button>
         <SaveForLater code={code} tone="inverse" />

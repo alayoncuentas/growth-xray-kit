@@ -1,6 +1,7 @@
 // Funciones puras del panel interno: códigos de acceso, embudo, CSV y validación del formulario de empresas.
 // Sin dependencias del servidor para poder testearlas; los datos los trae lib/server/admin-data.ts.
 
+import type { Lang } from "./config";
 import type { OutsideView } from "./types";
 
 // ---------- códigos de acceso ----------
@@ -71,6 +72,8 @@ export interface CompanyInput {
   email: string | null;
   expiresDays: number | null;
   outside_view: OutsideView | null;
+  /** Idioma del link (access_codes.lang). */
+  lang: Lang;
 }
 
 export type CompanyErrors = Partial<Record<"name" | "state" | "industry" | "website" | "email" | "expiresDays" | "outside", string>>;
@@ -116,6 +119,9 @@ export function parseCompanyForm(
   const email = t("email")?.toLowerCase() ?? null;
   if (email && !EMAIL_RE.test(email)) errors.email = "That doesn't look like an email address.";
 
+  // Idioma del link: inglés salvo que se elija español (un valor desconocido también queda en inglés).
+  const lang: Lang = t("lang") === "es" ? "es" : "en";
+
   const exp = t("expiresDays");
   let expiresDays: number | null = null;
   if (exp && exp !== "never") {
@@ -147,6 +153,7 @@ export function parseCompanyForm(
       email,
       expiresDays,
       outside_view,
+      lang,
     },
   };
 }

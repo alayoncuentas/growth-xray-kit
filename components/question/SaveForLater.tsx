@@ -3,7 +3,8 @@
 import { useActionState } from "react";
 import { saveForLater, type SaveLaterState } from "@/app/actions";
 import { buttonClass } from "@/components/ui/Button";
-import { copy, fill } from "@/lib/config";
+import { fill } from "@/lib/config";
+import { useConfig } from "@/lib/i18n";
 import { flushSaves } from "@/lib/sync";
 
 /**
@@ -11,7 +12,7 @@ import { flushSaves } from "@/lib/sync";
  * Si el código no tiene correo, lo pide. `tone="inverse"` es para el panel oscuro de la fase 2.
  */
 export function SaveForLater({ code, tone = "default" }: { code: string; tone?: "default" | "inverse" }) {
-  const t = copy.later;
+  const t = useConfig().copy.later;
   const [state, action, pending] = useActionState<SaveLaterState, FormData>(async (prev, fd) => {
     await flushSaves(); // que el link lleve a la respuesta más reciente
     return saveForLater(code, prev, fd);

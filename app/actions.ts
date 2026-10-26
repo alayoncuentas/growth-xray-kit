@@ -1,9 +1,10 @@
 "use server";
 
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { isLang, LANG_COOKIE } from "@/lib/config";
 import { checkAccess, type AccessError } from "@/lib/server/access";
-import { openLink } from "@/lib/server/diagnostic";
+import { openLink, setSessionLang } from "@/lib/server/diagnostic";
 import { sendResumeEmail } from "@/lib/server/email";
 import { appOrigin } from "@/lib/server/origin";
 
@@ -40,9 +41,27 @@ export async function saveForLater(code: string, _prev: SaveLaterState, formData
   const typed = String(formData.get("email") ?? "").trim().toLowerCase() || null;
   if (typed && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(typed)) return { status: "needEmail", error: "email" };
   try {
-    return await sendResumeEmail(r.access.code, await appOrigin(), typed);
+    return await sendResumeEmail(r.access.code, await appOrigin(), typed, r.access.lang);
   } catch (e) {
     console.error("[email resume]", r.access.code, e);
     return { status: "error" };
   }
+}
+
+/**
+ * Botón EN / ES: guarda la elección en este navegador (cookie) y, en un link con código, en la sesión,
+ * para que los correos y el informe salgan en ese idioma. En la vista previa solo cambia la cookie.
+ */
+export async function setLang(lang: string, code: string | null): Promise<void> {
+  if (!isLang(lang)) return;
+  (await cookies()).set(LANG_COOKIE, lang, {
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+    sameSite: "lax",
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+  });
+  if (!code) return;
+  const r = await checkAccess(code);
+  if (r.ok && !r.access.preview) await setSessionLang(r.access.code, lang);
 }

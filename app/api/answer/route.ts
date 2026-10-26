@@ -38,6 +38,7 @@ export async function POST(request: Request) {
       value: clean,
       complete: complete === true,
       userAgent: request.headers.get("user-agent"),
+      lang: access.access.lang,
     });
     return Response.json({ ok: true, completed });
   } catch (e) {

@@ -3,7 +3,7 @@
 
 import raw from "@/config/preview.json";
 import { insightFor, type InsightView } from "./insights";
-import { isChoice } from "./config";
+import { isChoice, type Lang } from "./config";
 import type { Answers, ArchetypeId, CalcOverrides, Company, Phase1Config, Question } from "./types";
 
 export type PreviewVariant = "outside" | "plain";
@@ -12,6 +12,8 @@ interface PreviewConfig {
   code: string;
   plainCode: string;
   company: Company;
+  /** Vista externa de ejemplo en español. */
+  outsideEs: NonNullable<Company["outside"]>;
   plainCompany: Company;
   samples: Record<ArchetypeId, { answers: Answers; calc: CalcOverrides }>;
 }
@@ -28,8 +30,10 @@ export function previewVariant(code: string): PreviewVariant | null {
   return null;
 }
 
-export function previewCompany(v: PreviewVariant): Company {
-  return v === "outside" ? preview.company : preview.plainCompany;
+/** Empresa de ejemplo de la vista previa; en español, con la vista externa de ejemplo en español. */
+export function previewCompany(v: PreviewVariant, lang: Lang = "en"): Company {
+  if (v !== "outside") return preview.plainCompany;
+  return lang === "es" ? { ...preview.company, outside: preview.outsideEs } : preview.company;
 }
 
 export function isSampleId(s: unknown): s is ArchetypeId {

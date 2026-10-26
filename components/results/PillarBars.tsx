@@ -1,13 +1,16 @@
+"use client";
+
 import { Bar } from "@/components/ui/Bar";
-import { copy, phase1 } from "@/lib/config";
+import { useConfig } from "@/lib/i18n";
 import { scoreTone } from "@/lib/scoring";
 import type { PillarScores } from "@/lib/types";
 
 /** Pilares de la fase 1 con su barra; los de la fase 2 en gris rayado con "PH. 2". */
 export function PillarBars({ scores }: { scores: PillarScores }) {
+  const cfg = useConfig();
   return (
     <div>
-      {phase1.pillars.map((p) => {
+      {cfg.pillars.map((p) => {
         const s = p.phase === 1 ? scores[p.id] : undefined;
         const locked = s == null;
         return (
@@ -22,7 +25,7 @@ export function PillarBars({ scores }: { scores: PillarScores }) {
               <Bar value={s} tone={scoreTone(s)} />
             )}
             <span className={`text-right font-mono font-medium tabular-nums ${locked ? "text-[11px] tracking-[0.05em] whitespace-nowrap" : ""}`}>
-              {locked ? copy.results.lockedPillar : s}
+              {locked ? cfg.copy.results.lockedPillar : s}
             </span>
           </div>
         );

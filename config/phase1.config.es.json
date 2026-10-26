@@ -1,0 +1,885 @@
+{
+  "version": "0.1.0",
+  "phase": 1,
+  "title": "Growth X-Ray",
+  "estimatedMinutes": 10,
+  "pillars": [
+    {
+      "id": "access",
+      "label": "Primera respuesta",
+      "phase": 1
+    },
+    {
+      "id": "pipeline",
+      "label": "Registro de consultas",
+      "phase": 1
+    },
+    {
+      "id": "followup",
+      "label": "Seguimiento",
+      "phase": 1
+    },
+    {
+      "id": "reputation",
+      "label": "Reseñas y prueba social",
+      "phase": 1
+    },
+    {
+      "id": "owner",
+      "label": "Independencia del dueño",
+      "phase": 1
+    },
+    {
+      "id": "retention",
+      "label": "Retención y valor del cliente",
+      "phase": 2
+    },
+    {
+      "id": "visibility",
+      "label": "Visibilidad del negocio",
+      "phase": 2
+    },
+    {
+      "id": "readiness",
+      "label": "Preparación",
+      "phase": 2
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "label": "Tu negocio"
+    },
+    {
+      "id": "s2",
+      "label": "Cuando alguien te contacta"
+    },
+    {
+      "id": "s3",
+      "label": "Después del primer contacto"
+    },
+    {
+      "id": "s4",
+      "label": "Tus números"
+    }
+  ],
+  "evidence": {
+    "hbr2011": {
+      "text": "En una auditoría de 2,241 empresas de EE. UU., solo el 37% respondió en menos de una hora a una consulta nueva recibida por la web, y el 23% nunca respondió. Las empresas que respondieron en la primera hora tuvieron casi 7 veces más probabilidades de hablar con quien toma la decisión que las que tardaron más.",
+      "source": "Harvard Business Review, \"The Short Life of Online Sales Leads\", 2011",
+      "kind": "academic",
+      "url": "https://hbr.org/2011/03/the-short-life-of-online-sales-leads"
+    },
+    "insidesales2013": {
+      "text": "Cuando InsideSales auditó los tiempos reales de respuesta, casi 1 de cada 4 empresas creía que llamaba a las consultas nuevas en menos de cinco minutos. Solo el 5% lo hacía de verdad. El número real de intentos de seguimiento más común fue cero.",
+      "source": "InsideSales ResponseAudit, 2013",
+      "kind": "industry",
+      "url": "https://www.marketingprofs.com/charts/2013/10870/companies-unaware-of-slow-sales-response-times"
+    },
+    "drift2017": {
+      "text": "Una prueba con 433 empresas encontró que solo el 7% respondió en menos de cinco minutos, y que el 55% no había respondido después de cinco días hábiles.",
+      "source": "Drift lead response study, 2017 (433 companies)",
+      "kind": "vendor",
+      "url": "https://ainora.lt/blog/lead-response-time-statistics-every-study-2026"
+    },
+    "locals2024": {
+      "text": "En una prueba de llamadas a negocios locales, solo el 37.8% fue atendido por una persona. En el 24.3% no contestó nadie ni había buzón de voz.",
+      "source": "411 Locals, 2024 (85 businesses, small sample)",
+      "kind": "industry",
+      "url": "https://getaira.io/blog/missed-business-calls-statistics"
+    },
+    "brightlocal2026a": {
+      "text": "El 94% de los consumidores está dispuesto a dejar una reseña cuando el negocio se lo pide. El 74% solo toma en cuenta las reseñas de los últimos tres meses.",
+      "source": "BrightLocal Local Consumer Review Survey, 2026 (1,002 U.S. adults)",
+      "kind": "industry",
+      "url": "https://www.brightlocal.com/research/local-consumer-review-survey/"
+    },
+    "brightlocal2026b": {
+      "text": "El 47% de los consumidores no contrataría a un negocio con menos de 20 reseñas, y el 89% espera que el dueño responda las reseñas.",
+      "source": "BrightLocal Local Consumer Review Survey, 2026 (1,002 U.S. adults)",
+      "kind": "industry",
+      "url": "https://www.brightlocal.com/research/local-consumer-review-survey/"
+    },
+    "reichheld": {
+      "text": "La investigación de Bain & Company sobre lealtad encontró que aumentar la retención de clientes en un 5% puede aumentar las ganancias entre un 25% y un 95%.",
+      "source": "Fred Reichheld, Bain & Company (via HBR, 2014)",
+      "kind": "consulting",
+      "url": "https://hbr.org/2014/10/the-value-of-keeping-the-right-customers"
+    }
+  },
+  "myths": {
+    "callback": {
+      "myth": "Si de verdad les interesa, van a volver a llamar.",
+      "reality": "El interés se enfría en horas, no en días. Los negocios que ganan suelen ser los que responden primero y hacen seguimiento de forma deliberada.",
+      "evidence": [
+        "drift2017"
+      ],
+      "note": "Quizás hayas visto que \"el 80% de las ventas se cierra después del quinto seguimiento\". Esa cifra se atribuye a una asociación que nadie ha podido encontrar. No la usamos."
+    },
+    "marketing": {
+      "myth": "El marketing no funciona en mi rubro.",
+      "reality": "Cuando la publicidad \"no funciona\", la causa suele estar en lo que pasa después del clic: respuestas lentas, cero seguimiento, nada de registro. Se culpa a los anuncios de un problema del sistema."
+    }
+  },
+  "questions": [
+    {
+      "id": "industry",
+      "section": "s1",
+      "type": "single",
+      "prompt": "¿Qué tipo de negocio tienes?",
+      "options": [
+        {
+          "id": "home",
+          "label": "Servicios para el hogar",
+          "hint": "climatización (HVAC), plomería, techos, remodelación"
+        },
+        {
+          "id": "dental",
+          "label": "Consultorio dental o médico"
+        },
+        {
+          "id": "medspa",
+          "label": "Med spa o bienestar"
+        },
+        {
+          "id": "legal",
+          "label": "Servicios legales"
+        },
+        {
+          "id": "realty",
+          "label": "Bienes raíces o hipotecas"
+        },
+        {
+          "id": "prof",
+          "label": "Servicios profesionales",
+          "hint": "contabilidad, consultoría, agencia"
+        },
+        {
+          "id": "other",
+          "label": "Otro servicio local"
+        }
+      ]
+    },
+    {
+      "id": "team",
+      "section": "s1",
+      "type": "single",
+      "prompt": "¿Cuántas personas trabajan en el negocio, contándote a ti?",
+      "options": [
+        {
+          "id": "1",
+          "label": "Solo yo",
+          "value": 1
+        },
+        {
+          "id": "2_5",
+          "label": "De 2 a 5",
+          "value": 4
+        },
+        {
+          "id": "6_15",
+          "label": "De 6 a 15",
+          "value": 10
+        },
+        {
+          "id": "16_50",
+          "label": "De 16 a 50",
+          "value": 30
+        },
+        {
+          "id": "50p",
+          "label": "Más de 50",
+          "value": 60
+        }
+      ]
+    },
+    {
+      "id": "channels",
+      "section": "s1",
+      "type": "multi",
+      "prompt": "¿Cómo te contactan los clientes nuevos?",
+      "sub": "Elige todas las que correspondan.",
+      "options": [
+        {
+          "id": "phone",
+          "label": "Llamadas"
+        },
+        {
+          "id": "text",
+          "label": "Mensajes de texto"
+        },
+        {
+          "id": "form",
+          "label": "Formulario del sitio web"
+        },
+        {
+          "id": "google",
+          "label": "Perfil de Empresa en Google"
+        },
+        {
+          "id": "social",
+          "label": "Mensajes de Facebook o Instagram"
+        },
+        {
+          "id": "email",
+          "label": "Correo electrónico"
+        },
+        {
+          "id": "ref",
+          "label": "Recomendaciones y boca a boca"
+        },
+        {
+          "id": "walk",
+          "label": "Visitas sin cita"
+        }
+      ]
+    },
+    {
+      "id": "busy",
+      "section": "s2",
+      "type": "single",
+      "prompt": "Es martes, 10:40 a. m. Estás con un cliente y llama un posible cliente nuevo. ¿Qué suele pasar?",
+      "options": [
+        {
+          "id": "a",
+          "label": "Alguien del equipo contesta y agenda el siguiente paso",
+          "scores": {
+            "access": 90
+          }
+        },
+        {
+          "id": "b",
+          "label": "Se va al buzón de voz y devuelvo la llamada cuando me desocupo",
+          "scores": {
+            "access": 45
+          }
+        },
+        {
+          "id": "c",
+          "label": "Depende de quién esté ese día",
+          "scores": {
+            "access": 35
+          }
+        },
+        {
+          "id": "d",
+          "label": "Siendo honesto, algunas de esas llamadas nunca se devuelven",
+          "scores": {
+            "access": 10
+          }
+        }
+      ],
+      "insight": {
+        "kind": "evidence",
+        "evidence": "hbr2011",
+        "leads": {
+          "a": "En esto vas por delante de la mayoría de los negocios.",
+          "*": "Hoy, la rapidez de respuesta depende de quién esté libre en ese momento. Es normal en un negocio que gira en torno al dueño, y es lo primero que corrige un sistema."
+        }
+      }
+    },
+    {
+      "id": "speed",
+      "section": "s2",
+      "type": "single",
+      "prompt": "En un día normal entre semana, ¿cuánto espera una consulta nueva hasta recibir la primera respuesta?",
+      "options": [
+        {
+          "id": "5m",
+          "label": "Menos de 5 minutos",
+          "scores": {
+            "access": 100
+          }
+        },
+        {
+          "id": "1h",
+          "label": "Menos de una hora",
+          "scores": {
+            "access": 75
+          }
+        },
+        {
+          "id": "day",
+          "label": "El mismo día",
+          "scores": {
+            "access": 45
+          }
+        },
+        {
+          "id": "next",
+          "label": "Al día siguiente o más tarde",
+          "scores": {
+            "access": 15
+          }
+        },
+        {
+          "id": "dk",
+          "label": "La verdad, no lo sé",
+          "scores": {
+            "access": 25
+          },
+          "flag": "unmeasured"
+        }
+      ],
+      "insight": {
+        "kind": "evidence",
+        "evidence": "insidesales2013",
+        "leads": {
+          "dk": "No saberlo ya es un hallazgo. No puedes corregir una demora que no ves.",
+          "5m": "Excelente, si se confirma al medirlo. La mayoría de los negocios lo sobreestima."
+        }
+      }
+    },
+    {
+      "id": "afterhours",
+      "section": "s2",
+      "type": "single",
+      "prompt": "Un posible cliente llena tu formulario un sábado a las 8:15 p. m. ¿Qué pasa antes del lunes por la mañana?",
+      "options": [
+        {
+          "id": "book",
+          "label": "Recibe respuesta de inmediato y puede agendar",
+          "scores": {
+            "access": 100
+          }
+        },
+        {
+          "id": "auto",
+          "label": "Recibe una respuesta automática, pero no puede agendar",
+          "scores": {
+            "access": 60
+          }
+        },
+        {
+          "id": "none",
+          "label": "Nada hasta el lunes",
+          "scores": {
+            "access": 20
+          }
+        },
+        {
+          "id": "dk",
+          "label": "No estoy seguro de que alguien lo vea",
+          "scores": {
+            "access": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "tracking",
+      "section": "s3",
+      "type": "single",
+      "prompt": "¿Dónde queda registrada una consulta nueva?",
+      "options": [
+        {
+          "id": "crm",
+          "label": "En un CRM o sistema de citas",
+          "scores": {
+            "pipeline": 95
+          }
+        },
+        {
+          "id": "sheet",
+          "label": "En una hoja de cálculo",
+          "scores": {
+            "pipeline": 60
+          }
+        },
+        {
+          "id": "paper",
+          "label": "En papel o en una pizarra",
+          "scores": {
+            "pipeline": 35
+          }
+        },
+        {
+          "id": "inbox",
+          "label": "Se queda en mi teléfono, mi correo o mis mensajes directos",
+          "scores": {
+            "pipeline": 15
+          }
+        },
+        {
+          "id": "none",
+          "label": "En realidad, en ninguna parte",
+          "scores": {
+            "pipeline": 5
+          }
+        }
+      ],
+      "insight": {
+        "kind": "mirror",
+        "id": "channels",
+        "when": {
+          "minChannels": 3,
+          "options": [
+            "paper",
+            "inbox",
+            "none"
+          ]
+        },
+        "text": "Las consultas te llegan por **{n} canales distintos**, y no hay un solo lugar que las reúna todas. Así que la foto real de tus oportunidades abiertas está repartida en varias apps y, en parte, en tu memoria."
+      }
+    },
+    {
+      "id": "followup",
+      "section": "s3",
+      "type": "single",
+      "prompt": "Alguien recibe una cotización y después deja de responder. ¿Qué pasa luego?",
+      "options": [
+        {
+          "id": "auto",
+          "label": "Se activa una secuencia automática de seguimiento",
+          "scores": {
+            "followup": 100,
+            "pipeline": 85
+          }
+        },
+        {
+          "id": "set",
+          "label": "Hacemos seguimiento un número fijo de veces",
+          "scores": {
+            "followup": 75
+          }
+        },
+        {
+          "id": "once",
+          "label": "Hacemos un solo seguimiento, si alguien se acuerda",
+          "scores": {
+            "followup": 35
+          }
+        },
+        {
+          "id": "wait",
+          "label": "Esperamos a que vuelva por su cuenta",
+          "scores": {
+            "followup": 10
+          }
+        }
+      ],
+      "insight": {
+        "kind": "myth",
+        "myth": "callback"
+      }
+    },
+    {
+      "id": "reviews",
+      "section": "s3",
+      "type": "single",
+      "prompt": "Un cliente termina contento con tu trabajo. ¿Qué pasa después?",
+      "options": [
+        {
+          "id": "process",
+          "label": "Siempre pedimos una reseña, con un proceso definido",
+          "scores": {
+            "reputation": 95
+          }
+        },
+        {
+          "id": "some",
+          "label": "A veces la pedimos",
+          "scores": {
+            "reputation": 50
+          }
+        },
+        {
+          "id": "hope",
+          "label": "Esperamos que deje una",
+          "scores": {
+            "reputation": 20
+          }
+        },
+        {
+          "id": "nothing",
+          "label": "Nada en particular",
+          "scores": {
+            "reputation": 10
+          }
+        }
+      ],
+      "insight": {
+        "kind": "evidence",
+        "evidence": "brightlocal2026a",
+        "leads": {
+          "process": "Bien. Pocos negocios tienen esto funcionando.",
+          "*": "Lo más probable es que tus clientes no sean el problema. La mayoría dejaría una reseña si alguien se la pidiera."
+        },
+        "outsideLead": "Tu reseña más reciente en Google es de {lastReview}. Para 3 de cada 4 personas que leen reseñas, eso es casi como no tener ninguna."
+      }
+    },
+    {
+      "id": "away",
+      "section": "s3",
+      "type": "single",
+      "prompt": "Si te tomaras dos semanas completas libres, sin teléfono ni correo, ¿qué pasaría con las ventas nuevas?",
+      "options": [
+        {
+          "id": "flow",
+          "label": "Seguirían entrando; el equipo se encarga",
+          "scores": {
+            "owner": 95
+          }
+        },
+        {
+          "id": "slow",
+          "label": "Bajarían",
+          "scores": {
+            "owner": 60
+          }
+        },
+        {
+          "id": "stop",
+          "label": "Casi se detendrían",
+          "scores": {
+            "owner": 25
+          }
+        },
+        {
+          "id": "cant",
+          "label": "No puedo tomarme dos semanas libres",
+          "scores": {
+            "owner": 10
+          }
+        }
+      ],
+      "insight": {
+        "kind": "mirror",
+        "id": "owner",
+        "texts": {
+          "flow": "Eso es poco común y muy valioso. Tu negocio ya funciona sin que tengas que estar en el centro de cada venta.",
+          "*": "No es un problema de disciplina. El negocio se construyó alrededor de ti, así que te espera. Lo que te devuelve ese tiempo es un proceso claro, un sistema que se encargue de los primeros pasos repetitivos y un equipo que lo haga funcionar."
+        }
+      }
+    },
+    {
+      "id": "ads",
+      "section": "s3",
+      "type": "single",
+      "prompt": "¿Pagas hoy por publicidad o por servicios que te consiguen clientes potenciales?",
+      "sub": "Google, Meta, Yelp, Angi, Thumbtack y similares.",
+      "options": [
+        {
+          "id": "0",
+          "label": "Por ahora no",
+          "value": 0
+        },
+        {
+          "id": "lt1",
+          "label": "Menos de $1,000 al mes",
+          "value": 500
+        },
+        {
+          "id": "1_3",
+          "label": "De $1,000 a $3,000",
+          "value": 2000
+        },
+        {
+          "id": "3_10",
+          "label": "De $3,000 a $10,000",
+          "value": 6000
+        },
+        {
+          "id": "10p",
+          "label": "Más de $10,000",
+          "value": 12000
+        }
+      ],
+      "insight": {
+        "kind": "mirror",
+        "id": "ads",
+        "variants": {
+          "leaky": {
+            "tag": "La cubeta con fugas",
+            "lead": "Estás pagando por llenar una cubeta que tiene agujeros.",
+            "text": "Según tus respuestas anteriores, algunas de las consultas que traen esos anuncios esperan demasiado o nunca reciben seguimiento. Cuando eso pasa, la culpa suele caer en los anuncios, aunque la falla está en lo que pasa después del clic.",
+            "myth": "marketing"
+          },
+          "fixFirst": {
+            "text": "Buen momento. Si arreglas el sistema antes de comprar tráfico, cada dólar que inviertas en anuncios llegará a un lugar preparado para aprovecharlo."
+          },
+          "solid": {
+            "text": "Tu respuesta y tu seguimiento se ven sólidos, así que tu inversión en anuncios tiene posibilidades reales de rendir. La fase 2 revisa si puedes medir qué anuncios te traen clientes, no solo clics."
+          }
+        }
+      }
+    },
+    {
+      "id": "numbers",
+      "section": "s4",
+      "type": "calculator",
+      "prompt": "Pongámosle una cifra.",
+      "sub": "Con estimaciones aproximadas basta. Puedes ajustar cada valor.",
+      "fields": [
+        {
+          "id": "inquiries",
+          "label": "Consultas nuevas al mes",
+          "min": 5,
+          "max": 500,
+          "step": 5,
+          "default": 60
+        },
+        {
+          "id": "value",
+          "label": "Valor promedio de un cliente nuevo",
+          "unit": "USD",
+          "min": 100,
+          "max": 25000,
+          "step": 50,
+          "default": 1500
+        },
+        {
+          "id": "leak",
+          "label": "Consultas que no reciben respuesta ni seguimiento a tiempo",
+          "unit": "%",
+          "min": 0,
+          "max": 70,
+          "step": 1,
+          "default": "fromAnswers",
+          "note": "Estimado a partir de tus respuestas sobre rapidez de respuesta, fuera de horario y seguimiento."
+        },
+        {
+          "id": "close",
+          "label": "Porcentaje de consultas con seguimiento que se convierten en clientes",
+          "unit": "%",
+          "min": 5,
+          "max": 60,
+          "step": 1,
+          "default": 20,
+          "note": "Si no lo sabes, 20% es un punto de partida prudente para muchos servicios locales."
+        }
+      ],
+      "prefillNote": "Completamos el porcentaje sin seguimiento a partir de tus respuestas.",
+      "disclaimer": "Esto es una estimación, no una promesa. Supone que las consultas que se escapan se cerrarían en la misma proporción que las que sí reciben seguimiento. Por eso también mostramos un escenario prudente en el que solo se recupera una cuarta parte."
+    }
+  ],
+  "archetypes": {
+    "ready": {
+      "name": "Listo para crecer",
+      "line": "Lo básico funciona. Lo que sigue es medir y automatizar lo que ya haces bien."
+    },
+    "leaky": {
+      "name": "La cubeta con fugas",
+      "line": "Pagas por atraer consultas, y algunas se escapan antes de que alguien les dé seguimiento."
+    },
+    "secret": {
+      "name": "El secreto mejor guardado",
+      "line": "Tus clientes están contentos, pero casi nadie más puede verlo."
+    },
+    "bottleneck": {
+      "name": "El dueño como cuello de botella",
+      "line": "El negocio crece hasta donde lo permite tu agenda, y no mucho más."
+    },
+    "silent": {
+      "name": "La fuga silenciosa",
+      "line": "Las consultas llegan, pero no hay un camino confiable del primer contacto a la venta cerrada."
+    }
+  },
+  "findings": {
+    "access": {
+      "title": "Las consultas nuevas esperan a quien esté libre.",
+      "step": "Una sola puerta de entrada: cada llamada, mensaje y formulario llega a un mismo lugar, recibe una respuesta inmediata y puede agendar una cita por su cuenta."
+    },
+    "pipeline": {
+      "title": "Tus oportunidades abiertas están repartidas en varios lugares y, en parte, en tu memoria.",
+      "step": "Una sola lista compartida con cada consulta abierta, su etapa y la siguiente acción. Para empezar, nada más complicado que eso."
+    },
+    "followup": {
+      "title": "Las cotizaciones quedan sin respuesta y nadie les da seguimiento de forma deliberada.",
+      "step": "Una secuencia de seguimiento sencilla que se activa con cada cotización sin cerrar, para que no dependa de que alguien se acuerde."
+    },
+    "reputation": {
+      "title": "Los clientes contentos no se están convirtiendo en prueba visible.",
+      "step": "Una solicitud automática de reseña después de cada trabajo terminado, enviada a cada cliente mientras la experiencia está fresca."
+    },
+    "owner": {
+      "title": "Las ventas dependen de que tú estés disponible.",
+      "step": "Define por escrito quién se encarga de cada primer paso y deja que el sistema haga las partes repetitivas, para que el equipo las maneje sin ti."
+    }
+  },
+  "notYet": {
+    "platform": "Una plataforma todo en uno con decenas de funciones. Empieza con una lista compartida y una sola puerta de entrada.",
+    "adBudget": "Un presupuesto de publicidad más grande. Primero cierra las brechas por las que pierdes las consultas que ya pagas.",
+    "moreAds": "Más publicidad. Arregla primero el sistema para que no se escapen las consultas que pagas.",
+    "customApp": "Una app a la medida, o cualquier cosa que te obligue a volverte técnico."
+  },
+  "indexBands": {
+    "solid": "Base sólida",
+    "gaps": "Brechas que vale la pena cerrar",
+    "leaks": "Fugas importantes"
+  },
+  "copy": {
+    "brand": "Growth X-Ray",
+    "phaseChip": "Fase 1",
+    "preparedFor": "Preparado para {business}",
+    "gate": {
+      "eyebrow": "Diagnóstico privado",
+      "title": "Descubre dónde se te escapan los clientes nuevos.",
+      "sub": "Ingresa el código de acceso que te enviamos por correo. Tus respuestas son privadas y puedes hacer una pausa cuando quieras.",
+      "label": "Código de acceso",
+      "cta": "Comenzar",
+      "errorShort": "Los códigos tienen al menos 6 caracteres. Revisa el correo que te enviamos.",
+      "errorRate": "Demasiados intentos. Espera unos minutos y vuelve a intentarlo.",
+      "placeholder": "XXXXX-XXXXX",
+      "resumeHint": "¿Ya habías empezado? Con el mismo código retomas donde te quedaste.",
+      "errorUnknown": "No encontramos ese código. Revisa el correo que te enviamos.",
+      "errorExpired": "Este código venció. Responde a nuestro correo y te enviaremos uno nuevo."
+    },
+    "welcome": {
+      "eyebrowGeneric": "Fase 1 · Unos 10 minutos",
+      "titleKnown": "Tu radiografía de crecimiento está lista para empezar.",
+      "titleGeneric": "Hagamos una radiografía de cómo consigues clientes.",
+      "sub": "Unos 10 minutos, casi todo con respuestas de un toque. Verás lo que vamos descubriendo sobre la marcha, y tus resultados aparecerán en la última pantalla.",
+      "promise": [
+        {
+          "k": "01 · Mapa",
+          "text": "Cómo te contactan los clientes nuevos y qué pasa después."
+        },
+        {
+          "k": "02 · Medición",
+          "text": "Una estimación en dólares de lo que se escapa."
+        },
+        {
+          "k": "03 · Prioridad",
+          "text": "El primer paso que más importa en tu caso."
+        }
+      ],
+      "outsideTitle": "Lo que vimos desde afuera",
+      "outsideBadge": "Datos de ejemplo",
+      "outsideReviewsLabel": "Reseñas",
+      "outsideReplyGap": "Es decir, {replyGap} más tarde.",
+      "outsideLatestReview": "Reseña más reciente: {lastReview}.",
+      "back": "Cambiar código",
+      "cta": "Empezar",
+      "resumeTitle": "Hola de nuevo. Tus respuestas están guardadas.",
+      "resumeSub": "Respondiste {done} de {total} preguntas. Retoma justo donde te quedaste.",
+      "resumeCta": "Retomar donde me quedé",
+      "resumeFromStart": "Revisar desde la primera pregunta",
+      "doneTitle": "Hola de nuevo. Tus resultados están listos.",
+      "doneSub": "Terminaste la fase 1. Tus resultados están guardados y puedes cambiar cualquier respuesta.",
+      "doneCta": "Ver mis resultados",
+      "doneReview": "Revisar mis respuestas"
+    },
+    "question": {
+      "part": "Parte {n} de {total} · {label}",
+      "minutesLeft": "Faltan unos {n} min",
+      "back": "Atrás",
+      "backToStart": "Volver al inicio",
+      "next": "Continuar",
+      "seeResults": "Ver mis resultados",
+      "saveError": "No pudimos guardar tu última respuesta. Revisa tu conexión; lo volveremos a intentar cuando continúes."
+    },
+    "insight": {
+      "evidenceTag": "Lo que dice la investigación",
+      "mirrorTag": "Lo que esto nos dice",
+      "mythTag": "Mito vs. realidad",
+      "source": "Fuente:",
+      "view": "ver"
+    },
+    "money": {
+      "monthlyLabel": "Ligado a consultas que se escapan",
+      "monthlyDetail": "Unas {missed} consultas al mes · {annual} al año",
+      "cautiousLabel": "Si recuperaras solo una cuarta parte",
+      "cautiousDetail": "{annual} al año en ingresos adicionales",
+      "perMonth": "/mes",
+      "adLeak": "Cerca de {adLeak} de tu inversión mensual en anuncios paga consultas que no reciben respuesta ni seguimiento a tiempo."
+    },
+    "results": {
+      "eyebrow": "Resultados de la fase 1",
+      "indexLabel": "Índice del sistema de captación de clientes",
+      "pillarsTitle": "Cómo está tu sistema",
+      "lockedPillar": "F. 2",
+      "moneyTitle": "Dinero que se queda sobre la mesa",
+      "fixTitle": "Qué corregir, en orden",
+      "severityHigh": "Alto impacto",
+      "severityMid": "Vale la pena corregir",
+      "firstStep": "Tu primer paso",
+      "noGaps": "No hay brechas importantes en la fase 1. Lo que sigue está en la medición y la retención, que cubre la fase 2.",
+      "notYetTitle": "Lo que probablemente todavía no necesitas",
+      "redo": "Cambiar mis respuestas",
+      "emptyTitle": "Todavía no hay respuestas con este código.",
+      "emptySub": "Empieza el diagnóstico y tus resultados aparecerán aquí. Tus respuestas se guardan sobre la marcha.",
+      "emptyCta": "Empezar el diagnóstico"
+    },
+    "unlock": {
+      "eyebrow": "Fase 2 · Unos 20 minutos · Pausa cuando quieras",
+      "title": "Ya sabes dónde está la fuga. La fase 2 te dice exactamente cómo cerrarla.",
+      "bullets": [
+        "Desbloquea las tres áreas en gris: retención y valor del cliente, visibilidad del negocio y preparación.",
+        "Un plan paso a paso en tres etapas, con lo que conviene configurar primero y lo que puede esperar.",
+        "Lo que implicaría, de forma realista, la implementación en un negocio como el tuyo."
+      ],
+      "cta": "Continuar a la fase 2",
+      "savedTo": "Tus respuestas están guardadas con el código {code}.",
+      "p2Pending": "La fase 2 todavía no está abierta. Tus respuestas de la fase 1 están guardadas y pasarán a la fase 2."
+    },
+    "lang": {
+      "label": "Idioma",
+      "names": {
+        "en": "English",
+        "es": "Español"
+      }
+    },
+    "theme": {
+      "system": "Automático",
+      "light": "Claro",
+      "dark": "Oscuro",
+      "label": "Tema de color"
+    },
+    "codeError": {
+      "expiredTitle": "Este código venció.",
+      "expiredSub": "Responde a nuestro correo y te enviaremos uno nuevo.",
+      "unknownTitle": "No encontramos ese código.",
+      "unknownSub": "Revisa el enlace de tu correo o vuelve a escribir el código.",
+      "rateTitle": "Demasiados intentos.",
+      "rateSub": "Espera unos minutos y vuelve a intentarlo.",
+      "cta": "Ingresar mi código"
+    },
+    "notFound": {
+      "title": "No encontramos esa página.",
+      "sub": "Revisa el enlace de tu correo o vuelve a ingresar tu código de acceso.",
+      "cta": "Ingresar mi código"
+    },
+    "report": {
+      "eyebrow": "Informe de la fase 1",
+      "readOnly": "Informe de solo lectura. Tus respuestas son privadas y solo se ven con tu código de acceso.",
+      "continueTitle": "¿Quieres cambiar una respuesta?",
+      "continueSub": "Abre el diagnóstico con el mismo código. Tus respuestas están guardadas, y la fase 2 empieza desde ahí cuando te convenga.",
+      "continueCta": "Abrir mi diagnóstico",
+      "pendingTitle": "Este informe todavía no está listo.",
+      "pendingSub": "Aparece cuando termines la fase 1. Las respuestas que diste hasta ahora están guardadas.",
+      "pendingCta": "Retomar donde me quedé"
+    },
+    "later": {
+      "cta": "Guardar y terminar después",
+      "sending": "Enviando…",
+      "sent": "Listo. Enviamos un enlace a {to} para que retomes donde te quedaste.",
+      "askEmail": "¿A qué correo te enviamos el enlace?",
+      "emailLabel": "Correo electrónico",
+      "submit": "Enviar mi enlace",
+      "errorEmail": "Ingresa un correo electrónico válido.",
+      "errorRate": "Ya te enviamos varios enlaces. Revisa tu bandeja de entrada o vuelve a intentarlo en una hora.",
+      "errorSend": "No pudimos enviar el correo en este momento. Tus respuestas siguen guardadas: vuelve cuando quieras con el código {code}.",
+      "preview": "Vista previa: no se envía ningún correo."
+    },
+    "email": {
+      "signoff": "Growth X-Ray",
+      "footer": "Recibes este correo porque se usó el código de acceso {code} en Growth X-Ray. Si no fuiste tú, puedes ignorarlo.",
+      "forBusiness": " de {business}",
+      "report": {
+        "subject": "Tus resultados de Growth X-Ray",
+        "greeting": "Gracias por terminar la fase 1 del diagnóstico{forBusiness}.",
+        "body": "Tus resultados están guardados en este enlace privado. Puedes volver a verlos cuando quieras.",
+        "cta": "Ver mis resultados",
+        "after": "La fase 2 es opcional. Si quieres continuar, puedes empezarla desde la misma página cuando te convenga."
+      },
+      "resume": {
+        "subject": "Tu enlace para terminar tu Growth X-Ray",
+        "greeting": "Tus respuestas del diagnóstico{forBusiness} están guardadas.",
+        "body": "Usa este enlace para retomar donde te quedaste. Todo lo que respondiste hasta ahora ya está ahí.",
+        "cta": "Retomar donde me quedé",
+        "after": "Sin prisa. El enlace no cambia hasta que venza tu código."
+      }
+    }
+  }
+}

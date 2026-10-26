@@ -9,8 +9,8 @@ El prototipo de referencia (comportamiento y diseño) está en `docs/prototype.h
 Next.js (App Router) + TypeScript + Tailwind · Supabase (Postgres) · Resend · Vercel.
 
 ## Reglas
-- La interfaz para el usuario final va en **inglés** (EE. UU.). Comentarios y documentación pueden ir en español.
-- Preguntas, opciones, puntajes, insights, mitos, evidencia y arquetipos viven en `config/phase1.config.json` (y `phase2.config.json`). **No hardcodear textos de preguntas en componentes.**
+- La interfaz para el usuario final va en **inglés** (EE. UU.) y en **español** (neutro latinoamericano, tuteo), con el botón EN / ES. El panel `/admin` va en inglés. Comentarios y documentación pueden ir en español.
+- Preguntas, opciones, puntajes, insights, mitos, evidencia y arquetipos viven en `config/phase1.config.json` y su versión en español `config/phase1.config.es.json` (y `phase2.config.json`). **No hardcodear textos de preguntas en componentes.** Todo texto nuevo va en los dos idiomas con la misma estructura (lo verifica `lib/config.test.ts`); en componentes se leen con `useConfig()` (`lib/i18n.tsx`) o `getConfig(lang)`.
 - Toda la lógica de puntaje va en `lib/scoring.ts` como funciones puras, con tests en `lib/scoring.test.ts`. Si cambias una regla, actualiza `docs/SPEC.md` en el mismo commit.
 - Nunca agregar estadísticas sin `source` y `url` verificables en `evidence`. Nada de cifras sin origen.
 - Mobile first: la mayoría de los usuarios responde desde el teléfono.

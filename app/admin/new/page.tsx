@@ -5,7 +5,7 @@ import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { LoadingCard } from "@/components/ui/Loading";
 import { EXPIRY_CHOICES } from "@/lib/admin";
-import { isChoice, phase1 } from "@/lib/config";
+import { isChoice, LANGS, phase1 } from "@/lib/config";
 import { requireAdmin } from "@/lib/server/auth";
 import { adminCopy } from "@/lib/server/team";
 
@@ -29,7 +29,12 @@ async function NewCompany() {
       <Eyebrow>{t.eyebrow}</Eyebrow>
       <h1 className="mb-3 text-[clamp(28px,5vw,40px)] tracking-[-0.02em]">{t.title}</h1>
       <p className="text-muted">{t.sub}</p>
-      <CompanyForm t={t} industries={industries} expiryChoices={[...EXPIRY_CHOICES]} />
+      <CompanyForm
+        t={t}
+        industries={industries}
+        expiryChoices={[...EXPIRY_CHOICES]}
+        langs={LANGS.map((id) => ({ id, label: adminCopy.langs[id] }))}
+      />
     </Card>
   );
 }

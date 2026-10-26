@@ -5,8 +5,9 @@ import { useEffect, useRef, useState } from "react";
 import { Insight } from "@/components/insight/InsightCard";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { StepProgress } from "@/components/ui/StepProgress";
-import { copy, getQuestion, isChoice, phase1 } from "@/lib/config";
+import { getQuestion, isChoice } from "@/lib/config";
 import { progress } from "@/lib/flow";
+import { useConfig } from "@/lib/i18n";
 import { insightFor } from "@/lib/insights";
 import { getDiagnostic, setAnswer, useDiagnostic, useSaveFailed } from "@/lib/store";
 import { completePhase, queueSave } from "@/lib/sync";
@@ -22,16 +23,17 @@ export function QuestionScreen({ code, qid, company }: { code: string; qid: stri
   const { answers } = useDiagnostic(code);
   const saveFailed = useSaveFailed();
   const [finishing, setFinishing] = useState(false);
-  const q = getQuestion(qid)!;
-  const p = progress(phase1, qid, company?.industry)!;
+  const cfg = useConfig();
+  const q = getQuestion(qid, cfg)!;
+  const p = progress(cfg, qid, company?.industry)!;
   const outside = company?.outside ?? null;
-  const c = copy.question;
+  const c = cfg.copy.question;
 
   const base = `/x/${encodeURIComponent(code)}`;
   const prevHref = p.prev ? `${base}/q/${p.prev.id}` : base;
   const nextHref = p.next ? `${base}/q/${p.next.id}` : `${base}/results`;
 
-  const insight = insightFor(phase1, q, answers, outside);
+  const insight = insightFor(cfg, q, answers, outside);
   const insightRef = useRef<HTMLDivElement>(null);
   const justSelected = useRef(false);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -67,7 +69,7 @@ export function QuestionScreen({ code, qid, company }: { code: string; qid: stri
     // Como en el prototipo: si la respuesta no trae insight, avanza solo.
     const after: Answers = { ...latest, [q.id]: next };
     clearTimeout(timer.current);
-    if (q.type === "single" && !insightFor(phase1, q, after, outside)) {
+    if (q.type === "single" && !insightFor(cfg, q, after, outside)) {
       timer.current = setTimeout(() => router.push(nextHref), AUTO_ADVANCE_MS);
     }
   }

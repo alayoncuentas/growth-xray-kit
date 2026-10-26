@@ -7,6 +7,7 @@ import { BusinessMarker } from "@/components/ui/BusinessMarker";
 import { Container } from "@/components/ui/Container";
 import { LoadingCard } from "@/components/ui/Loading";
 import { phase1 } from "@/lib/config";
+import { LangProvider } from "@/lib/i18n";
 import { progress } from "@/lib/flow";
 import { checkAccess } from "@/lib/server/access";
 import { initialState } from "@/lib/server/diagnostic";
@@ -31,10 +32,12 @@ async function Question({ code: raw, qid, sample, frame }: { code: string; qid: 
   // También descarta la pregunta de rubro cuando el código ya la trae.
   if (!progress(phase1, qid, company?.industry)) notFound();
   return (
-    <DiagnosticProvider code={code} initial={await initialState(r.access, sample)}>
-      <BusinessMarker business={company?.business ?? null} />
-      <QuestionScreen code={code} qid={qid} company={company} />
-      <PreviewChrome access={r.access} frame={frame} />
-    </DiagnosticProvider>
+    <LangProvider lang={r.access.lang} code={code}>
+      <DiagnosticProvider code={code} initial={await initialState(r.access, sample)}>
+        <BusinessMarker business={company?.business ?? null} />
+        <QuestionScreen code={code} qid={qid} company={company} />
+        <PreviewChrome access={r.access} frame={frame} />
+      </DiagnosticProvider>
+    </LangProvider>
   );
 }

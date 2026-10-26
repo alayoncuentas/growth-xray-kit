@@ -3,11 +3,11 @@
 import { useActionState } from "react";
 import { submitCode, type CodeFormState } from "@/app/actions";
 import { Button } from "@/components/ui/Button";
-import { copy } from "@/lib/config";
+import { useConfig } from "@/lib/i18n";
 
 export function CodeForm() {
   const [state, action, pending] = useActionState<CodeFormState, FormData>(submitCode, {});
-  const g = copy.gate;
+  const g = useConfig().copy.gate;
   const errors = { format: g.errorShort, unknown: g.errorUnknown, expired: g.errorExpired, rate: g.errorRate };
   const error: string | null = state.error ? errors[state.error] : null;
 

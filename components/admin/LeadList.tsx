@@ -1,6 +1,6 @@
 import "server-only";
 import Link from "next/link";
-import { phase1, usd } from "@/lib/config";
+import { fill, phase1, usd } from "@/lib/config";
 import type { LeadRow } from "@/lib/server/admin-data";
 import { adminCopy, team } from "@/lib/server/team";
 import type { ArchetypeId } from "@/lib/types";
@@ -37,6 +37,11 @@ export function LeadList({ leads }: { leads: LeadRow[] }) {
                   <b className="block truncate">{lead.company?.name ?? "—"}</b>
                   <span className="block truncate font-mono text-xs text-muted">
                     {lead.code} · {[lead.company?.city, lead.company?.state].filter(Boolean).join(", ") || "—"}
+                    {/* Idioma en que respondió; si todavía no respondió, el del link. */}
+                    {" · "}
+                    <span title={lead.phase1?.lang ? fill(l.langTitle, { lang: adminCopy.langs[lead.phase1.lang] }) : adminCopy.form.lang}>
+                      {(lead.phase1?.lang ?? lead.lang).toUpperCase()}
+                    </span>
                   </span>
                 </span>
                 <span className="flex flex-wrap items-center gap-2">

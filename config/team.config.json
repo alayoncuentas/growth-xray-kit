@@ -69,7 +69,8 @@
       "colFlags": "Alerts",
       "colActivity": "Updated",
       "expired": "expired",
-      "noScores": "No answers yet"
+      "noScores": "No answers yet",
+      "langTitle": "Answered in {lang}"
     },
     "funnel": {
       "title": "Funnel",
@@ -89,6 +90,9 @@
       "copied": "Copied",
       "contact": "Contact",
       "expires": "Expires",
+      "codeLang": "Link language",
+      "answeredLang": "Answered in",
+      "notYet": "Not yet",
       "never": "Never",
       "progress": "Phase 1",
       "notStarted": "Not started",
@@ -118,6 +122,8 @@
       "state": "State",
       "industry": "Industry",
       "industryUnknown": "Ask in the diagnostic",
+      "lang": "Language",
+      "langNote": "The language the link opens in. The prospect can switch with the EN / ES button. Write the outside view below in this language.",
       "website": "Website",
       "phone": "Phone",
       "email": "Contact email",
@@ -152,6 +158,12 @@
       "title": "Diagnostic preview",
       "sub": "Every Phase 1 screen exactly as a prospect sees it, at phone width (400 px). Nothing on this page or in the walkthrough is saved.",
       "theme": "Theme",
+      "lang": "Language",
+      "langNames": {
+        "en": "English",
+        "es": "Español"
+      },
+      "langNote": "Switches the language of every screen below and of the walkthrough in this browser.",
       "indexTitle": "On this page",
       "sections": {
         "walk": "Walkthrough",
@@ -194,6 +206,10 @@
         "back": "Preview map"
       },
       "sampleAnswers": "Sample answers"
+    },
+    "langs": {
+      "en": "English",
+      "es": "Spanish"
     }
   }
 }

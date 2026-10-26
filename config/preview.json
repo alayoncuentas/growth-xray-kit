@@ -1,5 +1,5 @@
 {
-  "_note": "Vista previa de /admin/preview y del modo recorrido. Los códigos de vista previa solo funcionan con sesión de admin y nunca escriben en la base. Negocios y respuestas son de ejemplo.",
+  "_note": "Vista previa de /admin/preview y del modo recorrido. Los códigos de vista previa solo funcionan con sesión de admin y nunca escriben en la base. Negocios y respuestas son de ejemplo. outsideEs: la vista externa de ejemplo en español (en una empresa real la escribe el equipo en el idioma del link).",
   "code": "PREVIEW",
   "plainCode": "PREVIEW-PLAIN",
   "company": {
@@ -15,30 +15,132 @@
       "lastReview": "5 months ago"
     }
   },
+  "outsideEs": {
+    "date": "mar., 13 de oct.",
+    "text": "Le enviamos un mensaje de texto a su número a las 8:42 p. m. para preguntar por una cita de limpieza.",
+    "reply": "Primera respuesta: al día siguiente a las 11:20 a. m.",
+    "replyGap": "14 h 38 min",
+    "reviews": "4.8 estrellas en 23 reseñas de Google",
+    "lastReview": "hace 5 meses"
+  },
   "plainCompany": {
     "business": "Sample Home Services",
     "city": "Denver, CO"
   },
   "samples": {
     "ready": {
-      "answers": { "industry": "home", "team": "6_15", "channels": ["phone", "form", "google", "ref"], "busy": "a", "speed": "5m", "afterhours": "book", "tracking": "crm", "followup": "auto", "reviews": "process", "away": "flow", "ads": "1_3" },
-      "calc": { "inquiries": 120, "value": 2500 }
+      "answers": {
+        "industry": "home",
+        "team": "6_15",
+        "channels": [
+          "phone",
+          "form",
+          "google",
+          "ref"
+        ],
+        "busy": "a",
+        "speed": "5m",
+        "afterhours": "book",
+        "tracking": "crm",
+        "followup": "auto",
+        "reviews": "process",
+        "away": "flow",
+        "ads": "1_3"
+      },
+      "calc": {
+        "inquiries": 120,
+        "value": 2500
+      }
     },
     "leaky": {
-      "answers": { "industry": "dental", "team": "2_5", "channels": ["phone", "form", "google"], "busy": "d", "speed": "dk", "afterhours": "none", "tracking": "inbox", "followup": "wait", "reviews": "hope", "away": "cant", "ads": "1_3" },
-      "calc": { "inquiries": 100 }
+      "answers": {
+        "industry": "dental",
+        "team": "2_5",
+        "channels": [
+          "phone",
+          "form",
+          "google"
+        ],
+        "busy": "d",
+        "speed": "dk",
+        "afterhours": "none",
+        "tracking": "inbox",
+        "followup": "wait",
+        "reviews": "hope",
+        "away": "cant",
+        "ads": "1_3"
+      },
+      "calc": {
+        "inquiries": 100
+      }
     },
     "secret": {
-      "answers": { "industry": "prof", "team": "2_5", "channels": ["phone", "email", "ref"], "busy": "a", "speed": "1h", "afterhours": "auto", "tracking": "sheet", "followup": "set", "reviews": "nothing", "away": "slow", "ads": "0" },
-      "calc": { "inquiries": 40, "value": 3000 }
+      "answers": {
+        "industry": "prof",
+        "team": "2_5",
+        "channels": [
+          "phone",
+          "email",
+          "ref"
+        ],
+        "busy": "a",
+        "speed": "1h",
+        "afterhours": "auto",
+        "tracking": "sheet",
+        "followup": "set",
+        "reviews": "nothing",
+        "away": "slow",
+        "ads": "0"
+      },
+      "calc": {
+        "inquiries": 40,
+        "value": 3000
+      }
     },
     "bottleneck": {
-      "answers": { "industry": "legal", "team": "2_5", "channels": ["phone", "form", "ref"], "busy": "b", "speed": "1h", "afterhours": "auto", "tracking": "sheet", "followup": "set", "reviews": "some", "away": "cant", "ads": "lt1" },
-      "calc": { "inquiries": 30, "value": 5000 }
+      "answers": {
+        "industry": "legal",
+        "team": "2_5",
+        "channels": [
+          "phone",
+          "form",
+          "ref"
+        ],
+        "busy": "b",
+        "speed": "1h",
+        "afterhours": "auto",
+        "tracking": "sheet",
+        "followup": "set",
+        "reviews": "some",
+        "away": "cant",
+        "ads": "lt1"
+      },
+      "calc": {
+        "inquiries": 30,
+        "value": 5000
+      }
     },
     "silent": {
-      "answers": { "industry": "home", "team": "1", "channels": ["phone", "text"], "busy": "b", "speed": "1h", "afterhours": "auto", "tracking": "none", "followup": "set", "reviews": "some", "away": "slow", "ads": "0" },
-      "calc": { "inquiries": 15, "value": 800 }
+      "answers": {
+        "industry": "home",
+        "team": "1",
+        "channels": [
+          "phone",
+          "text"
+        ],
+        "busy": "b",
+        "speed": "1h",
+        "afterhours": "auto",
+        "tracking": "none",
+        "followup": "set",
+        "reviews": "some",
+        "away": "slow",
+        "ads": "0"
+      },
+      "calc": {
+        "inquiries": 15,
+        "value": 800
+      }
     }
   }
 }

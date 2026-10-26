@@ -9,11 +9,12 @@ import { Card } from "@/components/ui/Card";
 import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { LoadingCard } from "@/components/ui/Loading";
-import { copy, fill, phase1 } from "@/lib/config";
+import { fill, getConfig } from "@/lib/config";
 import { answeredCount, resumeTarget } from "@/lib/answers";
 import { firstQuestion } from "@/lib/flow";
 import { checkAccess } from "@/lib/server/access";
 import { emptyPhase1, loadPhase1 } from "@/lib/server/diagnostic";
+import { LangProvider } from "@/lib/i18n";
 import { DiagnosticProvider } from "@/lib/store";
 
 export default function WelcomePage({ params, searchParams }: PageProps<"/x/[code]">) {
@@ -31,16 +32,17 @@ export default function WelcomePage({ params, searchParams }: PageProps<"/x/[cod
 async function Welcome({ code: raw, frame }: { code: string; frame: boolean }) {
   const r = await checkAccess(raw);
   if (!r.ok) return <CodeError reason={r.reason} />;
-  const { code, company: co } = r.access;
-  const w = copy.welcome;
+  const { code, company: co, lang } = r.access;
+  const cfg = getConfig(lang);
+  const w = cfg.copy.welcome;
   const o = co?.outside;
   const base = `/x/${encodeURIComponent(code)}`;
-  const firstHref = `${base}/q/${firstQuestion(phase1, co?.industry).id}`;
+  const firstHref = `${base}/q/${firstQuestion(cfg, co?.industry).id}`;
 
   // Retomar: si ya hay respuestas guardadas, la bienvenida lleva a la primera pregunta pendiente.
   const saved = r.access.preview ? emptyPhase1() : await loadPhase1(code); // la vista previa no lee la base
-  const { done, total } = answeredCount(phase1, saved, co?.industry);
-  const target = resumeTarget(phase1, saved, co?.industry);
+  const { done, total } = answeredCount(cfg, saved, co?.industry);
+  const target = resumeTarget(cfg, saved, co?.industry);
   const mode = saved.completed ? "done" : done > 0 ? "resume" : "new";
   const title = mode === "done" ? w.doneTitle : mode === "resume" ? w.resumeTitle : co ? w.titleKnown : w.titleGeneric;
   const sub = mode === "done" ? w.doneSub : mode === "resume" ? fill(w.resumeSub, { done, total }) : w.sub;
@@ -48,7 +50,7 @@ async function Welcome({ code: raw, frame }: { code: string; frame: boolean }) {
     mode === "new" ? firstHref : mode === "done" || target.kind === "results" ? `${base}/results` : `${base}/q/${target.qid}`;
 
   return (
-    <>
+    <LangProvider lang={lang} code={code}>
       <Card>
         {!r.access.preview && <LinkOpened code={code} />}
         <DiagnosticProvider code={code} initial={{ answers: saved.answers, calc: saved.calc }}>
@@ -99,7 +101,7 @@ async function Welcome({ code: raw, frame }: { code: string; frame: boolean }) {
         )}
       </Card>
       <PreviewChrome access={r.access} frame={frame} />
-    </>
+    </LangProvider>
   );
 }
 

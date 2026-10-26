@@ -60,6 +60,16 @@ describe("parseCompanyForm", () => {
     });
   });
 
+  it("idioma del link: inglés por defecto, español si se elige", () => {
+    const base = { name: "A" };
+    const def = parseCompanyForm(form(base), industries);
+    const sp = parseCompanyForm(form({ ...base, lang: "es" }), industries);
+    const bad = parseCompanyForm(form({ ...base, lang: "fr" }), industries);
+    expect(def.ok && def.data.lang).toBe("en");
+    expect(sp.ok && sp.data.lang).toBe("es");
+    expect(bad.ok && bad.data.lang).toBe("en");
+  });
+
   it("errores por campo", () => {
     const r = parseCompanyForm(form({ state: "Texas", website: "nope", email: "x@", industry: "zzz", expiresDays: "7" }), industries);
     expect(r.ok).toBe(false);

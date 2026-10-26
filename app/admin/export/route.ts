@@ -25,11 +25,13 @@ export async function GET(request: Request) {
       code: l.code,
       link: `${origin}/x/${l.code}`,
       status: l.status,
+      lang: l.lang,
+      answered_lang: l.phase1?.lang ?? null,
       expires_at: l.expires_at,
       created_at: l.created_at,
     }));
 
-  const csv = toCsv(rows, ["email", "business", "city", "state", "industry", "website", "phone", "code", "link", "status", "expires_at", "created_at"]);
+  const csv = toCsv(rows, ["email", "business", "city", "state", "industry", "website", "phone", "code", "link", "status", "lang", "answered_lang", "expires_at", "created_at"]);
   const date = new Date().toISOString().slice(0, 10);
   return new Response("﻿" + csv, {
     headers: {

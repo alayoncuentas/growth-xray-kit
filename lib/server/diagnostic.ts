@@ -1,6 +1,6 @@
 import "server-only";
 import { splitAnswers, unanswered, type AnswerValue, type SavedState } from "@/lib/answers";
-import { phase1 } from "@/lib/config";
+import { phase1, type Lang } from "@/lib/config";
 import { isSampleId, sampleState } from "@/lib/preview";
 import type { DiagnosticState } from "@/lib/store";
 import type { Access } from "./access";
@@ -36,13 +36,14 @@ async function findSession(code: string): Promise<SessionRow | null> {
 }
 
 /** Una sesión por código y fase; si dos peticiones llegan juntas, la restricción única deja una sola. */
-async function getOrCreateSession(code: string, userAgent: string | null): Promise<{ session: SessionRow; created: boolean }> {
+// Abrir el link no fija el idioma de la sesión (puede abrirlo alguien del equipo): lo fijan responder y el botón EN / ES.
+async function getOrCreateSession(code: string, userAgent: string | null, lang: Lang | null = null): Promise<{ session: SessionRow; created: boolean }> {
   const existing = await findSession(code);
   if (existing) return { session: existing, created: false };
   must(
     await db()
       .from("sessions")
-      .upsert({ code, phase: PHASE, user_agent: userAgent?.slice(0, 500) ?? null }, { onConflict: "code,phase", ignoreDuplicates: true }),
+      .upsert({ code, phase: PHASE, user_agent: userAgent?.slice(0, 500) ?? null, lang }, { onConflict: "code,phase", ignoreDuplicates: true }),
     "sessions insert",
   );
   const session = await findSession(code);
@@ -89,6 +90,11 @@ export async function loadPhase1(code: string): Promise<Phase1State> {
   return { ...saved, started: true, completed: !!session.completed_at };
 }
 
+/** El prospecto eligió idioma con el botón EN / ES: queda en su sesión, si ya existe (si no, la crea su primera respuesta). */
+export async function setSessionLang(code: string, lang: Lang) {
+  must(await db().from("sessions").update({ lang }).eq("code", code).eq("phase", PHASE), "sessions lang");
+}
+
 /** El usuario abrió su link (o volvió con su código): crea la sesión si no existe y lo registra. */
 export async function openLink(code: string, userAgent: string | null) {
   const { created } = await getOrCreateSession(code, userAgent);
@@ -129,9 +135,11 @@ export async function saveAnswer(input: {
   value: AnswerValue;
   complete: boolean;
   userAgent: string | null;
+  /** Idioma en que respondió: queda en la sesión y define el idioma del correo con el informe. */
+  lang: Lang;
 }): Promise<{ completed: boolean }> {
-  const { code, questionId, value } = input;
-  const { session } = await getOrCreateSession(code, input.userAgent);
+  const { code, questionId, value, lang } = input;
+  const { session } = await getOrCreateSession(code, input.userAgent, lang);
   const now = new Date().toISOString();
 
   // Todo en un solo viaje: las demás respuestas se leen en paralelo y la nueva se combina en memoria.
@@ -142,7 +150,7 @@ export async function saveAnswer(input: {
       .from("answers")
       .upsert({ session_id: session.id, question_id: questionId, value, answered_at: now })
       .then((r) => must(r, "answers upsert")),
-    db().from("sessions").update({ last_question_id: questionId }).eq("id", session.id).then((r) => must(r, "sessions update")),
+    db().from("sessions").update({ last_question_id: questionId, lang }).eq("id", session.id).then((r) => must(r, "sessions update")),
     logEvent(code, "answered", { phase: PHASE, question_id: questionId, value }),
   ]);
 
@@ -159,7 +167,7 @@ export async function saveAnswer(input: {
     ]);
     // El correo con el informe sale después de responder: el prospecto no espera a Resend.
     const origin = await appOrigin();
-    after(() => sendReportEmail(code, origin).catch((e) => console.error("[email report]", code, e)));
+    after(() => sendReportEmail(code, origin, lang).catch((e) => console.error("[email report]", code, e)));
     return { completed: true };
   }
   return { completed: done };
