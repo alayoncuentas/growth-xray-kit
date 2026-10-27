@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildEmail, maskEmail, normalizeEmail } from "./email";
+import { fill, getConfig } from "./config";
+import { buildEmail, consentedEmail, EMAIL_CONSENT_VERSION, maskEmail, normalizeEmail } from "./email";
 
 describe("buildEmail", () => {
   const v = { code: "K7MPX-4RHQ2", business: "Rivera Dental Studio", link: "https://xray.example.com/r/K7MPX-4RHQ2", lang: "en" as const };
@@ -87,5 +88,23 @@ describe("línea del regalo en el informe", () => {
   it("sin regalo, o en el correo para retomar, no hay línea", () => {
     expect(buildEmail("report", v).text).not.toContain("free extra");
     expect(buildEmail("resume", { ...v, gift: "A" }).text).not.toContain("free extra");
+  });
+});
+
+describe("consentimiento", () => {
+  it("consentedEmail: correo, fecha y versión del texto", () => {
+    const now = new Date("2026-10-27T15:00:00Z");
+    expect(consentedEmail("jane@rivera.com", now)).toEqual({
+      email: "jane@rivera.com",
+      email_consent_at: "2026-10-27T15:00:00.000Z",
+      email_consent_version: EMAIL_CONSENT_VERSION,
+    });
+  });
+
+  it("en español nombra el extra gratis antes del regalo; en inglés, el regalo", () => {
+    const es = getConfig("es").copy;
+    expect(fill(es.capture.consent, { giftShort: es.gifts.B.short })).toContain("sobre tu extra gratis (auditoría gratis de tus reseñas de Google)");
+    const en = getConfig("en").copy;
+    expect(fill(en.capture.consent, { giftShort: en.gifts.A.short })).toContain("follow up about your free response-time test");
   });
 });

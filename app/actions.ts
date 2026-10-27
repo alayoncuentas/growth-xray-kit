@@ -3,13 +3,14 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { isLang, LANG_COOKIE } from "@/lib/config";
-import { getConfig } from "@/lib/config";
+import { getConfig, phase1 } from "@/lib/config";
+import { giftForAnswers, type GiftKind } from "@/lib/gifts";
 import { afterBusiness, stepHref } from "@/lib/flow";
 import { normalizeEmail } from "@/lib/email";
 import { arrivalFrom, parseBusinessForm } from "@/lib/open-entry";
 import { browserLang, checkAccess, clientKey, type AccessError } from "@/lib/server/access";
 import { captureEmail as saveCapturedEmail, type CaptureFrom } from "@/lib/server/capture";
-import { openLink, setSessionLang } from "@/lib/server/diagnostic";
+import { loadPhase1, openLink, setSessionLang } from "@/lib/server/diagnostic";
 import { sendResumeEmail } from "@/lib/server/email";
 import { createOpenSession, openEntryEnabled, openLimitHit, saveBusinessData, verifyTurnstile } from "@/lib/server/open-entry";
 import { appOrigin } from "@/lib/server/origin";
@@ -119,18 +120,29 @@ export async function captureEmail(code: string, from: CaptureFrom, _prev: Captu
 export type SaveLaterState =
   | { status: "idle" }
   | { status: "sent"; to: string }
-  | { status: "needEmail"; error?: "email" }
+  | { status: "needEmail"; error?: "email"; /** Regalo que nombra el texto "By continuing…". */ gift: GiftKind }
   | { status: "rate" | "error" | "preview" };
 
-/** "Save and finish later": envía por correo el link para retomar. Las respuestas ya están guardadas. */
+/** Regalo que tocaría con lo respondido hasta ahora: solo para nombrarlo en el consentimiento. */
+async function giftSoFar(code: string): Promise<GiftKind> {
+  const saved = await loadPhase1(code);
+  return giftForAnswers(phase1, saved.answers, saved.calc);
+}
+
+/**
+ * "Save and finish later": envía por correo el link para retomar. Las respuestas ya están guardadas. Si el código no
+ * tiene correo, lo pide debajo del texto "By continuing…" y lo guarda con el consentimiento.
+ */
 export async function saveForLater(code: string, _prev: SaveLaterState, formData: FormData): Promise<SaveLaterState> {
   const r = await checkAccess(code);
   if (!r.ok) return { status: "error" };
   if (r.access.preview) return { status: "preview" }; // la vista previa no envía correos
-  const typed = String(formData.get("email") ?? "").trim().toLowerCase() || null;
-  if (typed && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(typed)) return { status: "needEmail", error: "email" };
+  const raw = String(formData.get("email") ?? "").trim();
+  const typed = raw ? normalizeEmail(raw) : null;
   try {
-    return await sendResumeEmail(r.access.code, await appOrigin(), typed, r.access.lang);
+    if (raw && !typed) return { status: "needEmail", error: "email", gift: await giftSoFar(r.access.code) };
+    const res = await sendResumeEmail(r.access.code, await appOrigin(), typed, r.access.lang);
+    return res.status === "needEmail" ? { status: "needEmail", gift: await giftSoFar(r.access.code) } : res;
   } catch (e) {
     console.error("[email resume]", r.access.code, e);
     return { status: "error" };

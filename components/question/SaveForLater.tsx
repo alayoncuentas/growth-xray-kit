@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { saveForLater, type SaveLaterState } from "@/app/actions";
+import { ConsentNote } from "@/components/results/ConsentNote";
 import { buttonClass } from "@/components/ui/Button";
 import { fill } from "@/lib/config";
 import { useConfig } from "@/lib/i18n";
@@ -60,6 +61,7 @@ export function SaveForLater({ code, tone = "default", open = false }: { code: s
             {t.errorEmail}
           </p>
         )}
+        <ConsentNote gift={state.gift} inverse={inverse} />
       </form>
     );
   }

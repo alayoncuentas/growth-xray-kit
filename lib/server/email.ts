@@ -1,6 +1,6 @@
 import "server-only";
 import type { Lang } from "@/lib/config";
-import { buildEmail, maskEmail, type EmailKind } from "@/lib/email";
+import { buildEmail, consentedEmail, EMAIL_CONSENT_VERSION, maskEmail, type EmailKind } from "@/lib/email";
 import type { GiftKind } from "@/lib/gifts";
 import { db, must } from "./db";
 import { offerGiftSafe } from "./gifts";
@@ -94,7 +94,8 @@ export type ResumeResult = { status: "sent"; to: string } | { status: "needEmail
 
 /**
  * "Save and finish later": envía el link para retomar al correo del código. Si el código no tiene correo,
- * usa el que escribe el prospecto y lo guarda (solo si estaba vacío: un correo ya registrado no se reemplaza).
+ * usa el que escribe el prospecto debajo del texto "By continuing…" y lo guarda con la fecha y la versión del
+ * consentimiento, más `email_captured` (solo si estaba vacío: un correo ya registrado no se reemplaza).
  * Máximo 3 por código y por hora, para que no sirva para enviar correos a terceros.
  */
 export async function sendResumeEmail(code: string, origin: string, typedEmail: string | null, lang: Lang): Promise<ResumeResult> {
@@ -103,7 +104,18 @@ export async function sendResumeEmail(code: string, origin: string, typedEmail: 
   let to = contact.email;
   if (!to) {
     if (!typedEmail) return { status: "needEmail" };
-    must(await db().from("access_codes").update({ email: typedEmail }).eq("code", code).is("email", null), "access_codes email");
+    const set = must(
+      await db().from("access_codes").update(consentedEmail(typedEmail, new Date())).eq("code", code).is("email", null).select("code"),
+      "access_codes email",
+    ) as { code: string }[];
+    if (set.length) {
+      must(
+        await db()
+          .from("events")
+          .insert({ code, type: "email_captured", payload: { phase: 1, from: "later", open: isOpen(contact.companies), consent: EMAIL_CONSENT_VERSION } }),
+        "events insert",
+      );
+    }
     to = typedEmail;
   }
 

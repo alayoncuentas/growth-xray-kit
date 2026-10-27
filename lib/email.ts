@@ -60,10 +60,19 @@ ${p(`— ${e.signoff}`, "margin:0")}
 }
 
 /**
- * Versión del texto de consentimiento de la pantalla del correo (copy.capture.consent): se guarda con la fecha en
+ * Versión del texto de consentimiento "By continuing…" (copy.capture.consent): se guarda con la fecha en
  * access_codes.email_consent_version. Cambiarla cada vez que cambie ese texto, en cualquiera de los dos idiomas.
+ * 2026-10-27: primera versión · 2026-10-27.2: en español, "sobre tu extra gratis ({giftShort})".
  */
-export const EMAIL_CONSENT_VERSION = "2026-10-27";
+export const EMAIL_CONSENT_VERSION = "2026-10-27.2";
+
+/**
+ * Columnas de access_codes al guardar un correo que la persona escribió debajo del texto "By continuing…"
+ * (pantalla del correo, parcial y "Save and finish later"): el correo, cuándo aceptó y qué versión del texto.
+ */
+export function consentedEmail(email: string, now: Date) {
+  return { email, email_consent_at: now.toISOString(), email_consent_version: EMAIL_CONSENT_VERSION };
+}
 
 const MAX_EMAIL = 254;
 

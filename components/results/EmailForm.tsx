@@ -3,9 +3,9 @@
 import { useActionState } from "react";
 import { captureEmail, type CaptureState } from "@/app/actions";
 import { Button } from "@/components/ui/Button";
-import { fill } from "@/lib/config";
 import type { GiftKind } from "@/lib/gifts";
 import { useConfig } from "@/lib/i18n";
+import { ConsentNote } from "./ConsentNote";
 
 const inputClass = "w-full min-w-0 rounded-card border-[1.5px] border-line bg-paper px-3.5 py-3 text-ink placeholder:text-muted placeholder:opacity-60";
 
@@ -51,12 +51,7 @@ export function EmailForm({ code, from, gift }: { code: string; from: "screen" |
       <Button type="submit" disabled={pending} className="w-full sm:w-auto sm:justify-self-start">
         {t.cta}
       </Button>
-      <p className="text-[12px] leading-normal text-muted">
-        {fill(t.consent, { giftShort: cfg.copy.gifts[gift].short })}{" "}
-        <a href="/privacy" className="underline underline-offset-2 hover:text-ink">
-          {t.privacy}
-        </a>
-      </p>
+      <ConsentNote gift={gift} />
     </form>
   );
 }

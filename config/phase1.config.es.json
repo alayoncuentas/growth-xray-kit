@@ -841,7 +841,7 @@
       "skipInvited": "Omitir por ahora y ver mis resultados",
       "errorEmail": "Ingresa un correo electrónico válido.",
       "errorSave": "No pudimos guardarlo en este momento. Vuelve a intentarlo en un minuto.",
-      "consent": "Al continuar, aceptas que te enviemos tus resultados por correo, que te contactemos sobre tu {giftShort} y que te mandemos de vez en cuando consejos para conseguir más clientes. Puedes darte de baja cuando quieras.",
+      "consent": "Al continuar, aceptas que te enviemos tus resultados por correo, que te contactemos sobre tu extra gratis ({giftShort}) y que te mandemos de vez en cuando consejos para conseguir más clientes. Puedes darte de baja cuando quieras.",
       "privacy": "Política de privacidad"
     },
     "partial": {

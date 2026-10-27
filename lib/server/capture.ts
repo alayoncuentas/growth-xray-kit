@@ -1,6 +1,6 @@
 import "server-only";
 import { after } from "next/server";
-import { EMAIL_CONSENT_VERSION } from "@/lib/email";
+import { consentedEmail, EMAIL_CONSENT_VERSION } from "@/lib/email";
 import type { Access } from "./access";
 import { db, must } from "./db";
 import { phaseDone } from "./diagnostic";
@@ -9,7 +9,8 @@ import { appOrigin } from "./origin";
 
 // Pantalla del correo y bloque para desbloquear el parcial (docs/OPEN_ENTRY.md §1 y §9).
 
-export type CaptureFrom = "screen" | "partial";
+/** Dónde dejó el correo: pantalla del correo, bloque del parcial o "Save and finish later" (lib/server/email.ts). */
+export type CaptureFrom = "screen" | "partial" | "later";
 
 /**
  * Guarda el correo con la fecha y la versión del consentimiento ("By continuing…"), solo si el código no tenía
@@ -21,7 +22,7 @@ export async function captureEmail(access: Access, email: string, from: CaptureF
   const set = must(
     await db()
       .from("access_codes")
-      .update({ email, email_consent_at: new Date().toISOString(), email_consent_version: EMAIL_CONSENT_VERSION })
+      .update(consentedEmail(email, new Date()))
       .eq("code", code)
       .is("email", null)
       .select("code"),
