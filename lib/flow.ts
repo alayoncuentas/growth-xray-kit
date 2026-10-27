@@ -86,6 +86,11 @@ export function businessFirst(cfg: Phase1Config, qid: string | null, ctx: FlowCo
   return qid !== INDUSTRY_QID;
 }
 
+/** Pregunta que se puede registrar como vista (`question_viewed`): existe y se muestra con el rubro que ya trae el código. */
+export function isVisibleQuestion(cfg: Phase1Config, qid: unknown, knownIndustry?: string | null): qid is string {
+  return typeof qid === "string" && visibleQuestions(cfg, knownIndustry).some((q) => q.id === qid);
+}
+
 // ---------- correo antes del resultado completo ----------
 
 export type ResultsMode = "full" | "partial";

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getConfig } from "./config";
-import { afterBusiness, businessFirst, needsBusinessStep, needsEmailStep, nextAfter, resultsMode, stepHref } from "./flow";
+import { afterBusiness, businessFirst, isVisibleQuestion, needsBusinessStep, needsEmailStep, nextAfter, resultsMode, stepHref } from "./flow";
 
 const cfg = getConfig("en");
 
@@ -54,5 +54,18 @@ describe("correo antes del resultado completo", () => {
     expect(needsEmailStep({ hasEmail: false, completed: true, skipped: true })).toBe(false);
     expect(needsEmailStep({ hasEmail: true, completed: true, skipped: false })).toBe(false);
     expect(needsEmailStep({ hasEmail: false, completed: false, skipped: false })).toBe(false);
+  });
+});
+
+describe("question_viewed: solo preguntas que se muestran", () => {
+  it("existe y es visible con el rubro del código", () => {
+    expect(isVisibleQuestion(cfg, "team")).toBe(true);
+    expect(isVisibleQuestion(cfg, "industry")).toBe(true);
+    // Con el rubro ya cargado por el equipo, la pregunta de rubro no se muestra.
+    expect(isVisibleQuestion(cfg, "industry", "dental")).toBe(false);
+  });
+
+  it("rechaza ids inventados o que no son texto", () => {
+    for (const v of ["nope", "", "results", null, 42, ["team"]]) expect(isVisibleQuestion(cfg, v)).toBe(false);
   });
 });

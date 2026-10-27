@@ -14,6 +14,7 @@ import { completePhase, queueSave } from "@/lib/sync";
 import type { Answers, Company } from "@/lib/types";
 import { Calculator } from "./Calculator";
 import { OptionList } from "./OptionList";
+import { QuestionViewed } from "./QuestionViewed";
 import { SaveForLater } from "./SaveForLater";
 
 const AUTO_ADVANCE_MS = 380;
@@ -101,6 +102,7 @@ export function QuestionScreen({
 
   return (
     <>
+      <QuestionViewed code={code} qid={qid} />
       <StepProgress p={p} />
       <section>
         <h1 className="mb-2 text-[clamp(24px,4.6vw,32px)] tracking-[-0.015em]">{q.prompt}</h1>

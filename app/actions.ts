@@ -5,12 +5,12 @@ import { redirect } from "next/navigation";
 import { isLang, LANG_COOKIE } from "@/lib/config";
 import { getConfig, phase1 } from "@/lib/config";
 import { giftForAnswers, type GiftKind } from "@/lib/gifts";
-import { afterBusiness, stepHref } from "@/lib/flow";
+import { afterBusiness, isVisibleQuestion, stepHref } from "@/lib/flow";
 import { normalizeEmail } from "@/lib/email";
 import { arrivalFrom, parseBusinessForm } from "@/lib/open-entry";
 import { browserLang, checkAccess, clientKey, type AccessError } from "@/lib/server/access";
 import { captureEmail as saveCapturedEmail, type CaptureFrom } from "@/lib/server/capture";
-import { loadPhase1, openLink, setSessionLang } from "@/lib/server/diagnostic";
+import { loadPhase1, logQuestionViewed, openLink, setSessionLang } from "@/lib/server/diagnostic";
 import { sendResumeEmail } from "@/lib/server/email";
 import { createOpenSession, openEntryEnabled, openLimitHit, saveBusinessData, verifyTurnstile } from "@/lib/server/open-entry";
 import { appOrigin } from "@/lib/server/origin";
@@ -115,6 +115,17 @@ export async function captureEmail(code: string, from: CaptureFrom, _prev: Captu
   }
   const results = stepHref(r.access.code, { kind: "results" });
   redirect(from === "partial" && !r.access.preview ? `${results}?unlocked=1` : results);
+}
+
+/**
+ * Una pregunta se vio en el navegador: registra `question_viewed`. Se llama desde el cliente (no al renderizar)
+ * para no contar prefetches. La vista previa no registra nada; una pregunta que no existe o no se muestra, tampoco.
+ */
+export async function markQuestionViewed(code: string, qid: string): Promise<void> {
+  const r = await checkAccess(code);
+  if (!r.ok || r.access.preview) return;
+  if (!isVisibleQuestion(phase1, qid, r.access.company?.industry)) return;
+  await logQuestionViewed(r.access.code, qid);
 }
 
 export type SaveLaterState =

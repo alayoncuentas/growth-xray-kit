@@ -16,7 +16,7 @@ import { appOrigin } from "./origin";
 const PHASE = 1;
 const STATUS_ORDER = ["sent", "opened", "p1_done", "p2_done", "booked"] as const;
 type Status = (typeof STATUS_ORDER)[number];
-type EventType = "link_opened" | "answered" | "phase_done";
+type EventType = "link_opened" | "question_viewed" | "answered" | "phase_done";
 
 interface SessionRow {
   id: string;
@@ -104,6 +104,11 @@ export async function setSessionLang(code: string, lang: Lang) {
 export async function openLink(code: string, userAgent: string | null) {
   const { created } = await getOrCreateSession(code, userAgent);
   await Promise.all([advanceStatus(code, "opened"), logEvent(code, "link_opened", { phase: PHASE, resumed: !created })]);
+}
+
+/** La pregunta se vio en el navegador. No crea la sesión: eso lo hacen abrir el link, el inicio abierto o responder. */
+export async function logQuestionViewed(code: string, questionId: string) {
+  await logEvent(code, "question_viewed", { phase: PHASE, question_id: questionId });
 }
 
 /** Camino abierto: la persona empieza desde el inicio. La sesión nace con el idioma de su navegador. */
