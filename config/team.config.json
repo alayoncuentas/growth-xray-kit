@@ -79,7 +79,8 @@
       "giftChip": "Gift {kind}",
       "giftLeft": "{n}d left",
       "giftOverdue": "overdue",
-      "giftDelivered": "delivered"
+      "giftDelivered": "delivered",
+      "deleted": "Lead deleted."
     },
     "funnel": {
       "title": "Funnel",
@@ -138,7 +139,14 @@
       "giftOverdue": "Overdue",
       "giftDelivered": "Delivered {date} by {by}",
       "markDelivered": "Mark delivered",
-      "noGift": "No gift offered yet. It's offered once the lead has an email and finishes Phase 1."
+      "noGift": "No gift offered yet. It's offered once the lead has an email and finishes Phase 1.",
+      "deleteTitle": "Delete lead",
+      "deleteText": "Permanently deletes this company and everything linked to it: its {codes} access code(s), answers, scores, activity and gifts. If the CRM is connected, its contacts are deleted there too. Emails already sent through Resend are not deleted here. This can't be undone.",
+      "deleteLabel": "Type {name} to confirm",
+      "deleteButton": "Delete permanently",
+      "deleteMismatch": "That doesn't match. Type it exactly as shown.",
+      "deleteCrm": "We couldn't reach the CRM, so nothing was deleted. Try again in a few minutes.",
+      "deleteFailed": "Something went wrong. Reload the page to check what was deleted."
     },
     "form": {
       "eyebrow": "Internal",

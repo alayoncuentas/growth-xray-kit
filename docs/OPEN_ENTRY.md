@@ -1,6 +1,6 @@
 # Camino abierto (sin código): decisiones aprobadas
 
-Estado: **aprobado; en construcción en `feature/open-entry`.** Hecho: el inicio (botón, Turnstile, límite por IP, UTM y referrer, empresa + código + sesión; detrás del flag), la migración, los datos del negocio, el código oculto en el camino abierto, la pantalla del correo con consentimiento, el resultado parcial, los regalos (ofrecimiento, plazos, bloque en resultados y línea en el informe) y el panel (origen, UTM, referrer, filtro, contador de regalos y "Mark delivered"). Falta: cron, Delete lead, `/privacy` y GHL. Este documento manda sobre `docs/SPEC.md` en todo lo que toca el camino abierto.
+Estado: **aprobado; en construcción en `feature/open-entry`.** Hecho: el inicio (botón, Turnstile, límite por IP, UTM y referrer, empresa + código + sesión; detrás del flag), la migración, los datos del negocio, el código oculto en el camino abierto, la pantalla del correo con consentimiento, el resultado parcial, los regalos (ofrecimiento, plazos, bloque en resultados y línea en el informe), el panel (origen, UTM, referrer, filtro, contador de regalos y "Mark delivered"), el cron diario de borrado y "Delete lead". Falta: `/privacy` y el sync con GHL. Este documento manda sobre `docs/SPEC.md` en todo lo que toca el camino abierto.
 Los textos de interfaz van en **inglés y en español**, con la misma estructura, en `config/phase1.config.json` y `config/phase1.config.es.json` (lo verifica `lib/config.test.ts`). Los del panel van solo en inglés, en `config/team.config.json`. Aquí se copia el inglés como referencia aprobada; el español es su traducción (neutro latinoamericano, tuteo).
 **Idioma sin código**: el elegido con el botón EN / ES (cookie); si no, el del navegador (`Accept-Language`); si no es inglés ni español, inglés. La sesión anónima nace con ese idioma (`access_codes.lang` y `sessions.lang`).
 
@@ -96,7 +96,8 @@ Se calcula con la vista del equipo (`lib/scoring.ts`), pero el prospecto nunca v
 - Los contactos que llenan el formulario llevan la etiqueta **`privacy-request`** y se **excluyen de marketing**.
 - El **borrado** cubre Supabase, GHL y Resend.
   - Supabase y GHL: "Delete lead".
-  - Resend: verificar qué permite su API (registros de envío y contactos) y documentar el procedimiento.
+  - Resend: **manual por ahora**. "Delete lead" no lo toca (lo dice la pantalla). Pendiente: verificar qué permite su API (registros de envío y contactos) y documentar el procedimiento.
+- **"Delete lead"** (construido): confirmación escribiendo el nombre del negocio (o el código), GHL primero (si no responde, no se borra nada), después la empresa en cascada y la constancia en `deletion_log`. El gancho de GHL (`lib/server/crm.ts`) busca cada correo con `GET /contacts/search/duplicate` y borra con `DELETE /contacts/{id}` (API v2, `Version: 2021-07-28`); está probado con un `fetch` simulado, **no contra una cuenta real**: verificarlo antes de configurar las variables.
 - **`/privacy`** debe nombrar como proveedores a **Supabase, Vercel, Resend y GHL**.
   - Pendiente de confirmar: Turnstile es de **Cloudflare** y también procesa datos del navegador; probablemente deba nombrarse.
 - La parte de hechos de `/privacy` (qué se guarda, para qué, retención) se redacta a partir del código; la parte legal (empresa, dirección, contacto, derechos, menores, cambios) la completa el dueño. La página no se publica mientras quede un placeholder.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { industryLabel, CODE_ALPHABET, funnel, generateCode, isAllowedEmail, parseCompanyForm, toCsv, filterBySource, giftCounts, giftState, parseSource, sourceOf, utmEntries, utmSummary, type GiftRow } from "./admin";
+import { confirmMatches, deleteConfirmation, industryLabel, CODE_ALPHABET, funnel, generateCode, isAllowedEmail, parseCompanyForm, toCsv, filterBySource, giftCounts, giftState, parseSource, sourceOf, utmEntries, utmSummary, type GiftRow } from "./admin";
 
 describe("generateCode", () => {
   it("10 símbolos sin ambiguos, en formato XXXXX-XXXXX", () => {
@@ -162,5 +162,20 @@ describe("rubro en el panel", () => {
     expect(industryLabel(options, "dental")).toBe("Dental or medical practice");
     expect(industryLabel(options, "zoo")).toBe("zoo");
     expect(industryLabel(options, null)).toBeNull();
+  });
+});
+
+describe("Delete lead: confirmación", () => {
+  it("se escribe el nombre del negocio o, sin nombre, el código", () => {
+    expect(deleteConfirmation("Lakeview Plumbing", "K7MPX-4RHQ2")).toBe("Lakeview Plumbing");
+    expect(deleteConfirmation(null, "K7MPX-4RHQ2")).toBe("K7MPX-4RHQ2");
+    expect(deleteConfirmation("  ", "K7MPX-4RHQ2")).toBe("K7MPX-4RHQ2");
+  });
+
+  it("sin importar mayúsculas ni espacios de más; nunca con algo vacío", () => {
+    expect(confirmMatches("  lakeview   plumbing ", "Lakeview Plumbing")).toBe(true);
+    expect(confirmMatches("Lakeview", "Lakeview Plumbing")).toBe(false);
+    expect(confirmMatches("", "")).toBe(false);
+    expect(confirmMatches(null, "Lakeview Plumbing")).toBe(false);
   });
 });

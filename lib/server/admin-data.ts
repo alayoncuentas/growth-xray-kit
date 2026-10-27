@@ -1,8 +1,9 @@
 import "server-only";
-import { generateCode, sourceOf, type CodeStatus, type CompanyInput, type GiftRow, type Source } from "@/lib/admin";
+import { confirmMatches, deleteConfirmation, generateCode, sourceOf, type CodeStatus, type CompanyInput, type GiftRow, type Source } from "@/lib/admin";
 import { isLang, type Lang } from "@/lib/config";
 import type { OutsideView } from "@/lib/types";
 import { requireAdmin } from "./auth";
+import { CrmUnavailableError, deleteContacts } from "./crm";
 import { db, must } from "./db";
 
 // Lecturas y escrituras del panel interno. Cada función exportada exige sesión de admin (capa de acceso a datos):
@@ -202,4 +203,48 @@ export async function markGiftDelivered(code: string): Promise<boolean> {
   if (!rows.length) return false;
   must(await db().from("events").insert({ code, type: "gift_delivered", payload: { gift: rows[0].kind, by: admin.email } }), "events insert");
   return true;
+}
+
+export type DeleteLeadResult = { ok: true } | { ok: false; error: "mismatch" | "crm" | "notFound" };
+
+/**
+ * "Delete lead" (docs/OPEN_ENTRY.md decisión 7): borra la empresa entera, con todos sus códigos y en cascada sesiones,
+ * respuestas, puntajes, eventos y regalos. Antes borra los contactos en el CRM (si está conectado): si no puede ni
+ * consultarlo, no borra nada. Deja constancia en deletion_log sin datos del prospecto. `typed` debe coincidir con el
+ * nombre del negocio (o el código si no tiene nombre). Resend no se toca aquí: su borrado es manual.
+ */
+export async function deleteLead(code: string, typed: unknown): Promise<DeleteLeadResult> {
+  const admin = await requireAdmin();
+  const row = must(await db().from("access_codes").select("code, company_id, companies(name)").eq("code", code).maybeSingle(), "lead delete") as {
+    code: string;
+    company_id: string | null;
+    companies: { name: string | null } | { name: string | null }[] | null;
+  } | null;
+  if (!row) return { ok: false, error: "notFound" };
+  if (!confirmMatches(typed, deleteConfirmation(one(row.companies)?.name, row.code))) return { ok: false, error: "mismatch" };
+
+  const codes = row.company_id
+    ? (must(await db().from("access_codes").select("code, email").eq("company_id", row.company_id), "company codes") as { code: string; email: string | null }[])
+    : [{ code: row.code, email: null }];
+  const emails = codes.map((c) => c.email).filter((e): e is string => !!e);
+
+  let crm: Awaited<ReturnType<typeof deleteContacts>>;
+  try {
+    crm = await deleteContacts(emails);
+  } catch (e) {
+    if (e instanceof CrmUnavailableError) {
+      console.error("[delete lead] CRM", e.message);
+      return { ok: false, error: "crm" };
+    }
+    throw e;
+  }
+
+  if (row.company_id) must(await db().from("companies").delete().eq("id", row.company_id), "companies delete");
+  else must(await db().from("access_codes").delete().eq("code", row.code), "access_codes delete");
+
+  const log = await db()
+    .from("deletion_log")
+    .insert({ admin_email: admin.email, company_id: row.company_id, codes: codes.length, crm_status: crm.status, crm_ids: crm.ids });
+  if (log.error) console.error("[delete lead] deletion_log", log.error.message); // el borrado ya ocurrió
+  return { ok: true };
 }

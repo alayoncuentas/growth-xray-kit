@@ -84,6 +84,17 @@ export function industryLabel(options: { id: string; label: string }[], id: stri
   return options.find((o) => o.id === id)?.label ?? id;
 }
 
+// ---------- Delete lead ----------
+
+/** Lo que hay que escribir para confirmar "Delete lead": el nombre del negocio o, si no tiene, el código. */
+export const deleteConfirmation = (name: string | null | undefined, code: string): string => name?.trim() || code;
+
+/** La confirmación coincide sin importar mayúsculas ni espacios de más. */
+export function confirmMatches(typed: unknown, expected: string): boolean {
+  const norm = (s: string) => s.replace(/\s+/g, " ").trim().toLowerCase();
+  return typeof typed === "string" && norm(expected) !== "" && norm(typed) === norm(expected);
+}
+
 // ---------- regalos ----------
 
 export interface GiftRow {

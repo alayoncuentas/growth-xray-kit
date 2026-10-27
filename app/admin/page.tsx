@@ -13,12 +13,16 @@ import { adminCopy } from "@/lib/server/team";
 export default function AdminPage({ searchParams }: PageProps<"/admin">) {
   return (
     <main>
-      <Suspense fallback={<LoadingCard />}>{searchParams.then((sp) => <Dashboard source={parseSource(sp.source)} />)}</Suspense>
+      <Suspense fallback={<LoadingCard />}>
+        {searchParams.then((sp) => (
+          <Dashboard source={parseSource(sp.source)} deleted={sp.deleted === "1"} />
+        ))}
+      </Suspense>
     </main>
   );
 }
 
-async function Dashboard({ source }: { source: Source | null }) {
+async function Dashboard({ source, deleted }: { source: Source | null; deleted: boolean }) {
   const leads = filterBySource(await listLeads(), source); // exige sesión de admin
   const l = adminCopy.list;
   const q = source ? `source=${source}` : "";
@@ -28,6 +32,11 @@ async function Dashboard({ source }: { source: Source | null }) {
   );
   return (
     <div className="grid gap-5">
+      {deleted && (
+        <p role="status" className="rounded-card border border-line bg-card px-4 py-3 text-sm">
+          {l.deleted}
+        </p>
+      )}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <Eyebrow>{l.eyebrow}</Eyebrow>

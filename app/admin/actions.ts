@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { parseCompanyForm, type CompanyErrors, EXPIRY_CHOICES } from "@/lib/admin";
 import { phase1 } from "@/lib/config";
-import { addCode, createCompany, markGiftDelivered } from "@/lib/server/admin-data";
+import { addCode, createCompany, deleteLead, markGiftDelivered } from "@/lib/server/admin-data";
 import { authClient, isAdminEmail, requireAdmin } from "@/lib/server/auth";
 import { appOrigin } from "@/lib/server/origin";
 
@@ -74,4 +74,20 @@ export async function markGiftDeliveredAction(code: string): Promise<void> {
   await requireAdmin();
   await markGiftDelivered(code);
   redirect(`/admin/c/${encodeURIComponent(code)}`);
+}
+
+export type DeleteLeadState = { error?: "mismatch" | "crm" | "notFound" | "failed" };
+
+/** "Delete lead": confirma con el nombre escrito, borra y vuelve a la lista con el aviso. */
+export async function deleteLeadAction(code: string, _prev: DeleteLeadState, formData: FormData): Promise<DeleteLeadState> {
+  await requireAdmin();
+  let res;
+  try {
+    res = await deleteLead(code, formData.get("confirm"));
+  } catch (e) {
+    console.error("[delete lead]", code, e);
+    return { error: "failed" };
+  }
+  if (!res.ok) return { error: res.error };
+  redirect("/admin?deleted=1");
 }

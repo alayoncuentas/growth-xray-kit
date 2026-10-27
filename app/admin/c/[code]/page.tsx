@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { CopyButton } from "@/components/admin/CopyButton";
+import { DeleteLead } from "@/components/admin/DeleteLead";
 import { NewCodeForm } from "@/components/admin/NewCodeForm";
 import { StatusBadge, when } from "@/components/admin/Status";
 import { TeamView } from "@/components/admin/TeamView";
@@ -10,7 +11,7 @@ import { Panel } from "@/components/ui/Card";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { LoadingCard } from "@/components/ui/Loading";
 import { markGiftDeliveredAction } from "@/app/admin/actions";
-import { EXPIRY_CHOICES, giftState, utmEntries } from "@/lib/admin";
+import { deleteConfirmation, EXPIRY_CHOICES, giftState, utmEntries } from "@/lib/admin";
 import { splitAnswers } from "@/lib/answers";
 import { fill, getQuestion, isChoice, phase1, usd } from "@/lib/config";
 import { calcValues, visibleQuestions } from "@/lib/scoring";
@@ -151,6 +152,16 @@ async function Lead({ code, created }: { code: string; created: boolean }) {
           </Panel>
         </div>
       </div>
+
+      <section className="grid gap-3 rounded-panel border border-bad/50 p-5">
+        <h2 className="text-xl text-bad">{d.deleteTitle}</h2>
+        <p className="max-w-[70ch] text-sm text-muted">{fill(d.deleteText, { codes: lead.otherCodes.length + 1 })}</p>
+        <DeleteLead
+          code={lead.code}
+          expected={deleteConfirmation(co?.name, lead.code)}
+          t={{ label: d.deleteLabel, button: d.deleteButton, mismatch: d.deleteMismatch, crm: d.deleteCrm, failed: d.deleteFailed }}
+        />
+      </section>
     </div>
   );
 }
