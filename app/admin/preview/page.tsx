@@ -47,11 +47,7 @@ function screens(lang: Lang): Screen[] {
   const phase1 = getConfig(lang);
   // Las preguntas usan el negocio sin rubro conocido, para que aparezca también la de rubro.
   const qs = visibleQuestions(phase1, preview.plainCompany.industry);
-  return [
-    { id: "gate", label: p.screens.gate, part: null, src: "/?frame=1" },
-    { id: "welcome", label: p.screens.welcomeOutside, part: null, src: X(preview.code) },
-    { id: "welcome-plain", label: p.screens.welcomePlain, part: null, src: X(preview.plainCode) },
-    ...qs.map((q) => {
+  const questions = qs.map((q) => {
       const pr = progress(phase1, q.id, preview.plainCompany.industry)!;
       return {
         id: q.id,
@@ -60,9 +56,24 @@ function screens(lang: Lang): Screen[] {
         // La calculadora se muestra con respuestas de ejemplo, para que el % que se escapa venga calculado.
         src: X(preview.plainCode, `/q/${q.id}`, q.type === "calculator" ? "&sample=leaky" : ""),
         question: q,
-      };
-    }),
+      } satisfies Screen;
+  });
+  // Camino abierto (docs/OPEN_ENTRY.md): los datos del negocio van justo después de la pregunta de rubro.
+  const afterIndustry = questions.findIndex((s) => s.id === "industry") + 1;
+  const business: Screen = { id: "business", label: p.screens.business, part: p.openPart, src: X(preview.plainCode, "/business") };
+  return [
+    { id: "gate", label: p.screens.gate, part: null, src: "/?frame=1" },
+    { id: "start", label: p.screens.start, part: p.openPart, src: "/?frame=1&preview=open" },
+    { id: "welcome", label: p.screens.welcomeOutside, part: null, src: X(preview.code) },
+    { id: "welcome-plain", label: p.screens.welcomePlain, part: null, src: X(preview.plainCode) },
+    ...questions.slice(0, afterIndustry),
+    business,
+    ...questions.slice(afterIndustry),
+    { id: "email-open", label: p.screens.emailOpen, part: p.openPart, src: X(preview.code, "/email", "&sample=leaky&open=1") },
+    { id: "email-invited", label: p.screens.emailInvited, part: null, src: X(preview.code, "/email", "&sample=ready") },
+    { id: "partial", label: p.screens.partial, part: p.openPart, src: X(preview.code, "/results", "&sample=leaky&partial=1") },
     { id: "results", label: p.screens.results, part: null, src: X(preview.code, "/results", "&sample=leaky") },
+    { id: "results-gift-b", label: p.screens.resultsGiftB, part: null, src: X(preview.code, "/results", "&sample=ready") },
     { id: "report", label: p.screens.report, part: null, src: `/r/${preview.code}?frame=1&sample=leaky` },
   ];
 }

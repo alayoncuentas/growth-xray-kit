@@ -1,6 +1,6 @@
 # Camino abierto (sin código): decisiones aprobadas
 
-Estado: **aprobado; en construcción en `feature/open-entry`.** Hecho: el inicio (botón, Turnstile, límite por IP, UTM y referrer, empresa + código + sesión; detrás del flag), la migración, los datos del negocio, el código oculto en el camino abierto, la pantalla del correo con consentimiento, el resultado parcial, los regalos (ofrecimiento, plazos, bloque en resultados y línea en el informe), el panel (origen, UTM, referrer, filtro, contador de regalos y "Mark delivered"), el cron diario de borrado y "Delete lead". Falta: `/privacy` y el sync con GHL. Este documento manda sobre `docs/SPEC.md` en todo lo que toca el camino abierto.
+Estado: **aprobado; construido en `feature/open-entry` (sin publicar).** Hecho: el inicio (botón, Turnstile, límite por IP, UTM y referrer, empresa + código + sesión; detrás del flag), la migración, los datos del negocio, el código oculto en el camino abierto, la pantalla del correo con consentimiento, el resultado parcial, los regalos (ofrecimiento, plazos, bloque en resultados y línea en el informe), el panel (origen, UTM, referrer, filtro, contador de regalos y "Mark delivered"), el cron diario de borrado, "Delete lead", la vista previa de las pantallas nuevas y el noindex del entorno de pruebas. Falta: `/privacy` (con eso se puede encender el flag), el sync con GHL (`/api/crm-sync`) y el procedimiento de borrado en Resend. Este documento manda sobre `docs/SPEC.md` en todo lo que toca el camino abierto.
 Los textos de interfaz van en **inglés y en español**, con la misma estructura, en `config/phase1.config.json` y `config/phase1.config.es.json` (lo verifica `lib/config.test.ts`). Los del panel van solo en inglés, en `config/team.config.json`. Aquí se copia el inglés como referencia aprobada; el español es su traducción (neutro latinoamericano, tuteo).
 **Idioma sin código**: el elegido con el botón EN / ES (cookie); si no, el del navegador (`Accept-Language`); si no es inglés ni español, inglés. La sesión anónima nace con ese idioma (`access_codes.lang` y `sessions.lang`).
 
@@ -130,7 +130,10 @@ Ahora: **"Valor primero; resultado completo a cambio del correo"**, en el camino
 | `CRON_SECRET` | Vercel | Protege la tarea diaria de borrado y reintentos. |
 | `GHL_PRIVATE_INTEGRATION_TOKEN` | Vercel y `.env.local` | Token de la integración privada de GHL. |
 | `GHL_LOCATION_ID` | Vercel y `.env.local` | Subcuenta (location) de GHL. |
-| `IP_HASH_SALT` | Vercel | Ya existe en el código; debe estar puesta en producción. |
+| `IP_HASH_SALT` | Vercel | Ya existe en el código; debe estar puesta en producción (sin ella el flag no enciende). |
+| `NEXT_PUBLIC_APP_URL` | Vercel | Ya existía. Si contiene `xray-test` (entorno de pruebas), todas las páginas salen con `noindex` (metadata y cabecera `X-Robots-Tag`); se lee al compilar. |
+
+Todas están en `.env.example`.
 
 Todas se agregan a `.env.example` sin valores.
 
@@ -246,5 +249,15 @@ Regalos:     A · Response-time test + website review · B · Google reviews aud
 
 ## 10. Al construir
 
-- Actualizar `docs/SPEC.md` (flujo, rutas, modelo de datos, eventos, reglas de persistencia), la vista previa (`/admin/preview`: inicio abierto, datos del negocio, correo, parcial y los dos regalos) y los tests (regla del regalo, días hábiles, UTM, límites, flag).
-- La regla del regalo y el cálculo de días hábiles van como funciones puras con tests.
+- Hecho: `docs/SPEC.md` (flujo, rutas, modelo de datos, eventos, reglas de persistencia), la vista previa y los tests (regla del regalo, días hábiles, UTM, límites, flag, consentimiento, cron, Delete lead).
+- La regla del regalo y el cálculo de días hábiles son funciones puras con tests (`lib/gifts.ts`).
+- **Vista previa** (`/admin/preview`): suma el inicio abierto (`/?preview=open`, botón inactivo, aunque el flag esté apagado), los datos del negocio, la pantalla del correo (camino abierto con `?open=1` y regalo A; invitado con regalo B), el resumen parcial (`?partial=1`) y los resultados con cada regalo. Esos parámetros solo valen con un código de vista previa (sesión de admin); nada se guarda.
+
+Textos de la vista previa agregados (panel, solo inglés): `Open entry`, `Start · open entry (shown only with OPEN_ENTRY_ENABLED; the button is inactive here)`, `Business details · after the industry question`, `Email screen · open entry (gift A)`, `Email screen · invited without an email (gift B)`, `Summary · open entry without an email`, `Results · with an email (gift A)` (antes `Results`) y `Results · with an email (gift B)`.
+
+### Para publicar
+
+1. Migraciones en producción (ver "Orden de despliegue").
+2. Variables en Vercel: `CRON_SECRET` (el cron responde 401 sin ella), `IP_HASH_SALT`; las de Turnstile y GHL cuando corresponda.
+3. Merge a `main` (el flag sigue apagado: el camino abierto no aparece).
+4. Publicar `/privacy` sin placeholders y recién entonces `OPEN_ENTRY_ENABLED=true`.

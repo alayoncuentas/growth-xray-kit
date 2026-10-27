@@ -23,17 +23,19 @@ export default function EmailPage({ params, searchParams }: PageProps<"/x/[code]
     <Container>
       <Suspense fallback={<LoadingCard />}>
         {Promise.all([params, searchParams]).then(([{ code }, sp]) => (
-          <EmailStep code={code} sample={sp.sample} frame={sp.frame === "1"} />
+          <EmailStep code={code} sample={sp.sample} frame={sp.frame === "1"} previewOpen={sp.open === "1"} />
         ))}
       </Suspense>
     </Container>
   );
 }
 
-async function EmailStep({ code: raw, sample, frame }: { code: string; sample: unknown; frame: boolean }) {
+async function EmailStep({ code: raw, sample, frame, previewOpen }: { code: string; sample: unknown; frame: boolean; previewOpen: boolean }) {
   const r = await checkAccess(raw);
   if (!r.ok) return <CodeError reason={r.reason} />;
-  const { code, lang, open, email, preview } = r.access;
+  const { code, lang, email, preview } = r.access;
+  // Vista previa: ?open=1 muestra la variante del camino abierto ("Skip" al resumen).
+  const open = preview ? previewOpen : r.access.open;
   const results = stepHref(code, { kind: "results" });
 
   let state;
@@ -59,7 +61,7 @@ async function EmailStep({ code: raw, sample, frame }: { code: string; sample: u
         </p>
         <EmailForm code={code} from="screen" gift={gift} />
         <div className="mt-5 border-t border-line pt-4">
-          <ButtonLink href={`${results}?skip=1`} variant="ghost">
+          <ButtonLink href={`${results}?skip=1${preview && open ? "&partial=1" : ""}`} variant="ghost">
             {open ? t.capture.skip : t.capture.skipInvited}
           </ButtonLink>
         </div>

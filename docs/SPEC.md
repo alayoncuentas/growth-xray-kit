@@ -168,6 +168,7 @@ Reglas de persistencia (fase 1):
 - **Inicio abierto en producción**: el flag además exige `IP_HASH_SALT`, y Turnstile debe responder con el hostname de `NEXT_PUBLIC_APP_URL` y la acción `start`.
 - **"Delete lead"** (detalle del panel): hay que escribir el nombre del negocio (o el código si no tiene) para habilitar el botón; el servidor lo vuelve a comprobar (`lib/admin.ts`: `confirmMatches`). Primero borra en GHL los contactos con los correos de todos los códigos de la empresa (`lib/server/crm.ts`; sin `GHL_PRIVATE_INTEGRATION_TOKEN` y `GHL_LOCATION_ID` no hace nada: `skipped`). Si no puede consultar GHL, **no borra nada** y lo dice. Después borra la empresa (en cascada: códigos, sesiones, respuestas, puntajes, eventos y regalos) y registra en `deletion_log` quién, cuándo, la empresa, cuántos códigos y el resultado en GHL (`ok`, `skipped` o `failed` con los ids de contacto, para reintentar), sin datos del prospecto. Los correos enviados por Resend no se borran aquí (procedimiento manual, docs/OPEN_ENTRY.md §5).
 - **Borrado automático** (`GET /api/cron/cleanup`, Vercel Cron todos los días a las 09:00 UTC según `vercel.json`): exige `Authorization: Bearer <CRON_SECRET>` (comparación en tiempo constante; sin `CRON_SECRET` o con menos de 16 caracteres, nunca pasa) y llama a `cleanup_expired()`, que borra empresas `open` sin correo con más de 30 días desde su creación (en cascada) y `access_attempts` y `open_starts` de más de 24 horas. Responde y registra en el log cuántas filas borró.
+- **Entorno de pruebas sin indexar**: si `NEXT_PUBLIC_APP_URL` contiene `xray-test`, todas las páginas salen con `robots: noindex, nofollow` (metadata) y la cabecera `X-Robots-Tag: noindex, nofollow` (`lib/seo.ts`, `next.config.ts`).
 - **`question_viewed`**: al ver una pregunta en el navegador (desde el cliente, no al renderizar, para no contar prefetches), una vez por pregunta y carga de página; `payload.question_id`. El servidor valida el código y que la pregunta exista y se muestre con el rubro del código (`lib/flow.ts`: `isVisibleQuestion`). La vista previa no registra nada. Sirve para el abandono por pregunta (vista sin `answered` posterior).
 - **`answered`**: cada `POST /api/answer` válido. Upsert en `answers` (la calculadora se guarda como un objeto con los campos que el usuario movió), actualiza `last_question_id` y recalcula la fila de `scores`. La respuesta de la API nunca incluye puntajes.
 - **`phase_done`**: con el botón "See my results" (`complete: true`), si no queda ninguna pregunta visible sin responder. Una sola vez por sesión: fija `completed_at` y el estado pasa a `p1_done`. El estado nunca retrocede.
@@ -202,7 +203,9 @@ Reglas de persistencia (fase 1):
 /r/[code]              informe compartible (solo lectura)
 /admin                 panel interno (protegido con Supabase Auth): lista, embudo, puntajes, vista del equipo; ?source=invited|open
 /admin/export          CSV (?status=sent, ?source=invited|open)
-/admin/preview         vista previa de todas las pantallas, variantes de insights y los 5 arquetipos (solo lectura)
+/admin/preview         vista previa de todas las pantallas (también las del camino abierto), variantes de insights
+                       y los 5 arquetipos (solo lectura). Parámetros solo con código de vista previa: /?preview=open,
+                       /x/[code]/email?open=1, /x/[code]/results?partial=1
 /api/answer            POST: guarda respuesta y recalcula puntajes
 /api/cron/cleanup      GET (Vercel Cron, Bearer CRON_SECRET): borrado automático diario
 /api/crm-sync          webhook al CRM cuando termina una fase

@@ -213,8 +213,14 @@
         "gate": "Code entry",
         "welcomeOutside": "Welcome · with outside view",
         "welcomePlain": "Welcome · without outside view",
-        "results": "Results",
-        "report": "Read-only report (/r) · link in the results email"
+        "results": "Results · with an email (gift A)",
+        "report": "Read-only report (/r) · link in the results email",
+        "start": "Start · open entry (shown only with OPEN_ENTRY_ENABLED; the button is inactive here)",
+        "business": "Business details · after the industry question",
+        "emailOpen": "Email screen · open entry (gift A)",
+        "emailInvited": "Email screen · invited without an email (gift B)",
+        "partial": "Summary · open entry without an email",
+        "resultsGiftB": "Results · with an email (gift B)"
       },
       "partLabel": "Part {n} · {label}",
       "mapSub": "In order. Question screens use a business without a known industry, so the industry question appears too; with a code that includes the industry it's skipped.",
@@ -240,7 +246,8 @@
         "reset": "Start over",
         "back": "Preview map"
       },
-      "sampleAnswers": "Sample answers"
+      "sampleAnswers": "Sample answers",
+      "openPart": "Open entry"
     },
     "langs": {
       "en": "English",

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import { SiteHeader } from "@/components/ui/SiteHeader";
+import { isTestDeploy } from "@/lib/seo";
 import "./globals.css";
 
 const bricolage = Bricolage_Grotesque({
@@ -25,6 +26,8 @@ const plexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "Growth X-Ray",
   description: "A private diagnostic that shows where new customers slip away.",
+  // Entorno de pruebas (xray-test): no se indexa (lib/seo.ts; la cabecera X-Robots-Tag está en next.config.ts).
+  ...(isTestDeploy(process.env.NEXT_PUBLIC_APP_URL) ? { robots: { index: false, follow: false } } : {}),
 };
 
 export const viewport: Viewport = {

@@ -6,7 +6,8 @@ import { ResultsView } from "@/components/results/ResultsView";
 import { BusinessMarker } from "@/components/ui/BusinessMarker";
 import { Container } from "@/components/ui/Container";
 import { LoadingCard } from "@/components/ui/Loading";
-import { phase1 } from "@/lib/config";
+import { getConfig, phase1 } from "@/lib/config";
+import { isSampleId } from "@/lib/preview";
 import { maskEmail } from "@/lib/email";
 import { needsBusinessStep, needsEmailStep, resultsMode, stepHref } from "@/lib/flow";
 import { giftForAnswers } from "@/lib/gifts";
@@ -21,14 +22,35 @@ export default function ResultsPage({ params, searchParams }: PageProps<"/x/[cod
     <Container wide>
       <Suspense fallback={<LoadingCard />}>
         {Promise.all([params, searchParams]).then(([{ code }, sp]) => (
-          <Results code={code} sample={sp.sample} frame={sp.frame === "1"} skipped={sp.skip === "1"} unlocked={sp.unlocked === "1"} />
+          <Results
+            code={code}
+            sample={sp.sample}
+            frame={sp.frame === "1"}
+            skipped={sp.skip === "1"}
+            unlocked={sp.unlocked === "1"}
+            previewPartial={sp.partial === "1"}
+          />
         ))}
       </Suspense>
     </Container>
   );
 }
 
-async function Results({ code: raw, sample, frame, skipped, unlocked }: { code: string; sample: unknown; frame: boolean; skipped: boolean; unlocked: boolean }) {
+async function Results({
+  code: raw,
+  sample,
+  frame,
+  skipped,
+  unlocked,
+  previewPartial,
+}: {
+  code: string;
+  sample: unknown;
+  frame: boolean;
+  skipped: boolean;
+  unlocked: boolean;
+  previewPartial: boolean;
+}) {
   const r = await checkAccess(raw);
   if (!r.ok) return <CodeError reason={r.reason} />;
   const { code, company, open, email, preview } = r.access;
@@ -46,8 +68,16 @@ async function Results({ code: raw, sample, frame, skipped, unlocked }: { code: 
     // Con correo y la fase terminada se muestra el regalo: queda ofrecido (y fijo) desde ahora.
     if (email && saved.completed) gift = await offerGiftSafe(code);
   }
-  // La vista previa muestra siempre el resultado completo (el parcial se ve en /admin/preview).
-  const mode = preview ? "full" : resultsMode({ open, hasEmail: !!email });
+  // Vista previa: completo, o el parcial con ?partial=1 (/admin/preview). Nada se lee ni se escribe.
+  const mode = preview ? (previewPartial ? "partial" : "full") : resultsMode({ open, hasEmail: !!email });
+  const giftKind = giftForAnswers(phase1, initial.answers, initial.calc);
+  // Vista previa con respuestas de muestra: el bloque del regalo que tocaría, con un correo de ejemplo enmascarado.
+  const offered =
+    gift && email
+      ? { kind: gift.kind, to: maskEmail(email) }
+      : preview && isSampleId(sample)
+        ? { kind: giftKind, to: maskEmail(getConfig(r.access.lang).copy.capture.emailPlaceholder) }
+        : null;
 
   return (
     <LangProvider lang={r.access.lang} code={code}>
@@ -58,9 +88,9 @@ async function Results({ code: raw, sample, frame, skipped, unlocked }: { code: 
           company={company}
           open={open}
           mode={mode}
-          gift={giftForAnswers(phase1, initial.answers, initial.calc)}
+          gift={giftKind}
           unlockedTo={unlocked && mode === "full" && email ? maskEmail(email) : null}
-          offered={gift && email ? { kind: gift.kind, to: maskEmail(email) } : null}
+          offered={offered}
         />
         <PreviewChrome access={r.access} frame={frame} />
       </DiagnosticProvider>
