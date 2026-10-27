@@ -1,7 +1,8 @@
 // Regalo según calificación (docs/OPEN_ENTRY.md §2). Funciones puras.
 // Se decide con la vista del equipo, pero el prospecto nunca ve Need, Potential ni Readiness: solo qué regalo le tocó.
 
-import { phase1Result, teamScores } from "./scoring";
+// Con extensión .ts: lo carga lib/admin.ts desde scripts/admin-link.mts, con Node directo (lib/scripts.test.ts).
+import { phase1Result, teamScores } from "./scoring.ts";
 import type { Answers, CalcOverrides, Phase1Config } from "./types";
 
 export type GiftKind = "A" | "B";

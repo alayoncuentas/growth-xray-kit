@@ -2,7 +2,8 @@
 // Sin dependencias del servidor para poder testearlas; los datos los trae lib/server/admin-data.ts.
 
 import type { Lang } from "./config";
-import { businessDaysLeft, type GiftKind } from "./gifts";
+// Imports de valor con extensión .ts: scripts/admin-link.mts carga este archivo con Node directo (lib/scripts.test.ts).
+import { businessDaysLeft, type GiftKind } from "./gifts.ts";
 import type { OutsideView } from "./types";
 
 // ---------- códigos de acceso ----------
