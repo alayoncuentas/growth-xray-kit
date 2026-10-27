@@ -69,6 +69,14 @@ monthly  = missed × close% × value
 cautious = monthly × 0.25
 adLeak   = adSpend × leak%
 ```
+Cifras derivadas que muestra la pantalla de resultados (solo presentación; `lib/scoring.ts`):
+```
+annual          = monthly × 12          (cifra principal, también en el parcial)
+customers/year  = missed × close% × 12  (< 1 → "less than one"; redondeado = 1 → singular)
+cautious/year   = cautious × 12
+per $1,000 ads  = 1,000 × leak%         (se omite si adSpend = 0)
+```
+Pilares en la pantalla de resultados: de menor a mayor puntaje (empates en el orden del config); los de la fase 2 en una sola fila gris con candado.
 
 ### Arquetipos (orden de evaluación)
 1. `ready` si índice promedio ≥ 70

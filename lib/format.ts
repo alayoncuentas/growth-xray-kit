@@ -1,0 +1,21 @@
+// Formato de presentación. Funciones puras.
+
+/**
+ * Ancho medio de un carácter de la cifra grande, en "em" (Bricolage Grotesque en negrita con tabular-nums).
+ * Es un tope prudente: los dígitos miden ~0.6 em y "$" y "," menos.
+ */
+export const FIGURE_GLYPH_EM = 0.66;
+
+/** Tamaño de letra (px) para que `text` quepa en una línea de `width` px, sin pasar de `max`. */
+export function figurePx(text: string, width: number, max = 72): number {
+  return Math.min(max, width / (FIGURE_GLYPH_EM * Math.max(1, text.length)));
+}
+
+/**
+ * El mismo cálculo en CSS, relativo al ancho del contenedor (`cqi`; el padre necesita `container-type: inline-size`).
+ * Así la cifra de 11 caracteres ($63,000,000) entra en una línea a 400 px y las cortas llegan a `max`.
+ */
+export function figureFontSize(text: string, max = 72): string {
+  const cqi = Math.floor((100 / (FIGURE_GLYPH_EM * Math.max(1, text.length))) * 100) / 100;
+  return `min(${max}px, ${cqi}cqi)`;
+}

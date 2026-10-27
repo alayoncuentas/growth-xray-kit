@@ -122,6 +122,43 @@ export function calcValues(cfg: Phase1Config, answers: Answers, overrides: CalcO
   };
 }
 
+// ---------- cifras derivadas para la pantalla de resultados ----------
+// Solo presentan de otra forma lo que ya da calcValues; no cambian ningún cálculo (docs/SPEC.md §3).
+
+/** Clientes al año ligados a las consultas que se escapan: missed × close% × 12. Sin redondear (ver customersBucket). */
+export function lostCustomersPerYear(c: CalcResult): number {
+  return ((c.missed * c.close) / 100) * 12;
+}
+
+/** Qué frase usar para los clientes al año: menos de uno, uno (redondeado) o varios. */
+export function customersBucket(n: number): "few" | "one" | "many" {
+  if (n < 1) return "few";
+  return Math.round(n) === 1 ? "one" : "many";
+}
+
+/** De cada $1,000 en anuncios, cuánto paga consultas que se escapan (= 1,000 × leak%). */
+export function adLeakPerThousand(leak: number): number {
+  return Math.round(leak * 10);
+}
+
+/** Escenario prudente al año: cautious × 12. */
+export function cautiousAnnual(c: CalcResult): number {
+  return c.cautious * 12;
+}
+
+/** Pilares de la fase 1 con puntaje, del más débil al más fuerte; los empates conservan el orden del config. */
+export function pillarsWeakestFirst(cfg: Phase1Config, ps: PillarScores): { id: Phase1PillarId; label: string; score: number }[] {
+  return cfg.pillars
+    .filter((p) => p.phase === 1 && typeof ps[p.id as Phase1PillarId] === "number")
+    .map((p) => ({ id: p.id as Phase1PillarId, label: p.label, score: ps[p.id as Phase1PillarId] as number }))
+    .sort((a, b) => a.score - b.score); // Array.prototype.sort es estable
+}
+
+/** Pilares que se abren en la fase 2 (fila gris con candado). */
+export function lockedPillars(cfg: Phase1Config): { id: string; label: string }[] {
+  return cfg.pillars.filter((p) => p.phase !== 1).map((p) => ({ id: p.id, label: p.label }));
+}
+
 // ---------- arquetipo y prioridades ----------
 
 /** Invierte en publicidad y la primera respuesta o el seguimiento están por debajo de 55. */

@@ -1,15 +1,21 @@
 import { describe, expect, it } from "vitest";
 import { phase1 as cfg } from "./config";
 import {
+  adLeakPerThousand,
   adSpend,
   archetype,
   averageIndex,
   calcValues,
+  cautiousAnnual,
+  customersBucket,
   indexBand,
   leakFromAnswers,
+  lockedPillars,
+  lostCustomersPerYear,
   notYet,
   phase1Result,
   pillarScores,
+  pillarsWeakestFirst,
   rankFixes,
   teamScores,
   visibleQuestions,
@@ -213,5 +219,58 @@ describe("config", () => {
     for (const p of cfg.pillars.filter((p) => p.phase === 1)) {
       expect(cfg.findings[p.id as keyof typeof cfg.findings], p.id).toBeDefined();
     }
+  });
+});
+
+describe("cifras derivadas de la pantalla de resultados", () => {
+  // Valores por defecto: 60 consultas, 30% se escapan, 20% de cierre, $1,500.
+  const c = calcValues(cfg, {}, { inquiries: 60, value: 1500, leak: 30, close: 20 });
+
+  it("clientes al año = missed × close% × 12", () => {
+    expect(c.missed).toBe(18);
+    expect(lostCustomersPerYear(c)).toBeCloseTo(43.2);
+    expect(customersBucket(lostCustomersPerYear(c))).toBe("many");
+  });
+
+  it("frases de uno y de menos de uno", () => {
+    expect(customersBucket(0)).toBe("few");
+    expect(customersBucket(0.99)).toBe("few");
+    expect(customersBucket(1)).toBe("one");
+    expect(customersBucket(1.49)).toBe("one");
+    expect(customersBucket(1.5)).toBe("many");
+    // 5 consultas × 5% × 5% × 12 = 0.15 clientes al año
+    expect(customersBucket(lostCustomersPerYear(calcValues(cfg, {}, { inquiries: 5, leak: 5, close: 5 })))).toBe("few");
+  });
+
+  it("de cada $1,000 en anuncios", () => {
+    expect(adLeakPerThousand(30)).toBe(300);
+    expect(adLeakPerThousand(0)).toBe(0);
+    expect(adLeakPerThousand(70)).toBe(700);
+  });
+
+  it("escenario prudente al año = cautious × 12 y no cambia los cálculos existentes", () => {
+    expect(c.monthly).toBe(5400);
+    expect(c.annual).toBe(64800);
+    expect(cautiousAnnual(c)).toBe(16200);
+  });
+
+  it("la cifra anual más alta posible es $63,000,000", () => {
+    expect(calcValues(cfg, {}, { inquiries: 500, value: 25000, leak: 70, close: 60 }).annual).toBe(63_000_000);
+  });
+
+  it("pilares del más débil al más fuerte; empates en el orden del config; sin los de la fase 2", () => {
+    const ids = cfg.pillars.filter((p) => p.phase === 1).map((p) => p.id);
+    const tie = Object.fromEntries(ids.map((id) => [id, 50]));
+    expect(pillarsWeakestFirst(cfg, tie).map((p) => p.id)).toEqual(ids);
+    const ps = pillarScores(cfg, leakyDental);
+    const sorted = pillarsWeakestFirst(cfg, ps);
+    expect(sorted.map((p) => p.score)).toEqual([...sorted.map((p) => p.score)].sort((a, b) => a - b));
+    expect(sorted.length).toBe(ids.length);
+    expect(sorted[0].id).toBe("pipeline");
+  });
+
+  it("pilares sin puntaje no aparecen; los de la fase 2 van aparte", () => {
+    expect(pillarsWeakestFirst(cfg, { access: 40 }).map((p) => p.id)).toEqual(["access"]);
+    expect(lockedPillars(cfg).map((p) => p.id)).toEqual(["retention", "visibility", "readiness"]);
   });
 });

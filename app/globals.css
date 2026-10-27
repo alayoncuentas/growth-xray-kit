@@ -16,10 +16,10 @@
   --accent: #0e5c61;
   --accent-ink: #ffffff;
   --accent-soft: #ddecea;
-  --leak: #b85e17;
+  --leak: #a3540f; /* ≥ 4.5:1 sobre paper, card y leak-soft (AA en texto chico) */
   --leak-soft: #f7e7d7;
   --good: #2c7a4d;
-  --warn: #a8731a;
+  --warn: #8f6116; /* ≥ 4.9:1 sobre paper y card */
   --bad: #b0412c;
   color-scheme: light;
 }
