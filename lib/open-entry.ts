@@ -38,12 +38,21 @@ export type Utm = Partial<Record<(typeof UTM_KEYS)[number], string>>;
 const MAX_UTM = 200;
 const MAX_REFERRER = 500;
 
-/** UTM de la URL de llegada (o del formulario). Solo las 5 claves conocidas, recortadas; null si no hay ninguna. */
+/**
+ * Texto que viene de la URL, listo para Postgres: sin caracteres de control (jsonb rechaza "\u0000") y recortado
+ * por caracteres, no por unidades UTF-16 (cortar un emoji por la mitad deja un surrogate suelto que jsonb rechaza).
+ */
+function cleanText(raw: string, max: number): string {
+  return Array.from(raw.replace(/\p{Cc}/gu, "").trim()).slice(0, max).join("").trim();
+}
+
+/** UTM de la URL de llegada (o del formulario). Solo las 5 claves conocidas, limpias y recortadas; null si no hay ninguna. */
 export function parseUtm(get: (key: string) => string | null | undefined): Utm | null {
   const out: Utm = {};
   for (const k of UTM_KEYS) {
-    const v = get(k)?.trim();
-    if (v) out[k] = v.slice(0, MAX_UTM);
+    const raw = get(k);
+    const v = typeof raw === "string" ? cleanText(raw, MAX_UTM) : "";
+    if (v) out[k] = v;
   }
   return Object.keys(out).length ? out : null;
 }
@@ -62,7 +71,32 @@ export function cleanReferrer(raw: string | null | undefined, ownHost: string | 
   }
   if (url.protocol !== "http:" && url.protocol !== "https:") return null;
   if (ownHost && url.host.toLowerCase() === ownHost.toLowerCase()) return null;
-  return url.toString().slice(0, MAX_REFERRER);
+  return cleanText(url.toString(), MAX_REFERRER) || null;
+}
+
+/**
+ * Primer contacto al tocar "Start my X-Ray": UTM de los campos ocultos del formulario y, si no llegaron, de la
+ * URL de la página, que el navegador manda como Referer de la acción (solo si es del propio sitio). El referrer
+ * externo sale solo del formulario: el Referer de la acción siempre es el propio sitio.
+ */
+export function arrivalFrom(
+  get: (key: string) => string | null | undefined,
+  refererHeader: string | null | undefined,
+  ownHost: string | null | undefined,
+): { utm: Utm | null; referrer: string | null } {
+  return { utm: parseUtm(get) ?? utmFromPage(refererHeader, ownHost), referrer: cleanReferrer(get("referrer"), ownHost) };
+}
+
+function utmFromPage(raw: string | null | undefined, ownHost: string | null | undefined): Utm | null {
+  if (!raw || !ownHost) return null;
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return null;
+  }
+  if (url.host.toLowerCase() !== ownHost.toLowerCase()) return null;
+  return parseUtm((k) => url.searchParams.get(k));
 }
 
 // ---------- datos del negocio (después de la pregunta de rubro) ----------

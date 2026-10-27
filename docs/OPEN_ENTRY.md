@@ -62,7 +62,7 @@ Se calcula con la vista del equipo (`lib/scoring.ts`), pero el prospecto nunca v
 
 - **Cloudflare Turnstile** en el inicio abierto (widget *Managed*, hostname `xray.123spice.com`). Se valida en el servidor (`siteverify`) antes de crear la sesión.
 - **Límite de sesiones nuevas por IP**: 5 por hora y 20 por día, con el mismo hash de IP de `access_attempts`, contadas en la tabla `open_starts` (aparte de `access_attempts`, para que empezar no bloquee el ingreso con código).
-- **UTM y referrer**: primer contacto (first touch). Se capturan al llegar a `/` y se guardan en la empresa al tocar "Start my X-Ray".
+- **UTM y referrer**: primer contacto (first touch). Se capturan al llegar a `/` y se guardan en la empresa al tocar "Start my X-Ray". Las 5 claves `utm_*`, sin caracteres de control y recortadas a 200 caracteres (referrer: 500) sin partir emojis. Si los campos ocultos del formulario no traen UTM, se toman de la URL de la página (el Referer de la acción, solo del propio sitio).
 - **Migración** `supabase/migrations/20261027000000_open_entry.sql` (detalle en `docs/SPEC.md` §5):
   - `companies`: `source` (`invited` | `open`), `utm jsonb`, `referrer`; `name` opcional solo para `open`.
   - `access_codes`: `email_consent_at`, `email_consent_version`.

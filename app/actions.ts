@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { isLang, LANG_COOKIE } from "@/lib/config";
 import { getConfig } from "@/lib/config";
 import { afterBusiness, stepHref } from "@/lib/flow";
-import { cleanReferrer, parseBusinessForm, parseUtm } from "@/lib/open-entry";
+import { arrivalFrom, parseBusinessForm } from "@/lib/open-entry";
 import { browserLang, checkAccess, clientKey, type AccessError } from "@/lib/server/access";
 import { openLink, setSessionLang } from "@/lib/server/diagnostic";
 import { sendResumeEmail } from "@/lib/server/email";
@@ -34,15 +34,16 @@ export async function startOpen(_prev: StartState, formData: FormData): Promise<
   try {
     const ipHash = await clientKey();
     if (await openLimitHit(ipHash)) return { error: "limit" };
-    const host = (await headers()).get("host");
-    code = await createOpenSession(ipHash, {
-      lang: await browserLang(),
-      utm: parseUtm((k) => {
+    const h = await headers();
+    const arrival = arrivalFrom(
+      (k) => {
         const v = formData.get(k);
         return typeof v === "string" ? v : null;
-      }),
-      referrer: cleanReferrer(String(formData.get("referrer") ?? ""), host),
-    });
+      },
+      h.get("referer"),
+      h.get("host"),
+    );
+    code = await createOpenSession(ipHash, { lang: await browserLang(), ...arrival });
   } catch (e) {
     console.error("[open start]", e);
     return { error: "generic" };
