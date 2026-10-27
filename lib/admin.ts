@@ -2,6 +2,7 @@
 // Sin dependencias del servidor para poder testearlas; los datos los trae lib/server/admin-data.ts.
 
 import type { Lang } from "./config";
+import { businessDaysLeft, type GiftKind } from "./gifts";
 import type { OutsideView } from "./types";
 
 // ---------- códigos de acceso ----------
@@ -41,6 +42,75 @@ export function funnel(statuses: string[]): FunnelStep[] {
     const count = rank.filter((r) => r >= i).length;
     return { status, count, pct: total ? Math.round((count / total) * 100) : 0 };
   });
+}
+
+// ---------- origen (camino abierto) ----------
+
+export const SOURCES = ["invited", "open"] as const;
+export type Source = (typeof SOURCES)[number];
+
+/** Filtro ?source= del panel y del CSV: invited, open o null (todos). */
+export function parseSource(v: unknown): Source | null {
+  return v === "invited" || v === "open" ? v : null;
+}
+
+/** Sin la columna (antes de la migración) o con otro valor, la empresa cuenta como invitada. */
+export const sourceOf = (v: unknown): Source => (v === "open" ? "open" : "invited");
+
+export function filterBySource<T extends { source: Source }>(rows: T[], source: Source | null): T[] {
+  return source ? rows.filter((r) => r.source === source) : rows;
+}
+
+const UTM_ORDER = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"] as const;
+
+/** UTM en una línea para la lista: "google / cpc / spring". null si no hay. */
+export function utmSummary(utm: unknown): string | null {
+  if (!utm || typeof utm !== "object") return null;
+  const u = utm as Record<string, unknown>;
+  const parts = UTM_ORDER.slice(0, 3).map((k) => u[k]).filter((v): v is string => typeof v === "string" && v.length > 0);
+  return parts.length ? parts.join(" / ") : null;
+}
+
+/** Las 5 claves en orden, solo las que tienen valor (detalle y CSV). */
+export function utmEntries(utm: unknown): [string, string][] {
+  if (!utm || typeof utm !== "object") return [];
+  const u = utm as Record<string, unknown>;
+  return UTM_ORDER.flatMap((k) => (typeof u[k] === "string" && u[k] ? [[k, u[k] as string] as [string, string]] : []));
+}
+
+// ---------- regalos ----------
+
+export interface GiftRow {
+  kind: GiftKind;
+  offered_at: string;
+  due_at: string;
+  delivered_at: string | null;
+  delivered_by: string | null;
+}
+
+export type GiftState = { state: "delivered" } | { state: "pending"; daysLeft: number } | { state: "overdue" };
+
+/** Estado de un regalo para el panel: entregado, pendiente (días hábiles que quedan, contando hoy) o vencido. */
+export function giftState(g: GiftRow, now: Date): GiftState {
+  if (g.delivered_at) return { state: "delivered" };
+  const due = new Date(g.due_at);
+  return now.getTime() >= due.getTime() ? { state: "overdue" } : { state: "pending", daysLeft: businessDaysLeft(due, now) };
+}
+
+/** Contador de la lista: pendientes (incluye vencidos), vencidos y entregados. */
+export function giftCounts(gifts: (GiftRow | null)[], now: Date): { pending: number; overdue: number; delivered: number } {
+  let pending = 0;
+  let overdue = 0;
+  let delivered = 0;
+  for (const g of gifts) {
+    if (!g) continue;
+    if (g.delivered_at) delivered++;
+    else {
+      pending++;
+      if (now.getTime() >= new Date(g.due_at).getTime()) overdue++;
+    }
+  }
+  return { pending, overdue, delivered };
 }
 
 // ---------- CSV ----------

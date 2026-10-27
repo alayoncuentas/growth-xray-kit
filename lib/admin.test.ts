@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CODE_ALPHABET, funnel, generateCode, isAllowedEmail, parseCompanyForm, toCsv } from "./admin";
+import { CODE_ALPHABET, funnel, generateCode, isAllowedEmail, parseCompanyForm, toCsv, filterBySource, giftCounts, giftState, parseSource, sourceOf, utmEntries, utmSummary, type GiftRow } from "./admin";
 
 describe("generateCode", () => {
   it("10 símbolos sin ambiguos, en formato XXXXX-XXXXX", () => {
@@ -98,5 +98,60 @@ describe("isAllowedEmail", () => {
     expect(isAllowedEmail("other@example.com", "owner@example.com")).toBe(false);
     expect(isAllowedEmail("owner@example.com", undefined)).toBe(false);
     expect(isAllowedEmail(null, "owner@example.com")).toBe(false);
+  });
+});
+
+describe("origen (camino abierto)", () => {
+  it("filtro ?source=: solo invited u open; cualquier otra cosa es todos", () => {
+    expect(parseSource("open")).toBe("open");
+    expect(parseSource("invited")).toBe("invited");
+    for (const v of [undefined, null, "", "OPEN", "all", ["open"]]) expect(parseSource(v)).toBeNull();
+  });
+
+  it("sin la columna (antes de la migración) la empresa es invitada", () => {
+    expect(sourceOf("open")).toBe("open");
+    expect(sourceOf(undefined)).toBe("invited");
+    expect(sourceOf(null)).toBe("invited");
+  });
+
+  it("filterBySource", () => {
+    const rows = [{ source: "open" as const, n: 1 }, { source: "invited" as const, n: 2 }];
+    expect(filterBySource(rows, "open").map((r) => r.n)).toEqual([1]);
+    expect(filterBySource(rows, null)).toHaveLength(2);
+  });
+
+  it("UTM: resumen de source / medium / campaign y las 5 claves en orden", () => {
+    const utm = { utm_campaign: "spring", utm_source: "google", utm_content: "ad1", utm_medium: "cpc" };
+    expect(utmSummary(utm)).toBe("google / cpc / spring");
+    expect(utmSummary({ utm_source: "newsletter" })).toBe("newsletter");
+    expect(utmSummary(null)).toBeNull();
+    expect(utmSummary({})).toBeNull();
+    expect(utmEntries(utm)).toEqual([
+      ["utm_source", "google"],
+      ["utm_medium", "cpc"],
+      ["utm_campaign", "spring"],
+      ["utm_content", "ad1"],
+    ]);
+    expect(utmEntries("x")).toEqual([]);
+  });
+});
+
+describe("regalos en el panel", () => {
+  const g = (due: string, delivered: string | null = null): GiftRow => ({ kind: "A", offered_at: "2026-10-27T14:00:00Z", due_at: due, delivered_at: delivered, delivered_by: delivered ? "team@x.com" : null });
+  const now = new Date("2026-10-27T14:00:00Z"); // martes
+
+  it("pendiente con días hábiles que quedan, vencido o entregado", () => {
+    expect(giftState(g("2026-10-31T04:00:00Z"), now)).toEqual({ state: "pending", daysLeft: 4 });
+    expect(giftState(g("2026-10-27T04:00:00Z"), now)).toEqual({ state: "overdue" });
+    // Entregado gana aunque esté vencido.
+    expect(giftState(g("2026-10-27T04:00:00Z", "2026-10-27T10:00:00Z"), now)).toEqual({ state: "delivered" });
+  });
+
+  it("contador: pendientes (con los vencidos), vencidos y entregados; sin regalo no cuenta", () => {
+    expect(giftCounts([g("2026-10-31T04:00:00Z"), g("2026-10-27T04:00:00Z"), g("2026-10-27T04:00:00Z", "2026-10-27T10:00:00Z"), null], now)).toEqual({
+      pending: 2,
+      overdue: 1,
+      delivered: 1,
+    });
   });
 });

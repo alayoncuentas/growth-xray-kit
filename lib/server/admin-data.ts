@@ -1,5 +1,5 @@
 import "server-only";
-import { generateCode, type CodeStatus, type CompanyInput } from "@/lib/admin";
+import { generateCode, sourceOf, type CodeStatus, type CompanyInput, type GiftRow, type Source } from "@/lib/admin";
 import { isLang, type Lang } from "@/lib/config";
 import type { OutsideView } from "@/lib/types";
 import { requireAdmin } from "./auth";
@@ -30,6 +30,10 @@ export interface CompanyRow {
   google_place_id: string | null;
   outside_view: OutsideView | null;
   created_at: string;
+  /** Camino abierto (con la migración): origen, UTM y referrer del primer contacto. */
+  source?: string | null;
+  utm?: Record<string, string> | null;
+  referrer?: string | null;
 }
 
 export interface LeadRow {
@@ -43,6 +47,12 @@ export interface LeadRow {
   expired: boolean;
   created_at: string;
   company: CompanyRow | null;
+  /** invited (la creó el equipo) u open ("Start my X-Ray"). */
+  source: Source;
+  /** Consentimiento "By continuing…" al dejar el correo; null si el correo lo cargó el equipo. */
+  consent: { at: string; version: string | null } | null;
+  /** Regalo ofrecido, si lo hay. */
+  gift: GiftRow | null;
   phase1: {
     started_at: string;
     completed_at: string | null;
@@ -57,7 +67,7 @@ export interface LeadRow {
 const one = <T,>(v: T | T[] | null | undefined): T | null => (Array.isArray(v) ? (v[0] ?? null) : (v ?? null));
 
 const LEAD_SELECT =
-  "code, status, email, expires_at, lang, created_at, companies(*), sessions(id, phase, started_at, completed_at, last_question_id, lang, scores(need, potential, readiness, archetype, monthly_at_stake, flags, verdict))";
+  "code, status, email, expires_at, lang, created_at, email_consent_at, email_consent_version, gifts(kind, offered_at, due_at, delivered_at, delivered_by), companies(*), sessions(id, phase, started_at, completed_at, last_question_id, lang, scores(need, potential, readiness, archetype, monthly_at_stake, flags, verdict))";
 
 interface RawLead {
   code: string;
@@ -66,6 +76,9 @@ interface RawLead {
   expires_at: string | null;
   lang: string;
   created_at: string;
+  email_consent_at: string | null;
+  email_consent_version: string | null;
+  gifts: GiftRow | GiftRow[] | null;
   companies: CompanyRow | CompanyRow[] | null;
   sessions: {
     id: string;
@@ -80,6 +93,7 @@ interface RawLead {
 
 function toLead(r: RawLead): LeadRow {
   const s = r.sessions?.find((x) => x.phase === 1);
+  const company = one(r.companies);
   return {
     code: r.code,
     status: r.status,
@@ -88,7 +102,10 @@ function toLead(r: RawLead): LeadRow {
     lang: isLang(r.lang) ? r.lang : "en",
     expired: !!r.expires_at && new Date(r.expires_at).getTime() < Date.now(),
     created_at: r.created_at,
-    company: one(r.companies),
+    company,
+    source: sourceOf(company?.source),
+    consent: r.email_consent_at ? { at: r.email_consent_at, version: r.email_consent_version } : null,
+    gift: one(r.gifts),
     phase1: s
       ? {
           started_at: s.started_at,
@@ -165,4 +182,24 @@ export async function addCode(fromCode: string, email: string | null, expiresDay
   } | null;
   if (!src?.company_id) return null;
   return insertCode(src.company_id, email, expiresDays, isLang(src.lang) ? src.lang : "en");
+}
+
+/**
+ * "Mark delivered": el regalo de este código se entregó. Solo si estaba pendiente (no pisa otra entrega).
+ * Registra `gift_delivered` con quién lo marcó. Devuelve false si no había un regalo pendiente.
+ */
+export async function markGiftDelivered(code: string): Promise<boolean> {
+  const admin = await requireAdmin();
+  const rows = must(
+    await db()
+      .from("gifts")
+      .update({ delivered_at: new Date().toISOString(), delivered_by: admin.email })
+      .eq("code", code)
+      .is("delivered_at", null)
+      .select("kind"),
+    "gifts delivered",
+  ) as { kind: string }[];
+  if (!rows.length) return false;
+  must(await db().from("events").insert({ code, type: "gift_delivered", payload: { gift: rows[0].kind, by: admin.email } }), "events insert");
+  return true;
 }

@@ -1,6 +1,6 @@
 # Camino abierto (sin código): decisiones aprobadas
 
-Estado: **aprobado; en construcción en `feature/open-entry`.** Hecho: el inicio (botón, Turnstile, límite por IP, UTM y referrer, empresa + código + sesión; detrás del flag), la migración, los datos del negocio, el código oculto en el camino abierto, la pantalla del correo con consentimiento, el resultado parcial y los regalos (ofrecimiento, plazos, bloque en resultados y línea en el informe). Falta: panel, cron, Delete lead, `/privacy` y GHL. Este documento manda sobre `docs/SPEC.md` en todo lo que toca el camino abierto.
+Estado: **aprobado; en construcción en `feature/open-entry`.** Hecho: el inicio (botón, Turnstile, límite por IP, UTM y referrer, empresa + código + sesión; detrás del flag), la migración, los datos del negocio, el código oculto en el camino abierto, la pantalla del correo con consentimiento, el resultado parcial, los regalos (ofrecimiento, plazos, bloque en resultados y línea en el informe) y el panel (origen, UTM, referrer, filtro, contador de regalos y "Mark delivered"). Falta: cron, Delete lead, `/privacy` y GHL. Este documento manda sobre `docs/SPEC.md` en todo lo que toca el camino abierto.
 Los textos de interfaz van en **inglés y en español**, con la misma estructura, en `config/phase1.config.json` y `config/phase1.config.es.json` (lo verifica `lib/config.test.ts`). Los del panel van solo en inglés, en `config/team.config.json`. Aquí se copia el inglés como referencia aprobada; el español es su traducción (neutro latinoamericano, tuteo).
 **Idioma sin código**: el elegido con el botón EN / ES (cookie); si no, el del navegador (`Accept-Language`); si no es inglés ni español, inglés. La sesión anónima nace con ese idioma (`access_codes.lang` y `sessions.lang`).
 
@@ -227,6 +227,21 @@ B · Everyone else
 Línea en el correo del informe: `Your free extra: {giftTitle}. We'll email you separately to set it up.`
 
 Agregado al construir (`copy.gifts.eyebrow`): `Your free extra` (encabezado del bloque del regalo en el resultado completo).
+
+### Panel (`config/team.config.json`, solo inglés; agregados al construir)
+```
+Filtro:      All · Invited · Open            (sources.invited / sources.open; filterLabel: Source)
+Sin nombre:  Unnamed business
+Contador:    Gifts  {pending} pending · {overdue} overdue · {delivered} delivered
+Chip:        Gift {kind} · {n} bd left | overdue | delivered
+Detalle:     Origin · Source · UTM · Referrer · None
+             Email consent: {date} · version {version} | Not recorded
+             Gift · Offered · Due: {date} · end of day, New York
+             {n} business days left | 1 business day left | Overdue
+             Delivered {date} by {by} · [Mark delivered]
+             No gift offered yet. It's offered once the lead has an email and finishes Phase 1.
+Regalos:     A · Response-time test + website review · B · Google reviews audit
+```
 
 ## 10. Al construir
 

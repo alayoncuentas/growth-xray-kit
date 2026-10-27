@@ -70,7 +70,16 @@
       "colActivity": "Updated",
       "expired": "expired",
       "noScores": "No answers yet",
-      "langTitle": "Answered in {lang}"
+      "langTitle": "Answered in {lang}",
+      "filterLabel": "Source",
+      "filterAll": "All",
+      "unnamed": "Unnamed business",
+      "giftsTitle": "Gifts",
+      "giftsSummary": "{pending} pending · {overdue} overdue · {delivered} delivered",
+      "giftChip": "Gift {kind}",
+      "giftLeft": "{n} bd left",
+      "giftOverdue": "overdue",
+      "giftDelivered": "delivered"
     },
     "funnel": {
       "title": "Funnel",
@@ -111,7 +120,25 @@
       "otherCodes": "Other codes for this company",
       "newCode": "Generate another code",
       "newCodeEmail": "Contact email (optional)",
-      "teamPending": "The team view appears once the lead answers at least one question."
+      "teamPending": "The team view appears once the lead answers at least one question.",
+      "originTitle": "Origin",
+      "source": "Source",
+      "utm": "UTM",
+      "referrer": "Referrer",
+      "none": "None",
+      "consent": "Email consent",
+      "consentValue": "{date} · version {version}",
+      "consentNone": "Not recorded",
+      "giftTitle": "Gift",
+      "giftOffered": "Offered",
+      "giftDue": "Due",
+      "giftDueValue": "{date} · end of day, New York",
+      "giftLeft": "{n} business days left",
+      "giftLeftOne": "1 business day left",
+      "giftOverdue": "Overdue",
+      "giftDelivered": "Delivered {date} by {by}",
+      "markDelivered": "Mark delivered",
+      "noGift": "No gift offered yet. It's offered once the lead has an email and finishes Phase 1."
     },
     "form": {
       "eyebrow": "Internal",
@@ -210,6 +237,14 @@
     "langs": {
       "en": "English",
       "es": "Spanish"
+    },
+    "sources": {
+      "invited": "Invited",
+      "open": "Open"
+    },
+    "gifts": {
+      "A": "A · Response-time test + website review",
+      "B": "B · Google reviews audit"
     }
   }
 }

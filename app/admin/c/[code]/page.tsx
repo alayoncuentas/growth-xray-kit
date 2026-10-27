@@ -5,10 +5,12 @@ import { CopyButton } from "@/components/admin/CopyButton";
 import { NewCodeForm } from "@/components/admin/NewCodeForm";
 import { StatusBadge, when } from "@/components/admin/Status";
 import { TeamView } from "@/components/admin/TeamView";
+import { Button } from "@/components/ui/Button";
 import { Panel } from "@/components/ui/Card";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { LoadingCard } from "@/components/ui/Loading";
-import { EXPIRY_CHOICES } from "@/lib/admin";
+import { markGiftDeliveredAction } from "@/app/admin/actions";
+import { EXPIRY_CHOICES, giftState, utmEntries } from "@/lib/admin";
 import { splitAnswers } from "@/lib/answers";
 import { fill, getQuestion, isChoice, phase1, usd } from "@/lib/config";
 import { calcValues, visibleQuestions } from "@/lib/scoring";
@@ -52,9 +54,10 @@ async function Lead({ code, created }: { code: string; created: boolean }) {
       </div>
       <header>
         <Eyebrow>{[co?.city, co?.state].filter(Boolean).join(", ") || adminCopy.list.eyebrow}</Eyebrow>
-        <h1 className="mb-2 text-[clamp(28px,5vw,40px)] tracking-[-0.02em]">{co?.name ?? lead.code}</h1>
+        <h1 className="mb-2 text-[clamp(28px,5vw,40px)] tracking-[-0.02em]">{co?.name ?? (lead.source === "open" ? adminCopy.list.unnamed : lead.code)}</h1>
         <div className="flex flex-wrap items-center gap-3 text-sm">
           <StatusBadge status={lead.status} expired={lead.expired} />
+          <span className="label-mono rounded-full border border-line px-2 py-1 text-[11px] leading-none text-muted">{adminCopy.sources[lead.source]}</span>
           <span className="text-muted">
             {d.progress}: {progress}
           </span>
@@ -76,6 +79,18 @@ async function Lead({ code, created }: { code: string; created: boolean }) {
         <dl className="mt-1 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1 text-sm">
           <dt className="text-muted">{d.contact}</dt>
           <dd className="break-all">{lead.email ?? "—"}</dd>
+          {lead.email && (
+            <>
+              <dt className="text-muted">{d.consent}</dt>
+              <dd>
+                {lead.consent ? (
+                  fill(d.consentValue, { date: when(lead.consent.at), version: lead.consent.version ?? "—" })
+                ) : (
+                  <span className="text-muted">{d.consentNone}</span>
+                )}
+              </dd>
+            </>
+          )}
           <dt className="text-muted">{d.expires}</dt>
           <dd>{lead.expires_at ? when(lead.expires_at) : d.never}</dd>
           <dt className="text-muted">{d.codeLang}</dt>
@@ -97,6 +112,12 @@ async function Lead({ code, created }: { code: string; created: boolean }) {
           </Panel>
         </div>
         <div className="grid content-start gap-5">
+          <Panel title={d.giftTitle}>
+            <Gift lead={lead} />
+          </Panel>
+          <Panel title={d.originTitle}>
+            <Origin lead={lead} />
+          </Panel>
           <Panel title={d.companyTitle}>
             <CompanyInfo lead={lead} />
           </Panel>
@@ -232,10 +253,77 @@ function Events({ lead }: { lead: LeadDetail }) {
               <b className="font-mono text-xs font-medium">{e.type}</b>
               {qid && <span className="text-muted"> · {qid}</span>}
               {e.type === "link_opened" && e.payload.resumed === true && <span className="text-muted"> · resumed</span>}
+              {e.type === "link_opened" && e.payload.open === true && <span className="text-muted"> · open</span>}
+              {typeof e.payload.gift === "string" && <span className="text-muted"> · {e.payload.gift}</span>}
+              {e.type === "email_captured" && typeof e.payload.from === "string" && <span className="text-muted"> · {e.payload.from}</span>}
             </span>
           </li>
         );
       })}
     </ol>
+  );
+}
+
+function Origin({ lead }: { lead: LeadDetail }) {
+  const d = adminCopy.detail;
+  const utm = utmEntries(lead.company?.utm);
+  return (
+    <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5 text-sm">
+      <dt className="text-muted">{d.source}</dt>
+      <dd>{adminCopy.sources[lead.source]}</dd>
+      <dt className="text-muted">{d.utm}</dt>
+      <dd>
+        {utm.length ? (
+          <ul className="grid gap-0.5">
+            {utm.map(([k, v]) => (
+              <li key={k} className="break-all">
+                <span className="font-mono text-xs text-muted">{k}</span> {v}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <span className="text-muted">{d.none}</span>
+        )}
+      </dd>
+      <dt className="text-muted">{d.referrer}</dt>
+      {/* Texto, no enlace: lo escribió el navegador del visitante. */}
+      <dd className="break-all">{lead.company?.referrer ?? <span className="text-muted">{d.none}</span>}</dd>
+    </dl>
+  );
+}
+
+/** Último día del plazo en Nueva York ("Fri, Oct 30"): due_at es la medianoche siguiente, exclusiva. */
+function dueDay(iso: string): string {
+  return new Date(new Date(iso).getTime() - 1).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "America/New_York" });
+}
+
+function Gift({ lead }: { lead: LeadDetail }) {
+  const d = adminCopy.detail;
+  const g = lead.gift;
+  if (!g) return <p className="text-sm text-muted">{d.noGift}</p>;
+  const st = giftState(g, new Date());
+  return (
+    <div className="grid gap-3">
+      <p className="font-semibold">{adminCopy.gifts[g.kind]}</p>
+      <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5 text-sm">
+        <dt className="text-muted">{d.giftOffered}</dt>
+        <dd>{when(g.offered_at)}</dd>
+        <dt className="text-muted">{d.giftDue}</dt>
+        <dd>
+          {fill(d.giftDueValue, { date: dueDay(g.due_at) })}
+          {st.state === "pending" && <span className="text-muted"> · {st.daysLeft === 1 ? d.giftLeftOne : fill(d.giftLeft, { n: st.daysLeft })}</span>}
+          {st.state === "overdue" && <b className="text-bad"> · {d.giftOverdue}</b>}
+        </dd>
+      </dl>
+      {g.delivered_at ? (
+        <p className="text-sm text-good">{fill(d.giftDelivered, { date: when(g.delivered_at), by: g.delivered_by ?? "—" })}</p>
+      ) : (
+        <form action={markGiftDeliveredAction.bind(null, lead.code)}>
+          <Button type="submit" variant="line">
+            {d.markDelivered}
+          </Button>
+        </form>
+      )}
+    </div>
   );
 }

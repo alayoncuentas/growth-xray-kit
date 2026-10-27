@@ -1,5 +1,6 @@
 import "server-only";
 import Link from "next/link";
+import { giftState, utmSummary } from "@/lib/admin";
 import { fill, phase1, usd } from "@/lib/config";
 import type { LeadRow } from "@/lib/server/admin-data";
 import { adminCopy, team } from "@/lib/server/team";
@@ -35,7 +36,12 @@ export function LeadList({ leads }: { leads: LeadRow[] }) {
               >
                 <span className="min-w-0">
                   <span className="flex min-w-0 items-center gap-2">
-                    <b className="truncate">{lead.company?.name ?? "—"}</b>
+                    <b className={`truncate ${lead.company?.name ? "" : "font-medium text-muted"}`}>{lead.company?.name ?? l.unnamed}</b>
+                    {lead.source === "open" && (
+                      <span className="label-mono flex-none rounded-full border border-accent px-1.5 py-0.5 text-[10px] leading-none text-accent">
+                        {adminCopy.sources.open}
+                      </span>
+                    )}
                     {/* Idioma en que respondió; si todavía no respondió, el del link. Fuera del texto truncado para que siempre se vea. */}
                     <span
                       title={lead.phase1?.lang ? fill(l.langTitle, { lang: adminCopy.langs[lead.phase1.lang] }) : `${adminCopy.detail.codeLang}: ${adminCopy.langs[lead.lang]}`}
@@ -45,11 +51,14 @@ export function LeadList({ leads }: { leads: LeadRow[] }) {
                     </span>
                   </span>
                   <span className="block truncate font-mono text-xs text-muted">
-                    {lead.code} · {[lead.company?.city, lead.company?.state].filter(Boolean).join(", ") || "—"}
+                    {[lead.code, [lead.company?.city, lead.company?.state].filter(Boolean).join(", ") || null, utmSummary(lead.company?.utm) ?? referrerHost(lead.company?.referrer)]
+                      .filter(Boolean)
+                      .join(" · ")}
                   </span>
                 </span>
                 <span className="flex flex-wrap items-center gap-2">
                   <StatusBadge status={lead.status} expired={lead.expired} />
+                  {lead.gift && <GiftChip lead={lead} />}
                   <span className="text-xs text-muted min-[860px]:hidden">{when(lead.phase1?.started_at ?? lead.created_at)}</span>
                 </span>
                 {s ? (
@@ -74,5 +83,33 @@ export function LeadList({ leads }: { leads: LeadRow[] }) {
         })}
       </ul>
     </div>
+  );
+}
+
+/** Host del referrer para la lista ("www.google.com"); el detalle muestra la URL completa. */
+function referrerHost(r: string | null | undefined): string | null {
+  if (!r) return null;
+  try {
+    return new URL(r).host;
+  } catch {
+    return null;
+  }
+}
+
+/** Regalo en la lista: tipo y días hábiles que quedan; vencido en rojo. */
+function GiftChip({ lead }: { lead: LeadRow }) {
+  const l = adminCopy.list;
+  const g = lead.gift!;
+  const st = giftState(g, new Date());
+  const [tone, text] =
+    st.state === "delivered"
+      ? ["border-good text-good", l.giftDelivered]
+      : st.state === "overdue"
+        ? ["border-bad text-bad", l.giftOverdue]
+        : ["border-line text-muted", fill(l.giftLeft, { n: st.daysLeft })];
+  return (
+    <span className={`label-mono rounded-full border px-2 py-1 text-[11px] leading-none ${tone}`} title={adminCopy.gifts[g.kind]}>
+      {fill(l.giftChip, { kind: g.kind })} · {text}
+    </span>
   );
 }

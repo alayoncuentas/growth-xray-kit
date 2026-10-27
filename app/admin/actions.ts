@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { parseCompanyForm, type CompanyErrors, EXPIRY_CHOICES } from "@/lib/admin";
 import { phase1 } from "@/lib/config";
-import { addCode, createCompany } from "@/lib/server/admin-data";
+import { addCode, createCompany, markGiftDelivered } from "@/lib/server/admin-data";
 import { authClient, isAdminEmail, requireAdmin } from "@/lib/server/auth";
 import { appOrigin } from "@/lib/server/origin";
 
@@ -67,4 +67,11 @@ export async function newCodeAction(fromCode: string, _prev: NewCodeState, formD
   const code = await addCode(fromCode, email, days);
   if (!code) return { error: "company" };
   redirect(`/admin/c/${code}?created=1`);
+}
+
+/** "Mark delivered" en el detalle de un lead: marca el regalo como entregado y vuelve al detalle. */
+export async function markGiftDeliveredAction(code: string): Promise<void> {
+  await requireAdmin();
+  await markGiftDelivered(code);
+  redirect(`/admin/c/${encodeURIComponent(code)}`);
 }
