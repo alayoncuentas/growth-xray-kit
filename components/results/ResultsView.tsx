@@ -9,6 +9,7 @@ import { useConfig } from "@/lib/i18n";
 import { firstQuestion } from "@/lib/flow";
 import { useDiagnostic } from "@/lib/store";
 import type { Company } from "@/lib/types";
+import { GiftPanel } from "./GiftPanel";
 import { PartialResults } from "./PartialResults";
 import { ResultsBody } from "./ResultsBody";
 import { UnlockPanel } from "./UnlockPanel";
@@ -20,6 +21,7 @@ export function ResultsView({
   mode = "full",
   gift = "B",
   unlockedTo = null,
+  offered = null,
 }: {
   code: string;
   company: Company | null;
@@ -30,6 +32,8 @@ export function ResultsView({
   gift?: GiftKind;
   /** Correo enmascarado, recién dejado desde el parcial: aviso "Unlocked…". */
   unlockedTo?: string | null;
+  /** Regalo ya ofrecido (código con correo y fase terminada) y el correo enmascarado al que escribiremos. */
+  offered?: { kind: GiftKind; to: string } | null;
 }) {
   const { answers, calc } = useDiagnostic(code);
   const cfg = useConfig();
@@ -74,6 +78,8 @@ export function ResultsView({
       )}
 
       <ResultsBody answers={answers} calc={calc} company={company} eyebrow={t.eyebrow} />
+
+      {offered && <GiftPanel kind={offered.kind} to={offered.to} />}
 
       <UnlockPanel code={code} open={open} />
 

@@ -1,7 +1,9 @@
 import "server-only";
 import type { Lang } from "@/lib/config";
 import { buildEmail, maskEmail, type EmailKind } from "@/lib/email";
+import type { GiftKind } from "@/lib/gifts";
 import { db, must } from "./db";
+import { offerGiftSafe } from "./gifts";
 
 // Envío con Resend (API HTTP, sin SDK). Claves en variables de entorno: RESEND_API_KEY y EMAIL_FROM.
 // Sin RESEND_API_KEY en desarrollo, el correo se imprime en la terminal en lugar de enviarse.
@@ -16,7 +18,7 @@ interface Sent {
 async function send(
   to: string,
   kind: EmailKind,
-  vars: { code: string; business: string | null; link: string; lang: Lang; open: boolean },
+  vars: { code: string; business: string | null; link: string; lang: Lang; open: boolean; gift?: GiftKind | null },
 ): Promise<Sent> {
   const { subject, text, html } = buildEmail(kind, vars);
   const key = process.env.RESEND_API_KEY;
@@ -75,7 +77,10 @@ async function reportAlreadySent(code: string): Promise<boolean> {
 export async function sendReportEmail(code: string, origin: string, lang: Lang): Promise<void> {
   const contact = await codeContact(code);
   if (!contact?.email || (await reportAlreadySent(code))) return;
+  // Con correo y la fase terminada, el informe ofrece el regalo (una línea con su nombre).
+  const gift = await offerGiftSafe(code);
   const sent = await send(contact.email, "report", {
+    gift: gift?.kind ?? null,
     code,
     business: businessName(contact.companies),
     link: `${origin}/r/${code}`,

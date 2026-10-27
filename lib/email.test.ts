@@ -73,3 +73,19 @@ describe("normalizeEmail", () => {
     }
   });
 });
+
+describe("línea del regalo en el informe", () => {
+  const v = { code: "K7MPX-4RHQ2", business: null, link: "https://xray.example.com/r/K7MPX-4RHQ2", lang: "en" as const, open: true };
+
+  it("el informe nombra el regalo ofrecido, en los dos idiomas", () => {
+    const a = buildEmail("report", { ...v, gift: "A" });
+    expect(a.text).toContain("Your free extra: Free response-time test + website review. We'll email you separately to set it up.");
+    expect(a.html).toContain("Your free extra: Free response-time test + website review.");
+    expect(buildEmail("report", { ...v, gift: "B", lang: "es" }).text).toContain("Tu extra gratis: Auditoría gratis de tus reseñas de Google.");
+  });
+
+  it("sin regalo, o en el correo para retomar, no hay línea", () => {
+    expect(buildEmail("report", v).text).not.toContain("free extra");
+    expect(buildEmail("resume", { ...v, gift: "A" }).text).not.toContain("free extra");
+  });
+});

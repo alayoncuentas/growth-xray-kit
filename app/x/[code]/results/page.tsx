@@ -12,6 +12,7 @@ import { needsBusinessStep, needsEmailStep, resultsMode, stepHref } from "@/lib/
 import { giftForAnswers } from "@/lib/gifts";
 import { checkAccess } from "@/lib/server/access";
 import { initialState, loadPhase1 } from "@/lib/server/diagnostic";
+import { offerGiftSafe, type Gift } from "@/lib/server/gifts";
 import { LangProvider } from "@/lib/i18n";
 import { DiagnosticProvider, type DiagnosticState } from "@/lib/store";
 
@@ -34,6 +35,7 @@ async function Results({ code: raw, sample, frame, skipped, unlocked }: { code: 
   if (needsBusinessStep({ open, business: company?.business })) redirect(stepHref(code, { kind: "business" }));
 
   let initial: DiagnosticState;
+  let gift: Gift | null = null;
   if (preview) {
     initial = await initialState(r.access, sample);
   } else {
@@ -41,6 +43,8 @@ async function Results({ code: raw, sample, frame, skipped, unlocked }: { code: 
     // Al terminar la fase 1 sin correo, primero la pantalla del correo (salvo que la haya omitido).
     if (needsEmailStep({ hasEmail: !!email, completed: saved.completed, skipped })) redirect(`/x/${encodeURIComponent(code)}/email`);
     initial = { answers: saved.answers, calc: saved.calc };
+    // Con correo y la fase terminada se muestra el regalo: queda ofrecido (y fijo) desde ahora.
+    if (email && saved.completed) gift = await offerGiftSafe(code);
   }
   // La vista previa muestra siempre el resultado completo (el parcial se ve en /admin/preview).
   const mode = preview ? "full" : resultsMode({ open, hasEmail: !!email });
@@ -56,6 +60,7 @@ async function Results({ code: raw, sample, frame, skipped, unlocked }: { code: 
           mode={mode}
           gift={giftForAnswers(phase1, initial.answers, initial.calc)}
           unlockedTo={unlocked && mode === "full" && email ? maskEmail(email) : null}
+          offered={gift && email ? { kind: gift.kind, to: maskEmail(email) } : null}
         />
         <PreviewChrome access={r.access} frame={frame} />
       </DiagnosticProvider>

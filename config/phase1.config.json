@@ -850,13 +850,20 @@
       "after": "Unlocked. We sent your results to {to}."
     },
     "gifts": {
+      "eyebrow": "Your free extra",
       "A": {
         "title": "Free response-time test + website review",
-        "short": "free response-time test"
+        "short": "free response-time test",
+        "days": 3,
+        "text": "We'll contact your business the way a new customer would, time how long the first reply takes, and send you what we found along with a 5-minute review of your website within 3 business days.",
+        "status": "Requested. We'll email you at {to} to set it up."
       },
       "B": {
         "title": "Free Google reviews audit",
-        "short": "free Google reviews audit"
+        "short": "free Google reviews audit",
+        "days": 2,
+        "text": "We'll look at your Google profile and reviews the way a new customer sees them, and send you a short list of what to fix first within 2 business days.",
+        "status": "Requested. We'll send it to {to} within 2 business days."
       }
     },
     "unlock": {
@@ -929,6 +936,7 @@
       "footer": "You're getting this email because access code {code} was used on Growth X-Ray. If that wasn't you, you can ignore it.",
       "footerOpen": "You're getting this email because this address was entered on Growth X-Ray. If that wasn't you, you can ignore it.",
       "forBusiness": " for {business}",
+      "giftLine": "Your free extra: {giftTitle}. We'll email you separately to set it up.",
       "report": {
         "subject": "Your Growth X-Ray results",
         "greeting": "Thanks for finishing Phase 1{forBusiness}.",

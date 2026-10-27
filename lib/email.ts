@@ -2,6 +2,7 @@
 // desde copy.email del config, en el idioma del prospecto. El envío está en lib/server/email.ts.
 
 import { fill, getConfig, type Lang } from "./config";
+import type { GiftKind } from "./gifts";
 
 export type EmailKind = "report" | "resume";
 
@@ -16,16 +17,27 @@ const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
 /** Correo corto y sin lenguaje de venta: saludo, una línea, un botón, una nota y el pie. */
 export function buildEmail(
   kind: EmailKind,
-  v: { code: string; business: string | null; link: string; lang: Lang; /** Camino abierto: el correo no menciona el código. */ open?: boolean },
+  v: {
+    code: string;
+    business: string | null;
+    link: string;
+    lang: Lang;
+    /** Camino abierto: el correo no menciona el código. */
+    open?: boolean;
+    /** Regalo ofrecido: el informe agrega una línea con su nombre. */
+    gift?: GiftKind | null;
+  },
 ): EmailContent {
-  const e = getConfig(v.lang).copy.email;
+  const cfg = getConfig(v.lang);
+  const e = cfg.copy.email;
   const t = e[kind];
   const forBusiness = v.business ? fill(e.forBusiness, { business: v.business }) : "";
   const greeting = fill(t.greeting, { forBusiness });
   const footer = v.open ? e.footerOpen : fill(e.footer, { code: v.code });
   const after = v.open && t.afterOpen ? t.afterOpen : t.after;
+  const giftLine = kind === "report" && v.gift ? fill(e.giftLine, { giftTitle: cfg.copy.gifts[v.gift].title }) : null;
 
-  const text = [greeting, "", t.body, "", `${t.cta}: ${v.link}`, "", after, "", `— ${e.signoff}`, "", footer].join("\n");
+  const text = [greeting, "", t.body, "", `${t.cta}: ${v.link}`, "", ...(giftLine ? [giftLine, ""] : []), after, "", `— ${e.signoff}`, "", footer].join("\n");
 
   const p = (s: string, style = "") => `<p style="margin:0 0 16px;${style}">${esc(s)}</p>`;
   const html = `<!doctype html>
@@ -36,6 +48,7 @@ export function buildEmail(
 ${p(greeting, "font-weight:600")}
 ${p(t.body)}
 <p style="margin:0 0 20px"><a href="${esc(v.link)}" style="display:inline-block;background:#1f6f66;color:#ffffff;text-decoration:none;font-weight:600;padding:12px 22px;border-radius:999px">${esc(t.cta)}</a></p>
+${giftLine ? p(giftLine, "font-weight:600") : ""}
 ${p(after, "color:#51605f;font-size:14px")}
 ${p(`— ${e.signoff}`, "margin:0")}
 </td></tr></table>
