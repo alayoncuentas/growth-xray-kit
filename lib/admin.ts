@@ -78,6 +78,12 @@ export function utmEntries(utm: unknown): [string, string][] {
   return UTM_ORDER.flatMap((k) => (typeof u[k] === "string" && u[k] ? [[k, u[k] as string] as [string, string]] : []));
 }
 
+/** Nombre del rubro en inglés para el panel ("dental" → "Dental or medical practice"); el id si no se conoce. */
+export function industryLabel(options: { id: string; label: string }[], id: string | null | undefined): string | null {
+  if (!id) return null;
+  return options.find((o) => o.id === id)?.label ?? id;
+}
+
 // ---------- regalos ----------
 
 export interface GiftRow {

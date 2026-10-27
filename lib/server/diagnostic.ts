@@ -4,6 +4,7 @@ import { phase1, type Lang } from "@/lib/config";
 import { isSampleId, sampleState } from "@/lib/preview";
 import type { DiagnosticState } from "@/lib/store";
 import type { Access } from "./access";
+import { INDUSTRY_QID } from "@/lib/flow";
 import { phase1Result, teamScores } from "@/lib/scoring";
 import { after } from "next/server";
 import { db, must } from "./db";
@@ -59,6 +60,22 @@ async function advanceStatus(code: string, to: Status) {
 
 async function logEvent(code: string, type: EventType, payload: Record<string, unknown>) {
   must(await db().from("events").insert({ code, type, payload }), "events insert");
+}
+
+/**
+ * Camino abierto: el rubro respondido se copia a companies.industry (para el panel y el CSV), solo si la empresa
+ * es `open` y todavía no tiene rubro. No cambia el recorrido: para una empresa abierta ese valor no cuenta como
+ * rubro conocido (lib/server/access.ts).
+ */
+async function copyOpenIndustry(code: string, industry: string) {
+  const row = must(await db().from("access_codes").select("company_id").eq("code", code).maybeSingle(), "access_codes company") as {
+    company_id: string | null;
+  } | null;
+  if (!row?.company_id) return;
+  must(
+    await db().from("companies").update({ industry }).eq("id", row.company_id).eq("source", "open").is("industry", null),
+    "companies industry",
+  );
 }
 
 async function loadRows(sessionId: string) {
@@ -168,6 +185,7 @@ export async function saveAnswer(input: {
       .then((r) => must(r, "answers upsert")),
     db().from("sessions").update({ last_question_id: questionId, lang }).eq("id", session.id).then((r) => must(r, "sessions update")),
     logEvent(code, "answered", { phase: PHASE, question_id: questionId, value }),
+    questionId === INDUSTRY_QID && typeof value === "string" ? copyOpenIndustry(code, value) : null,
   ]);
 
   const others = rows.filter((r) => r.question_id !== questionId);

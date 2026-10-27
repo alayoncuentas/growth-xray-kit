@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CODE_ALPHABET, funnel, generateCode, isAllowedEmail, parseCompanyForm, toCsv, filterBySource, giftCounts, giftState, parseSource, sourceOf, utmEntries, utmSummary, type GiftRow } from "./admin";
+import { industryLabel, CODE_ALPHABET, funnel, generateCode, isAllowedEmail, parseCompanyForm, toCsv, filterBySource, giftCounts, giftState, parseSource, sourceOf, utmEntries, utmSummary, type GiftRow } from "./admin";
 
 describe("generateCode", () => {
   it("10 símbolos sin ambiguos, en formato XXXXX-XXXXX", () => {
@@ -153,5 +153,14 @@ describe("regalos en el panel", () => {
       overdue: 1,
       delivered: 1,
     });
+  });
+});
+
+describe("rubro en el panel", () => {
+  const options = [{ id: "dental", label: "Dental or medical practice" }];
+  it("nombre del rubro; el id si no se conoce; null sin rubro", () => {
+    expect(industryLabel(options, "dental")).toBe("Dental or medical practice");
+    expect(industryLabel(options, "zoo")).toBe("zoo");
+    expect(industryLabel(options, null)).toBeNull();
   });
 });

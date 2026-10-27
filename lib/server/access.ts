@@ -99,11 +99,13 @@ interface CodeRow {
   } | null;
 }
 
-function toCompany(c: NonNullable<CodeRow["companies"]>): Company {
+export function toCompany(c: NonNullable<CodeRow["companies"]>): Company {
   return {
     business: c.name ?? "", // camino abierto: sin nombre hasta la pantalla de datos del negocio
     city: [c.city, c.state].filter(Boolean).join(", "),
-    industry: c.industry ?? undefined,
+    // "Rubro conocido" (la pregunta no se muestra) es solo el que carga el equipo. En el camino abierto el rubro es una
+    // respuesta; su copia en companies.industry es para el panel y el CSV, y no debe ocultar la pregunta.
+    industry: c.source === "open" ? undefined : (c.industry ?? undefined),
     website: c.website ?? undefined,
     outside: c.outside_view ?? undefined,
   };

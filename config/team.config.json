@@ -77,7 +77,7 @@
       "giftsTitle": "Gifts",
       "giftsSummary": "{pending} pending · {overdue} overdue · {delivered} delivered",
       "giftChip": "Gift {kind}",
-      "giftLeft": "{n} bd left",
+      "giftLeft": "{n}d left",
       "giftOverdue": "overdue",
       "giftDelivered": "delivered"
     },

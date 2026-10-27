@@ -1,6 +1,6 @@
 import "server-only";
 import Link from "next/link";
-import { giftState, utmSummary } from "@/lib/admin";
+import { giftState, industryLabel, utmSummary } from "@/lib/admin";
 import { fill, phase1, usd } from "@/lib/config";
 import type { LeadRow } from "@/lib/server/admin-data";
 import { adminCopy, team } from "@/lib/server/team";
@@ -51,7 +51,12 @@ export function LeadList({ leads }: { leads: LeadRow[] }) {
                     </span>
                   </span>
                   <span className="block truncate font-mono text-xs text-muted">
-                    {[lead.code, [lead.company?.city, lead.company?.state].filter(Boolean).join(", ") || null, utmSummary(lead.company?.utm) ?? referrerHost(lead.company?.referrer)]
+                    {[
+                      lead.code,
+                      [lead.company?.city, lead.company?.state].filter(Boolean).join(", ") || null,
+                      industryLabel(industryOptions, lead.company?.industry),
+                      utmSummary(lead.company?.utm) ?? referrerHost(lead.company?.referrer),
+                    ]
                       .filter(Boolean)
                       .join(" · ")}
                   </span>
@@ -85,6 +90,11 @@ export function LeadList({ leads }: { leads: LeadRow[] }) {
     </div>
   );
 }
+
+const industryOptions = (() => {
+  const q = phase1.questions.find((x) => x.id === "industry");
+  return q && q.type !== "calculator" ? q.options : [];
+})();
 
 /** Host del referrer para la lista ("www.google.com"); el detalle muestra la URL completa. */
 function referrerHost(r: string | null | undefined): string | null {

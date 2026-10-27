@@ -21,7 +21,7 @@ El camino con código de invitación (`/x/[code]`) se mantiene igual.
 
 ### Orden de despliegue (obligatorio)
 
-1. **Aplicar primero la migración en producción** (`supabase/migrations/20261027000000_open_entry.sql`, en el SQL editor de Supabase). Es aditiva y se puede correr más de una vez; el código publicado hoy sigue funcionando con ella.
+1. **Aplicar primero las migraciones en producción**, en orden, en el SQL editor de Supabase: `supabase/migrations/20261027000000_open_entry.sql` y después `20261028000000_open_industry.sql` (rubro de las empresas abiertas desde sus respuestas). Son aditivas y se pueden correr más de una vez; el código publicado hoy sigue funcionando con ellas.
 2. **Después, publicar el código** (merge a `main`).
 
 Por qué: aunque `OPEN_ENTRY_ENABLED` esté apagado, desde la pantalla del correo los **invitados sin correo** ya ven esa pantalla al terminar la fase 1, y "Save and finish later" guarda el consentimiento. Las dos cosas escriben `access_codes.email_consent_at` / `email_consent_version`, y el regalo usa la tabla `gifts`. Si el código sale antes que la migración, dejar el correo falla con "We couldn't save that…" (el regalo se omite sin romper la pantalla). Lo mismo vale para el panel (origen, regalos) y el cron.
