@@ -9,7 +9,7 @@ El camino con código de invitación (`/x/[code]`) se mantiene igual.
 ### Decisiones tomadas al planear la construcción (2026-10-26)
 
 1. **Base de desarrollo aparte**: las pruebas con el flag encendido van contra un proyecto de Supabase de desarrollo, creado con `supabase/dev-setup.sql`. La migración en producción la aplica el dueño después de probar.
-2. **El parcial muestra el dinero en juego** (cifra principal), además de arquetipo e índice. Quedan bloqueados: el desglose, el primer paso, "What to fix" y el regalo.
+2. **El parcial muestra el dinero en juego** (cifra principal **anual**, la misma que encabeza el resultado completo; antes era la mensual), además de arquetipo e índice. Quedan bloqueados: el desglose (clientes al año, escenario prudente, "How we calculate it", anuncios), los pilares, el primer paso, "What to fix" y el regalo. *(Actualizado el 2026-10-27 con el rediseño de resultados.)*
 3. **Días hábiles**: lunes a viernes, zona `America/New_York`, **sin feriados** por ahora.
 4. **Invitados sin correo ven el resultado completo.** La pantalla del correo les aparece como opcional, con el regalo como incentivo. El parcial aplica solo a empresas `source = 'open'` sin correo.
 5. **Borrado a 30 días desde la creación** de la empresa (no desde la última actividad).
@@ -47,7 +47,7 @@ Por qué: aunque `OPEN_ENTRY_ENABLED` esté apagado, desde la pantalla del corre
 - **Sesión anónima**: tiene su propio código interno, generado con el mismo generador (`lib/admin.ts`, `XXXXX-XXXXX`). La interfaz nunca lo muestra a quien entró por el camino abierto (por ejemplo, se oculta "Your answers are saved to code …"). El código sí va en la URL (`/x/[code]/…`): así funcionan retomar y "Save and finish later".
 - **"Save and finish later"** en el camino abierto pide el correo, como ya hace cuando el código no tiene correo. Debajo del campo va el mismo texto "By continuing…", y al guardar el correo se registran `email_consent_at` y `email_consent_version` y el evento `email_captured` (`from: later`), igual que en la pantalla del correo.
 - **Pantalla del correo**: aparece siempre que el código no tenga correo. En el camino abierto, "Skip" lleva al parcial; para un invitado sin correo es opcional y "Skip" lleva al resultado completo. Los invitados con correo ven el resultado completo como hoy (y también reciben regalo).
-- **Resultado parcial (sin correo, solo camino abierto)**: arquetipo, índice y dinero en juego (cifra principal), con valor real suficiente para decidir si continuar. Debajo, el bloque para desbloquear con el correo. Si no deja el correo, puede seguir viendo el parcial.
+- **Resultado parcial (sin correo, solo camino abierto)**: arquetipo, índice y dinero en juego (cifra principal anual), con valor real suficiente para decidir si continuar. Debajo, el bloque para desbloquear con el correo. Si no deja el correo, puede seguir viendo el parcial.
 - **El correo desbloquea**: el desglose del dinero en juego, los hallazgos ("What to fix, in order"), el primer paso, el envío del informe (`/r/[code]`) y el regalo.
 
 

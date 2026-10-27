@@ -7,7 +7,7 @@ import { BusinessMarker } from "@/components/ui/BusinessMarker";
 import { Container } from "@/components/ui/Container";
 import { LoadingCard } from "@/components/ui/Loading";
 import { getConfig, phase1 } from "@/lib/config";
-import { isSampleId } from "@/lib/preview";
+import { isSampleId, maxCalc } from "@/lib/preview";
 import { maskEmail } from "@/lib/email";
 import { needsBusinessStep, needsEmailStep, resultsMode, stepHref } from "@/lib/flow";
 import { giftForAnswers } from "@/lib/gifts";
@@ -29,6 +29,7 @@ export default function ResultsPage({ params, searchParams }: PageProps<"/x/[cod
             skipped={sp.skip === "1"}
             unlocked={sp.unlocked === "1"}
             previewPartial={sp.partial === "1"}
+            previewMax={sp.calc === "max"}
           />
         ))}
       </Suspense>
@@ -43,6 +44,7 @@ async function Results({
   skipped,
   unlocked,
   previewPartial,
+  previewMax,
 }: {
   code: string;
   sample: unknown;
@@ -50,6 +52,7 @@ async function Results({
   skipped: boolean;
   unlocked: boolean;
   previewPartial: boolean;
+  previewMax: boolean;
 }) {
   const r = await checkAccess(raw);
   if (!r.ok) return <CodeError reason={r.reason} />;
@@ -60,6 +63,8 @@ async function Results({
   let gift: Gift | null = null;
   if (preview) {
     initial = await initialState(r.access, sample);
+    // ?calc=max: la calculadora en sus máximos ($63,000,000 al año), para revisar que la cifra cabe en una línea.
+    if (previewMax) initial = { ...initial, calc: maxCalc(phase1) };
   } else {
     const saved = await loadPhase1(code);
     // Al terminar la fase 1 sin correo, primero la pantalla del correo (salvo que la haya omitido).

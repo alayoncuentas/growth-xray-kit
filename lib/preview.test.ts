@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { getQuestion, phase1 as cfg } from "./config";
-import { insightCases, preview, previewVariant, SAMPLE_IDS, sampleState } from "./preview";
-import { phase1Result } from "./scoring";
+import { insightCases, maxCalc, preview, previewVariant, SAMPLE_IDS, sampleState } from "./preview";
+import { calcValues, phase1Result } from "./scoring";
 import { validateAnswer } from "./answers";
 
 const q = (id: string) => getQuestion(id)!;
@@ -77,5 +77,11 @@ describe("insightCases", () => {
       ["weak", "mirror"],
       ["strong", null],
     ]);
+  });
+});
+
+describe("maxCalc (?calc=max)", () => {
+  it("lleva la calculadora a la cifra anual más alta", () => {
+    expect(calcValues(cfg, sampleState("leaky").answers, maxCalc(cfg)).annual).toBe(63_000_000);
   });
 });

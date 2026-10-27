@@ -40,6 +40,13 @@ export function firstQuestion(cfg: Phase1Config, knownIndustry?: string | null):
   return visibleQuestions(cfg, knownIndustry)[0];
 }
 
+/** Id de la pregunta de la calculadora ("Change the numbers" en los resultados). */
+export function calculatorId(cfg: Phase1Config): string {
+  const q = cfg.questions.find((x) => x.type === "calculator");
+  if (!q) throw new Error("Config has no calculator question");
+  return q.id;
+}
+
 // ---------- camino abierto: datos del negocio después del rubro ----------
 
 export const INDUSTRY_QID = "industry";

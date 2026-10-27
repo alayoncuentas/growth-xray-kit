@@ -1,6 +1,5 @@
 "use client";
 
-import { Panel } from "@/components/ui/Card";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { fill } from "@/lib/config";
 import type { GiftKind } from "@/lib/gifts";
@@ -9,11 +8,13 @@ import { phase1Result } from "@/lib/scoring";
 import type { Answers, CalcOverrides, Company } from "@/lib/types";
 import { ArchetypeHeader } from "./ArchetypeHeader";
 import { EmailForm } from "./EmailForm";
-import { MoneyHeadline } from "./MoneyAtStake";
+import { IndexMeter } from "./IndexMeter";
+import { MoneyHero } from "./MoneyHero";
 
 /**
  * Resultado parcial (camino abierto sin correo, docs/OPEN_ENTRY.md decisión 2): arquetipo, índice y la cifra principal
- * del dinero en juego. El desglose, los hallazgos, el primer paso, el informe y el regalo se desbloquean con el correo.
+ * del dinero en juego (anual, sin desglose). Los clientes al año, el escenario prudente, "How we calculate it", los
+ * anuncios, los pilares, los hallazgos, el primer paso, el informe y el regalo se desbloquean con el correo.
  */
 export function PartialResults({ code, answers, calc, company, gift }: { code: string; answers: Answers; calc: CalcOverrides; company: Company | null; gift: GiftKind }) {
   const cfg = useConfig();
@@ -26,13 +27,14 @@ export function PartialResults({ code, answers, calc, company, gift }: { code: s
         {t.eyebrow}
         {company?.business ? ` · ${company.business}` : ""}
       </Eyebrow>
-      <ArchetypeHeader archetype={res.archetype} avg={res.avg} band={res.band} />
+      <ArchetypeHeader archetype={res.archetype} />
 
-      <Panel title={t.moneyTitle}>
-        <div className="min-[521px]:max-w-[50%]">
-          <MoneyHeadline monthly={res.calc.monthly} />
-        </div>
-      </Panel>
+      <div className="grid gap-5">
+        <MoneyHero calc={res.calc} figureOnly />
+        <section className="rounded-panel border border-line bg-card p-5">
+          <IndexMeter avg={res.avg} band={res.band} />
+        </section>
+      </div>
 
       <section className="mt-5 grid gap-3.5 rounded-panel border border-line bg-card p-[clamp(20px,4vw,32px)]">
         <h2 className="text-[clamp(22px,4vw,28px)]">{p.title}</h2>

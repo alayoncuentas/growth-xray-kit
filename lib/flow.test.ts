@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getConfig } from "./config";
-import { afterBusiness, businessFirst, isVisibleQuestion, needsBusinessStep, needsEmailStep, nextAfter, resultsMode, stepHref } from "./flow";
+import { afterBusiness, businessFirst, calculatorId, isVisibleQuestion, needsBusinessStep, needsEmailStep, nextAfter, resultsMode, stepHref } from "./flow";
 
 const cfg = getConfig("en");
 
@@ -67,5 +67,12 @@ describe("question_viewed: solo preguntas que se muestran", () => {
 
   it("rechaza ids inventados o que no son texto", () => {
     for (const v of ["nope", "", "results", null, 42, ["team"]]) expect(isVisibleQuestion(cfg, v)).toBe(false);
+  });
+});
+
+describe("calculatorId", () => {
+  it("la pregunta de la calculadora, en los dos idiomas", () => {
+    expect(calculatorId(cfg)).toBe("numbers");
+    expect(calculatorId(getConfig("es"))).toBe("numbers");
   });
 });

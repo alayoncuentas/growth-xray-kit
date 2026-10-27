@@ -19,3 +19,8 @@ export function figureFontSize(text: string, max = 72): string {
   const cqi = Math.floor((100 / (FIGURE_GLYPH_EM * Math.max(1, text.length))) * 100) / 100;
   return `min(${max}px, ${cqi}cqi)`;
 }
+
+/** Cantidad aproximada para un texto ("about 18", "about 0.3"): un decimal por debajo de 10, entero desde ahí. */
+export function approx(n: number): string {
+  return n.toLocaleString("en-US", { maximumFractionDigits: n < 10 ? 1 : 0 });
+}

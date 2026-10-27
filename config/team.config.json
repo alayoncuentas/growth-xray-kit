@@ -220,7 +220,8 @@
         "emailOpen": "Email screen · open entry (gift A)",
         "emailInvited": "Email screen · invited without an email (gift B)",
         "partial": "Summary · open entry without an email",
-        "resultsGiftB": "Results · with an email (gift B)"
+        "resultsGiftB": "Results · with an email (gift B)",
+        "resultsMax": "Results · widest figure ($63,000,000 a year, calculator at its maximums)"
       },
       "partLabel": "Part {n} · {label}",
       "mapSub": "In order. Question screens use a business without a known industry, so the industry question appears too; with a code that includes the industry it's skipped.",

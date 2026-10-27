@@ -6,7 +6,7 @@ import { fill } from "@/lib/config";
 import type { ResultsMode } from "@/lib/flow";
 import type { GiftKind } from "@/lib/gifts";
 import { useConfig } from "@/lib/i18n";
-import { firstQuestion } from "@/lib/flow";
+import { calculatorId, firstQuestion } from "@/lib/flow";
 import { useDiagnostic } from "@/lib/store";
 import type { Company } from "@/lib/types";
 import { GiftPanel } from "./GiftPanel";
@@ -40,6 +40,7 @@ export function ResultsView({
   const t = cfg.copy.results;
   const base = `/x/${encodeURIComponent(code)}`;
   const firstHref = `${base}/q/${firstQuestion(cfg, company?.industry).id}`;
+  const numbersHref = `${base}/q/${calculatorId(cfg)}`;
 
   // Sin respuestas en memoria (p. ej. después de recargar): no inventamos un resultado.
   if (!Object.keys(answers).length) {
@@ -77,7 +78,7 @@ export function ResultsView({
         </p>
       )}
 
-      <ResultsBody answers={answers} calc={calc} company={company} eyebrow={t.eyebrow} />
+      <ResultsBody answers={answers} calc={calc} company={company} eyebrow={t.eyebrow} editHref={numbersHref} />
 
       {offered && <GiftPanel kind={offered.kind} to={offered.to} />}
 

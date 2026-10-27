@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FIGURE_GLYPH_EM, figureFontSize, figurePx } from "./format";
+import { approx, FIGURE_GLYPH_EM, figureFontSize, figurePx } from "./format";
 import { usd } from "./config";
 
 describe("cifra grande en una línea", () => {
@@ -19,5 +19,15 @@ describe("cifra grande en una línea", () => {
   it("en CSS: tope en px y el resto relativo al contenedor", () => {
     expect(figureFontSize("$63,000,000")).toBe("min(72px, 13.77cqi)");
     expect(figureFontSize("$9,000", 56)).toMatch(/^min\(56px, [\d.]+cqi\)$/);
+  });
+});
+
+describe("approx", () => {
+  it("un decimal por debajo de 10, entero desde ahí, con formato de EE. UU.", () => {
+    expect(approx(0.25)).toBe("0.3");
+    expect(approx(3)).toBe("3");
+    expect(approx(18)).toBe("18");
+    expect(approx(43.2)).toBe("43");
+    expect(approx(1750)).toBe("1,750");
   });
 });

@@ -4,11 +4,11 @@ import { fill, usd } from "@/lib/config";
 import { useConfig } from "@/lib/i18n";
 import type { CalcResult } from "@/lib/scoring";
 
-/** Dos tarjetas: dinero que se escapa (naranja) y escenario cauteloso (verde azulado). */
-export function MoneyAtStake({ calc, compact = false }: { calc: CalcResult; compact?: boolean }) {
+/** Dos tarjetas de la calculadora: dinero que se escapa al mes (naranja) y escenario cauteloso (verde azulado). */
+export function MoneyAtStake({ calc }: { calc: CalcResult }) {
   const m = useConfig().copy.money;
   return (
-    <div className={`grid gap-3 min-[521px]:grid-cols-2 ${compact ? "" : "mt-4"}`}>
+    <div className="mt-4 grid gap-3 min-[521px]:grid-cols-2">
       <Tile
         tone="leak"
         label={m.monthlyLabel}
@@ -18,11 +18,6 @@ export function MoneyAtStake({ calc, compact = false }: { calc: CalcResult; comp
       <Tile tone="accent" label={m.cautiousLabel} value={calc.cautious} detail={fill(m.cautiousDetail, { annual: usd(calc.cautious * 12) })} />
     </div>
   );
-}
-
-/** Solo la cifra principal (resultado parcial): sin el desglose, el escenario cauteloso ni la inversión en anuncios. */
-export function MoneyHeadline({ monthly }: { monthly: number }) {
-  return <Tile tone="leak" label={useConfig().copy.money.monthlyLabel} value={monthly} />;
 }
 
 function Tile({ tone, label, value, detail }: { tone: "leak" | "accent"; label: string; value: number; detail?: string }) {

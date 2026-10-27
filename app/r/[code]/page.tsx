@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { resultsMode } from "@/lib/flow";
+import { calculatorId, resultsMode } from "@/lib/flow";
 import { Suspense } from "react";
 import { CodeError } from "@/components/gate/CodeError";
 import { ResultsBody } from "@/components/results/ResultsBody";
@@ -9,7 +9,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Container } from "@/components/ui/Container";
 import { LoadingCard } from "@/components/ui/Loading";
-import { getConfig } from "@/lib/config";
+import { getConfig, phase1 } from "@/lib/config";
 import { LangProvider } from "@/lib/i18n";
 import { isSampleId, sampleState } from "@/lib/preview";
 import { checkAccess } from "@/lib/server/access";
@@ -63,7 +63,13 @@ async function Report({ code: raw, sample }: { code: string; sample: unknown }) 
   return (
     <LangProvider lang={lang} code={code}>
       <BusinessMarker business={company?.business ?? null} />
-      <ResultsBody answers={state.answers} calc={state.calc} company={company} eyebrow={t.eyebrow} />
+      <ResultsBody
+        answers={state.answers}
+        calc={state.calc}
+        company={company}
+        eyebrow={t.eyebrow}
+        editHref={`${resumeHref}/q/${calculatorId(phase1)}`}
+      />
       <section className="mt-5 grid gap-3 rounded-panel border border-line bg-card p-[clamp(20px,4vw,28px)]">
         <h2 className="text-xl">{t.continueTitle}</h2>
         <p className="text-muted">{open ? t.continueSubOpen : t.continueSub}</p>

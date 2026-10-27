@@ -1,27 +1,15 @@
 "use client";
 
 import { useConfig } from "@/lib/i18n";
-import { scoreTone } from "@/lib/scoring";
-import type { ArchetypeId, IndexBand } from "@/lib/types";
+import type { ArchetypeId } from "@/lib/types";
 
-export function ArchetypeHeader({ archetype, avg, band }: { archetype: ArchetypeId; avg: number; band: IndexBand }) {
-  const cfg = useConfig();
-  const a = cfg.archetypes[archetype];
-  const tone = { good: "text-good", warn: "text-warn", bad: "text-bad" }[scoreTone(avg)];
+/** Título de los resultados: el arquetipo y su línea. El índice va aparte (IndexMeter). */
+export function ArchetypeHeader({ archetype }: { archetype: ArchetypeId }) {
+  const a = useConfig().archetypes[archetype];
   return (
-    <div className="mt-2 mb-7 grid items-end gap-6 min-[621px]:grid-cols-[1fr_auto]">
-      <div>
-        <h1 className="text-[clamp(34px,7vw,56px)] tracking-[-0.025em]">{a.name}</h1>
-        <p className="mt-2.5 max-w-[52ch] text-lg text-muted">{a.line}</p>
-      </div>
-      <div className="min-[621px]:text-right">
-        <div className="label-mono text-muted">{cfg.copy.results.indexLabel}</div>
-        <div className="font-display text-[64px] leading-none font-bold tabular-nums">
-          {avg}
-          <small className="text-xl font-semibold text-muted">/100</small>
-        </div>
-        <div className={`label-mono ${tone}`}>{cfg.indexBands[band]}</div>
-      </div>
+    <div className="mt-2 mb-6">
+      <h1 className="text-[clamp(34px,7vw,56px)] tracking-[-0.025em]">{a.name}</h1>
+      <p className="mt-2.5 max-w-[52ch] text-lg text-muted">{a.line}</p>
     </div>
   );
 }

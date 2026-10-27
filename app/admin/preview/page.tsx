@@ -74,6 +74,7 @@ function screens(lang: Lang): Screen[] {
     { id: "partial", label: p.screens.partial, part: p.openPart, src: X(preview.code, "/results", "&sample=leaky&partial=1") },
     { id: "results", label: p.screens.results, part: null, src: X(preview.code, "/results", "&sample=leaky") },
     { id: "results-gift-b", label: p.screens.resultsGiftB, part: null, src: X(preview.code, "/results", "&sample=ready") },
+    { id: "results-max", label: p.screens.resultsMax, part: null, src: X(preview.code, "/results", "&sample=leaky&calc=max") },
     { id: "report", label: p.screens.report, part: null, src: `/r/${preview.code}?frame=1&sample=leaky` },
   ];
 }

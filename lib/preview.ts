@@ -4,7 +4,7 @@
 import raw from "@/config/preview.json";
 import { insightFor, type InsightView } from "./insights";
 import { isChoice, type Lang } from "./config";
-import type { Answers, ArchetypeId, CalcOverrides, Company, Phase1Config, Question } from "./types";
+import type { Answers, ArchetypeId, CalcOverrides, CalculatorQuestion, Company, Phase1Config, Question } from "./types";
 
 export type PreviewVariant = "outside" | "plain";
 
@@ -43,6 +43,12 @@ export function isSampleId(s: unknown): s is ArchetypeId {
 export function sampleState(id: ArchetypeId): { answers: Answers; calc: CalcOverrides } {
   const s = preview.samples[id];
   return { answers: { ...s.answers }, calc: { ...s.calc } };
+}
+
+/** Calculadora en sus máximos (?calc=max en la vista previa): la cifra anual más larga, para ver que cabe en una línea. */
+export function maxCalc(cfg: Phase1Config): CalcOverrides {
+  const q = cfg.questions.find((x): x is CalculatorQuestion => x.type === "calculator");
+  return Object.fromEntries((q?.fields ?? []).map((f) => [f.id, f.max]));
 }
 
 // ---------- variantes de insights ----------
