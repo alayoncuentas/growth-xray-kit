@@ -56,14 +56,25 @@ async function logSent(code: string, kind: EmailKind, sent: Sent, lang: Lang) {
   must(await db().from("events").insert({ code, type: "email_sent", payload: { kind, phase: 1, id: sent.id, dev: sent.dev, lang } }), "events insert");
 }
 
+async function reportAlreadySent(code: string): Promise<boolean> {
+  const res = await db()
+    .from("events")
+    .select("id", { count: "exact", head: true })
+    .eq("code", code)
+    .eq("type", "email_sent")
+    .eq("payload->>kind", "report");
+  if (res.error) throw new Error(`Supabase (events count): ${res.error.message}`);
+  return (res.count ?? 0) > 0;
+}
+
 /**
- * Informe de la fase 1 al correo del código. Se llama una vez, al registrar phase_done.
- * Sin correo en el código no hay a quién enviarlo: se omite (el informe sigue en /r/[code]).
- * `lang`: el idioma en que respondió.
+ * Informe de la fase 1 al correo del código, una sola vez: al registrar phase_done si el código ya tenía correo,
+ * o al dejar el correo después (pantalla del correo o parcial). Sin correo en el código no hay a quién enviarlo:
+ * se omite (el informe sigue en /r/[code]). `lang`: el idioma en que respondió o el de la pantalla.
  */
 export async function sendReportEmail(code: string, origin: string, lang: Lang): Promise<void> {
   const contact = await codeContact(code);
-  if (!contact?.email) return;
+  if (!contact?.email || (await reportAlreadySent(code))) return;
   const sent = await send(contact.email, "report", {
     code,
     business: businessName(contact.companies),

@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { resultsMode } from "@/lib/flow";
 import { Suspense } from "react";
 import { CodeError } from "@/components/gate/CodeError";
 import { ResultsBody } from "@/components/results/ResultsBody";
@@ -32,9 +34,11 @@ export default function SharedReportPage({ params, searchParams }: PageProps<"/r
 async function Report({ code: raw, sample }: { code: string; sample: unknown }) {
   const r = await checkAccess(raw);
   if (!r.ok) return <CodeError reason={r.reason} />;
-  const { code, company, preview, lang, open } = r.access;
+  const { code, company, preview, lang, open, email } = r.access;
   const t = getConfig(lang).copy.report;
   const resumeHref = `/x/${encodeURIComponent(code)}`;
+  // El informe es parte de lo que desbloquea el correo: en el camino abierto sin correo, al resultado parcial.
+  if (!preview && resultsMode({ open, hasEmail: !!email }) === "partial") redirect(`${resumeHref}/results`);
 
   // Vista previa: una muestra (?sample=leaky), sin leer la base.
   const state = preview

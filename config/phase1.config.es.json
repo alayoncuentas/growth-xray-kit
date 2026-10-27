@@ -829,6 +829,36 @@
       "emptySub": "Empieza el diagnóstico y tus resultados aparecerán aquí. Tus respuestas se guardan sobre la marcha.",
       "emptyCta": "Empezar el diagnóstico"
     },
+    "capture": {
+      "eyebrow": "Tus resultados están listos",
+      "title": "¿A dónde te enviamos tus resultados completos?",
+      "sub": "Vas a ver todo aquí mismo: qué corregir primero, tu primer paso y un enlace privado para volver.",
+      "gift": "También incluye: {giftTitle}",
+      "emailLabel": "Correo electrónico",
+      "emailPlaceholder": "tu@tunegocio.com",
+      "cta": "Ver mis resultados completos",
+      "skip": "Omitir por ahora y ver un resumen",
+      "skipInvited": "Omitir por ahora y ver mis resultados",
+      "errorEmail": "Ingresa un correo electrónico válido.",
+      "errorSave": "No pudimos guardarlo en este momento. Vuelve a intentarlo en un minuto.",
+      "consent": "Al continuar, aceptas que te enviemos tus resultados por correo, que te contactemos sobre tu {giftShort} y que te mandemos de vez en cuando consejos para conseguir más clientes. Puedes darte de baja cuando quieras.",
+      "privacy": "Política de privacidad"
+    },
+    "partial": {
+      "title": "Mira qué corregir primero",
+      "text": "Deja tu correo para desbloquear tus hallazgos, tu primer paso y tu {giftShort}. También te enviaremos un enlace privado a tus resultados.",
+      "after": "Listo. Enviamos tus resultados a {to}."
+    },
+    "gifts": {
+      "A": {
+        "title": "Prueba gratis de tiempo de respuesta + revisión de tu sitio web",
+        "short": "prueba gratis de tiempo de respuesta"
+      },
+      "B": {
+        "title": "Auditoría gratis de tus reseñas de Google",
+        "short": "auditoría gratis de tus reseñas de Google"
+      }
+    },
     "unlock": {
       "eyebrow": "Fase 2 · Unos 20 minutos · Pausa cuando quieras",
       "title": "Ya sabes dónde está la fuga. La fase 2 te dice exactamente cómo cerrarla.",

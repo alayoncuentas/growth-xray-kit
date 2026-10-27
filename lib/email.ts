@@ -46,6 +46,22 @@ ${p(`— ${e.signoff}`, "margin:0")}
   return { subject: t.subject, text, html };
 }
 
+/**
+ * Versión del texto de consentimiento de la pantalla del correo (copy.capture.consent): se guarda con la fecha en
+ * access_codes.email_consent_version. Cambiarla cada vez que cambie ese texto, en cualquiera de los dos idiomas.
+ */
+export const EMAIL_CONSENT_VERSION = "2026-10-27";
+
+const MAX_EMAIL = 254;
+
+/** Correo escrito por el prospecto: sin espacios, en minúsculas y con forma de correo. null si no sirve. */
+export function normalizeEmail(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  const s = raw.trim().toLowerCase();
+  if (!s || s.length > MAX_EMAIL || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)) return null;
+  return s;
+}
+
 /** "jane.doe@rivera.com" → "j•••@rivera.com": confirma el destino sin mostrar la dirección completa. */
 export function maskEmail(email: string): string {
   const [user, domain] = email.split("@");

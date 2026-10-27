@@ -86,6 +86,23 @@ export function businessFirst(cfg: Phase1Config, qid: string | null, ctx: FlowCo
   return qid !== INDUSTRY_QID;
 }
 
+// ---------- correo antes del resultado completo ----------
+
+export type ResultsMode = "full" | "partial";
+
+/** Parcial solo en el camino abierto sin correo. Los invitados siempre ven el resultado completo (con o sin correo). */
+export function resultsMode(c: { open: boolean; hasEmail: boolean }): ResultsMode {
+  return c.open && !c.hasEmail ? "partial" : "full";
+}
+
+/**
+ * La pantalla del correo aparece al terminar la fase 1 si el código no tiene correo, en los dos caminos,
+ * salvo que la persona la haya omitido ("Skip": resultados con ?skip=1).
+ */
+export function needsEmailStep(c: { hasEmail: boolean; completed: boolean; skipped: boolean }): boolean {
+  return c.completed && !c.hasEmail && !c.skipped;
+}
+
 export function stepHref(code: string, s: Step): string {
   const base = `/x/${encodeURIComponent(code)}`;
   return s.kind === "question" ? `${base}/q/${s.qid}` : s.kind === "business" ? `${base}/business` : `${base}/results`;

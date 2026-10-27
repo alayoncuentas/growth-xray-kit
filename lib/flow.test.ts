@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getConfig } from "./config";
-import { afterBusiness, businessFirst, needsBusinessStep, nextAfter, stepHref } from "./flow";
+import { afterBusiness, businessFirst, needsBusinessStep, needsEmailStep, nextAfter, resultsMode, stepHref } from "./flow";
 
 const cfg = getConfig("en");
 
@@ -37,5 +37,22 @@ describe("camino abierto: datos del negocio después del rubro", () => {
     expect(stepHref("AB-12", { kind: "business" })).toBe("/x/AB-12/business");
     expect(stepHref("AB-12", { kind: "question", qid: "team" })).toBe("/x/AB-12/q/team");
     expect(stepHref("AB-12", { kind: "results" })).toBe("/x/AB-12/results");
+  });
+});
+
+describe("correo antes del resultado completo", () => {
+  it("parcial solo en el camino abierto sin correo", () => {
+    expect(resultsMode({ open: true, hasEmail: false })).toBe("partial");
+    expect(resultsMode({ open: true, hasEmail: true })).toBe("full");
+    // Invitados: siempre completo, con o sin correo (decisión 4).
+    expect(resultsMode({ open: false, hasEmail: false })).toBe("full");
+    expect(resultsMode({ open: false, hasEmail: true })).toBe("full");
+  });
+
+  it("la pantalla del correo aparece al terminar sin correo, salvo que la haya omitido", () => {
+    expect(needsEmailStep({ hasEmail: false, completed: true, skipped: false })).toBe(true);
+    expect(needsEmailStep({ hasEmail: false, completed: true, skipped: true })).toBe(false);
+    expect(needsEmailStep({ hasEmail: true, completed: true, skipped: false })).toBe(false);
+    expect(needsEmailStep({ hasEmail: false, completed: false, skipped: false })).toBe(false);
   });
 });

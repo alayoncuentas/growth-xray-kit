@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildEmail, maskEmail } from "./email";
+import { buildEmail, maskEmail, normalizeEmail } from "./email";
 
 describe("buildEmail", () => {
   const v = { code: "K7MPX-4RHQ2", business: "Rivera Dental Studio", link: "https://xray.example.com/r/K7MPX-4RHQ2", lang: "en" as const };
@@ -59,5 +59,17 @@ describe("maskEmail", () => {
   it("deja la inicial y el dominio", () => {
     expect(maskEmail("jane.doe@rivera.com")).toBe("j•••@rivera.com");
     expect(maskEmail("bad")).toBe("•••");
+  });
+});
+
+describe("normalizeEmail", () => {
+  it("recorta y pasa a minúsculas", () => {
+    expect(normalizeEmail("  Jane.Doe@Rivera.COM ")).toBe("jane.doe@rivera.com");
+  });
+
+  it("rechaza lo que no es un correo", () => {
+    for (const v of ["", "   ", "jane", "jane@", "@rivera.com", "jane@rivera", "ja ne@rivera.com", "a@b.c" + "x".repeat(260), null, 42]) {
+      expect(normalizeEmail(v)).toBeNull();
+    }
   });
 });

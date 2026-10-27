@@ -18,6 +18,8 @@ export interface Access {
   lang: Lang;
   /** Camino abierto (companies.source = open): la interfaz nunca muestra el código. */
   open: boolean;
+  /** Correo del código (solo en el servidor: a un componente de cliente se pasa enmascarado con maskEmail). */
+  email: string | null;
   /** Código de vista previa (solo con sesión de admin): nada se lee ni se escribe en la base. */
   preview?: PreviewVariant;
 }
@@ -81,6 +83,7 @@ export async function browserLang(): Promise<Lang> {
 
 interface CodeRow {
   code: string;
+  email: string | null;
   expires_at: string | null;
   lang: string;
   sessions: { phase: number; lang: string | null }[] | null;
@@ -121,7 +124,7 @@ export async function checkAccess(raw: string): Promise<AccessResult> {
   const pv = wellFormed ? previewVariant(code) : null;
   if (pv && (await getAdmin())) {
     const lang = (await cookieLang()) ?? DEFAULT_LANG;
-    return { ok: true, access: { code, company: previewCompany(pv, lang), preview: pv, lang, open: false } };
+    return { ok: true, access: { code, company: previewCompany(pv, lang), preview: pv, lang, open: false, email: null } };
   }
 
   // En paralelo para ahorrar un viaje a la base; si la IP está bloqueada, el resultado se descarta.
@@ -131,7 +134,7 @@ export async function checkAccess(raw: string): Promise<AccessResult> {
     wellFormed
       ? db()
           .from("access_codes")
-          .select("code, expires_at, lang, sessions(phase, lang), companies(*)")
+          .select("code, email, expires_at, lang, sessions(phase, lang), companies(*)")
           .eq("code", code)
           .maybeSingle<CodeRow>()
           .then((r) => must(r, "access_codes"))
@@ -152,6 +155,6 @@ export async function checkAccess(raw: string): Promise<AccessResult> {
   const lang = chosen ?? (isLang(sessionLang) ? sessionLang : isLang(row.lang) ? row.lang : DEFAULT_LANG);
   return {
     ok: true,
-    access: { code: row.code, company: row.companies ? toCompany(row.companies) : null, lang, open: row.companies?.source === "open" },
+    access: { code: row.code, company: row.companies ? toCompany(row.companies) : null, lang, open: row.companies?.source === "open", email: row.email },
   };
 }

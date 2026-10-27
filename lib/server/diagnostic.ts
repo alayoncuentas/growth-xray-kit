@@ -90,6 +90,11 @@ export async function loadPhase1(code: string): Promise<Phase1State> {
   return { ...saved, started: true, completed: !!session.completed_at };
 }
 
+/** La fase 1 de este código terminó (`phase_done`). */
+export async function phaseDone(code: string): Promise<boolean> {
+  return !!(await findSession(code))?.completed_at;
+}
+
 /** El prospecto eligió idioma con el botón EN / ES: queda en su sesión, si ya existe (si no, la crea su primera respuesta). */
 export async function setSessionLang(code: string, lang: Lang) {
   must(await db().from("sessions").update({ lang }).eq("code", code).eq("phase", PHASE), "sessions lang");

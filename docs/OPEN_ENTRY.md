@@ -1,6 +1,6 @@
 # Camino abierto (sin código): decisiones aprobadas
 
-Estado: **aprobado; en construcción en `feature/open-entry`.** Hecho: el inicio (botón, Turnstile, límite por IP, UTM y referrer, empresa + código + sesión; detrás del flag), la migración, los datos del negocio y el código oculto en el camino abierto. Falta: pantalla del correo, resultado parcial, regalos, panel, cron, Delete lead, `/privacy` y GHL. Este documento manda sobre `docs/SPEC.md` en todo lo que toca el camino abierto.
+Estado: **aprobado; en construcción en `feature/open-entry`.** Hecho: el inicio (botón, Turnstile, límite por IP, UTM y referrer, empresa + código + sesión; detrás del flag), la migración, los datos del negocio, el código oculto en el camino abierto, la pantalla del correo con consentimiento y el resultado parcial. Falta: regalos, panel, cron, Delete lead, `/privacy` y GHL. Este documento manda sobre `docs/SPEC.md` en todo lo que toca el camino abierto.
 Los textos de interfaz van en **inglés y en español**, con la misma estructura, en `config/phase1.config.json` y `config/phase1.config.es.json` (lo verifica `lib/config.test.ts`). Los del panel van solo en inglés, en `config/team.config.json`. Aquí se copia el inglés como referencia aprobada; el español es su traducción (neutro latinoamericano, tuteo).
 **Idioma sin código**: el elegido con el botón EN / ES (cookie); si no, el del navegador (`Accept-Language`); si no es inglés ni español, inglés. La sesión anónima nace con ese idioma (`access_codes.lang` y `sessions.lang`).
 
@@ -181,6 +181,13 @@ Consent:
   your {giftShort}, and send occasional tips on winning more customers.
   Unsubscribe anytime. Privacy policy
 ```
+
+Agregados al construir (no estaban en la aprobación; en `copy.capture`):
+```
+Skip (invitado):  Skip for now and see my results    (un invitado sin correo ve el resultado completo)
+Error al guardar: We couldn't save that just now. Try again in a minute.   (mismo texto que copy.business.errorSave)
+```
+"Privacy policy" enlaza a `/privacy` (todavía no publicada: el flag sigue apagado hasta entonces). Versión del consentimiento: `EMAIL_CONSENT_VERSION` en `lib/email.ts`.
 
 ### Resultado parcial (bloque para desbloquear)
 ```

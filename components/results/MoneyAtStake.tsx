@@ -20,7 +20,12 @@ export function MoneyAtStake({ calc, compact = false }: { calc: CalcResult; comp
   );
 }
 
-function Tile({ tone, label, value, detail }: { tone: "leak" | "accent"; label: string; value: number; detail: string }) {
+/** Solo la cifra principal (resultado parcial): sin el desglose, el escenario cauteloso ni la inversión en anuncios. */
+export function MoneyHeadline({ monthly }: { monthly: number }) {
+  return <Tile tone="leak" label={useConfig().copy.money.monthlyLabel} value={monthly} />;
+}
+
+function Tile({ tone, label, value, detail }: { tone: "leak" | "accent"; label: string; value: number; detail?: string }) {
   const perMonth = useConfig().copy.money.perMonth;
   return (
     <div className={`rounded-card p-4 ${tone === "leak" ? "bg-leak-soft" : "bg-accent-soft"}`}>
@@ -29,7 +34,7 @@ function Tile({ tone, label, value, detail }: { tone: "leak" | "accent"; label: 
         {usd(value)}
         <span className="text-[0.5em]"> {perMonth}</span>
       </div>
-      <div className="mt-1 text-[13px] text-muted">{detail}</div>
+      {detail && <div className="mt-1 text-[13px] text-muted">{detail}</div>}
     </div>
   );
 }

@@ -5,8 +5,10 @@ import { redirect } from "next/navigation";
 import { isLang, LANG_COOKIE } from "@/lib/config";
 import { getConfig } from "@/lib/config";
 import { afterBusiness, stepHref } from "@/lib/flow";
+import { normalizeEmail } from "@/lib/email";
 import { arrivalFrom, parseBusinessForm } from "@/lib/open-entry";
 import { browserLang, checkAccess, clientKey, type AccessError } from "@/lib/server/access";
+import { captureEmail as saveCapturedEmail, type CaptureFrom } from "@/lib/server/capture";
 import { openLink, setSessionLang } from "@/lib/server/diagnostic";
 import { sendResumeEmail } from "@/lib/server/email";
 import { createOpenSession, openEntryEnabled, openLimitHit, saveBusinessData, verifyTurnstile } from "@/lib/server/open-entry";
@@ -87,6 +89,31 @@ export async function markLinkOpened(code: string): Promise<void> {
   const r = await checkAccess(code);
   if (!r.ok || r.access.preview) return; // la vista previa no crea sesión ni registra eventos
   await openLink(r.access.code, (await headers()).get("user-agent"));
+}
+
+export type CaptureState = { error?: "email" | "save"; email?: string };
+
+/**
+ * Pantalla del correo (`from = "screen"`) o bloque para desbloquear el parcial (`"partial"`): guarda el correo con
+ * el consentimiento y lleva al resultado completo. Desde el parcial, con el aviso "Unlocked…" (?unlocked=1).
+ * La vista previa valida igual pero no guarda nada.
+ */
+export async function captureEmail(code: string, from: CaptureFrom, _prev: CaptureState, formData: FormData): Promise<CaptureState> {
+  const r = await checkAccess(code);
+  if (!r.ok) return { error: "save" };
+  const raw = String(formData.get("email") ?? "");
+  const email = normalizeEmail(raw);
+  if (!email) return { error: "email", email: raw };
+  if (!r.access.preview) {
+    try {
+      await saveCapturedEmail(r.access, email, from);
+    } catch (e) {
+      console.error("[email capture]", r.access.code, e);
+      return { error: "save", email: raw };
+    }
+  }
+  const results = stepHref(r.access.code, { kind: "results" });
+  redirect(from === "partial" && !r.access.preview ? `${results}?unlocked=1` : results);
 }
 
 export type SaveLaterState =

@@ -829,6 +829,36 @@
       "emptySub": "Start the diagnostic and your results will show up here. Your answers save as you go.",
       "emptyCta": "Start the diagnostic"
     },
+    "capture": {
+      "eyebrow": "Your results are ready",
+      "title": "Where should we send your full results?",
+      "sub": "You'll see everything here right away: what to fix first, your first step, and a private link to come back to.",
+      "gift": "Also included: {giftTitle}",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@yourbusiness.com",
+      "cta": "Show my full results",
+      "skip": "Skip for now and see a summary",
+      "skipInvited": "Skip for now and see my results",
+      "errorEmail": "Enter a valid email address.",
+      "errorSave": "We couldn't save that just now. Try again in a minute.",
+      "consent": "By continuing, you agree that we can email you your results, follow up about your {giftShort}, and send occasional tips on winning more customers. Unsubscribe anytime.",
+      "privacy": "Privacy policy"
+    },
+    "partial": {
+      "title": "See what to fix first",
+      "text": "Add your email to unlock your findings, your first step and your {giftShort}. We'll also send you a private link to your results.",
+      "after": "Unlocked. We sent your results to {to}."
+    },
+    "gifts": {
+      "A": {
+        "title": "Free response-time test + website review",
+        "short": "free response-time test"
+      },
+      "B": {
+        "title": "Free Google reviews audit",
+        "short": "free Google reviews audit"
+      }
+    },
     "unlock": {
       "eyebrow": "Phase 2 · About 20 minutes · Pause any time",
       "title": "You know where the leak is. Phase 2 tells you exactly how to close it.",
