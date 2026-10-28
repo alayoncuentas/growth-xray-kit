@@ -23,12 +23,12 @@ export function IndexMeter({ avg, band }: { avg: number; band: IndexBand }) {
     <div>
       <div className="label-mono text-muted">{t.indexLabel}</div>
       <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <span className="font-display text-[56px] leading-none font-bold tabular-nums">
+        <span className="numeral text-[56px]">
           {avg}
-          <small className="text-xl font-semibold text-muted">/100</small>
+          <small className="text-xl font-bold tracking-normal text-muted">/100</small>
         </span>
-        <span className="inline-flex items-center gap-1.5 text-[15px] font-semibold">
-          <i aria-hidden="true" className={`inline-block size-2.5 rounded-full ${BG[tone]}`} />
+        <span className="label-mono inline-flex items-center gap-1.5 text-sm text-ink">
+          <i aria-hidden="true" className={`inline-block size-2.5 ${BG[tone]}`} />
           {bandName}
         </span>
       </div>
@@ -44,17 +44,17 @@ export function IndexMeter({ avg, band }: { avg: number; band: IndexBand }) {
         {SEGMENTS.map((s) => (
           <i
             key={s.tone}
-            className={`block h-full first:rounded-l-[6px] last:rounded-r-[6px] ${BG[s.tone]} ${s.tone === tone ? "" : "opacity-30"}`}
+            className={`block h-full ${BG[s.tone]} ${s.tone === tone ? "" : "opacity-30"}`}
             style={{ width: `${s.to - s.from}%` }}
           />
         ))}
         <i
           aria-hidden="true"
-          className="absolute -top-1.5 block h-6 w-1 -translate-x-1/2 rounded-full bg-ink ring-2 ring-card"
+          className="absolute -top-1.5 block h-6 w-1 -translate-x-1/2 bg-ink outline-2 outline-card"
           style={{ left: `${Math.min(100, Math.max(0, avg))}%` }}
         />
       </div>
-      <div aria-hidden="true" className="relative mt-1.5 h-4 font-mono text-[11px] text-muted tabular-nums">
+      <div aria-hidden="true" className="relative mt-1.5 h-4 text-xs text-muted tabular-nums">
         {[0, 45, 70, 100].map((n) => (
           <span key={n} className={`absolute ${n === 0 ? "" : n === 100 ? "right-0" : "-translate-x-1/2"}`} style={n === 100 ? undefined : { left: `${n}%` }}>
             {n}

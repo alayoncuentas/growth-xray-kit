@@ -42,7 +42,7 @@ export function PhoneFrame({ src, title }: { src: string; title: string }) {
       title={title}
       loading="lazy"
       style={{ height }}
-      className="block w-[402px] max-w-full rounded-[18px] border border-line bg-paper"
+      className="block w-[402px] max-w-full border-2 border-rule bg-paper"
     />
   );
 }

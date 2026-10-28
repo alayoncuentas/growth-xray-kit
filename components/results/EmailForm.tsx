@@ -2,12 +2,12 @@
 
 import { useActionState } from "react";
 import { captureEmail, type CaptureState } from "@/app/actions";
-import { Button } from "@/components/ui/Button";
+import { Arrow, Button } from "@/components/ui/Button";
 import type { GiftKind } from "@/lib/gifts";
 import { useConfig } from "@/lib/i18n";
 import { ConsentNote } from "./ConsentNote";
+import { ErrorText, inputClass, labelClass } from "@/components/ui/field";
 
-const inputClass = "w-full min-w-0 rounded-card border-[1.5px] border-line bg-paper px-3.5 py-3 text-ink placeholder:text-muted placeholder:opacity-60";
 
 /**
  * Correo antes del resultado completo: un campo, el botón y el consentimiento "By continuing…" (docs/OPEN_ENTRY.md §9).
@@ -22,7 +22,7 @@ export function EmailForm({ code, from, gift }: { code: string; from: "screen" |
   return (
     <form action={action} noValidate className="grid gap-3">
       <div className="grid gap-1.5">
-        <label htmlFor="capture-email" className="text-[13px] font-semibold">
+        <label htmlFor="capture-email" className={labelClass}>
           {t.emailLabel}
         </label>
         <input
@@ -43,13 +43,14 @@ export function EmailForm({ code, from, gift }: { code: string; from: "screen" |
           className={inputClass}
         />
         {error && (
-          <p id="capture-err" role="alert" className="text-[13px] text-bad">
+          <ErrorText id="capture-err" role="alert">
             {error}
-          </p>
+          </ErrorText>
         )}
       </div>
       <Button type="submit" disabled={pending} className="w-full sm:w-auto sm:justify-self-start">
         {t.cta}
+        <Arrow />
       </Button>
       <ConsentNote gift={gift} />
     </form>

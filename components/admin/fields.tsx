@@ -1,6 +1,7 @@
+import { ErrorText, labelClass } from "@/components/ui/field";
 // Campos de formulario del panel (sin estado: sirven en cliente y servidor).
 
-export const inputClass = "w-full min-w-0 rounded-card border-[1.5px] border-line bg-paper px-3 py-2.5 text-ink";
+export { inputClass } from "@/components/ui/field";
 
 export function Field({
   name,
@@ -15,14 +16,14 @@ export function Field({
 }) {
   return (
     <div className="grid content-start gap-1.5">
-      <label htmlFor={name} className="text-[13px] font-semibold">
+      <label htmlFor={name} className={labelClass}>
         {label}
       </label>
       {children}
       {error && (
-        <p id={`${name}-err`} className="text-[13px] text-bad">
+        <ErrorText id={`${name}-err`}>
           {error}
-        </p>
+        </ErrorText>
       )}
     </div>
   );

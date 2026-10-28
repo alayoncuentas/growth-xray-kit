@@ -18,6 +18,7 @@ import { calcValues, visibleQuestions } from "@/lib/scoring";
 import { getLead, type LeadDetail } from "@/lib/server/admin-data";
 import { appOrigin } from "@/lib/server/origin";
 import { adminCopy } from "@/lib/server/team";
+import { Badge } from "@/components/ui/Badge";
 
 export default function LeadPage({ params, searchParams }: PageProps<"/admin/c/[code]">) {
   return (
@@ -55,24 +56,24 @@ async function Lead({ code, created }: { code: string; created: boolean }) {
       </div>
       <header>
         <Eyebrow>{[co?.city, co?.state].filter(Boolean).join(", ") || adminCopy.list.eyebrow}</Eyebrow>
-        <h1 className="mb-2 text-[clamp(28px,5vw,40px)] tracking-[-0.02em]">{co?.name ?? (lead.source === "open" ? adminCopy.list.unnamed : lead.code)}</h1>
+        <h1 className="mb-2 display text-[clamp(28px,5vw,40px)]">{co?.name ?? (lead.source === "open" ? adminCopy.list.unnamed : lead.code)}</h1>
         <div className="flex flex-wrap items-center gap-3 text-sm">
           <StatusBadge status={lead.status} expired={lead.expired} />
-          <span className="label-mono rounded-full border border-line px-2 py-1 text-[11px] leading-none text-muted">{adminCopy.sources[lead.source]}</span>
-          <span className="text-muted">
+          <Badge tone={lead.source === "open" ? "new" : "neutral"}>{adminCopy.sources[lead.source]}</Badge>
+          <span className="text-ink-2">
             {d.progress}: {progress}
           </span>
         </div>
       </header>
 
-      <section className={`grid gap-2.5 rounded-panel border p-5 ${created ? "border-accent bg-accent-soft" : "border-line bg-card"}`}>
-        <div className="label-mono text-xs text-muted">{d.link}</div>
+      <section className={`grid gap-2.5 border-2 border-rule bg-card px-[18px] py-3.5 min-[561px]:px-6 min-[561px]:py-5 ${created ? "border-l-[6px] border-l-accent" : ""}`}>
+        <div className="label-mono text-ink-2">{d.link}</div>
         <div className="flex flex-wrap items-center gap-2.5">
-          <code className="min-w-0 font-mono text-lg font-medium tracking-[0.06em] break-all">{lead.code}</code>
+          <code className="min-w-0 text-lg font-bold tracking-[0.06em] break-all tabular-nums">{lead.code}</code>
           <CopyButton text={lead.code} label={d.copy} done={d.copied} />
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
-          <a href={link} className="min-w-0 text-sm break-all text-accent underline underline-offset-2" target="_blank" rel="noreferrer">
+          <a href={link} className="min-w-0 text-sm break-all text-link underline underline-offset-2" target="_blank" rel="noreferrer">
             {link}
           </a>
           <CopyButton text={link} label={d.copy} done={d.copied} />
@@ -106,7 +107,7 @@ async function Lead({ code, created }: { code: string; created: boolean }) {
           {started ? (
             <TeamView code={lead.code} answers={saved.answers} calc={saved.calc} />
           ) : (
-            <p className="rounded-panel border-2 border-dashed border-line p-5 text-muted">{d.teamPending}</p>
+            <p className="border-2 border-dashed border-rule px-[18px] py-4 text-ink-2">{d.teamPending}</p>
           )}
           <Panel title={d.answersTitle}>
             <Answers lead={lead} />
@@ -153,9 +154,9 @@ async function Lead({ code, created }: { code: string; created: boolean }) {
         </div>
       </div>
 
-      <section className="grid gap-3 rounded-panel border border-bad/50 p-5">
-        <h2 className="text-xl text-bad">{d.deleteTitle}</h2>
-        <p className="max-w-[70ch] text-sm text-muted">{fill(d.deleteText, { codes: lead.otherCodes.length + 1 })}</p>
+      <section className="grid gap-3 border-2 border-l-[6px] border-bad bg-card px-[18px] py-4 min-[561px]:px-6">
+        <h2 className="text-lg text-danger uppercase">{d.deleteTitle}</h2>
+        <p className="max-w-[70ch] text-sm text-ink-2">{fill(d.deleteText, { codes: lead.otherCodes.length + 1 })}</p>
         <DeleteLead
           code={lead.code}
           expected={deleteConfirmation(co?.name, lead.code)}
@@ -191,7 +192,7 @@ function Answers({ lead }: { lead: LeadDetail }) {
               {q.fields.map((f) => (
                 <li key={f.id}>
                   {f.label}:{" "}
-                  <b className="font-mono font-medium">{f.unit === "USD" ? usd(c[f.id]) : f.unit === "%" ? `${c[f.id]}%` : c[f.id]}</b>
+                  <b className="font-mono font-semibold">{f.unit === "USD" ? usd(c[f.id]) : f.unit === "%" ? `${c[f.id]}%` : c[f.id]}</b>
                   {saved.calc[f.id] === undefined && <span className="text-muted"> ({d.calcDefault})</span>}
                 </li>
               ))}
@@ -205,7 +206,7 @@ function Answers({ lead }: { lead: LeadDetail }) {
             <span className="text-muted">
               {i + 1}. {q.prompt}
             </span>
-            <span className="font-medium">{value}</span>
+            <span className="font-semibold">{value}</span>
           </li>
         );
       })}
@@ -261,7 +262,7 @@ function Events({ lead }: { lead: LeadDetail }) {
           <li key={i} className="grid grid-cols-[auto_minmax(0,1fr)] gap-3">
             <span className="font-mono text-xs text-muted tabular-nums">{when(e.at)}</span>
             <span>
-              <b className="font-mono text-xs font-medium">{e.type}</b>
+              <b className="font-mono text-xs font-semibold">{e.type}</b>
               {qid && <span className="text-muted"> · {qid}</span>}
               {e.type === "link_opened" && e.payload.resumed === true && <span className="text-muted"> · resumed</span>}
               {e.type === "link_opened" && e.payload.open === true && <span className="text-muted"> · open</span>}
@@ -323,11 +324,13 @@ function Gift({ lead }: { lead: LeadDetail }) {
         <dd>
           {fill(d.giftDueValue, { date: dueDay(g.due_at) })}
           {st.state === "pending" && <span className="text-muted"> · {st.daysLeft === 1 ? d.giftLeftOne : fill(d.giftLeft, { n: st.daysLeft })}</span>}
-          {st.state === "overdue" && <b className="text-bad"> · {d.giftOverdue}</b>}
+          {st.state === "overdue" && <> · <Badge tone="danger">{d.giftOverdue}</Badge></>}
         </dd>
       </dl>
       {g.delivered_at ? (
-        <p className="text-sm text-good">{fill(d.giftDelivered, { date: when(g.delivered_at), by: g.delivered_by ?? "—" })}</p>
+        <p className="text-sm">
+          <span aria-hidden="true" className="mr-1.5 font-bold text-link">✓</span>
+          {fill(d.giftDelivered, { date: when(g.delivered_at), by: g.delivered_by ?? "—" })}</p>
       ) : (
         <form action={markGiftDeliveredAction.bind(null, lead.code)}>
           <Button type="submit" variant="line">

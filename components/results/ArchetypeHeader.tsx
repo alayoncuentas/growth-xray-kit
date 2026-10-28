@@ -8,8 +8,8 @@ export function ArchetypeHeader({ archetype }: { archetype: ArchetypeId }) {
   const a = useConfig().archetypes[archetype];
   return (
     <div className="mt-2 mb-6">
-      <h1 className="text-[clamp(34px,7vw,56px)] tracking-[-0.025em]">{a.name}</h1>
-      <p className="mt-2.5 max-w-[52ch] text-lg text-muted">{a.line}</p>
+      <h1 className="display text-[clamp(34px,7vw,56px)]">{a.name}</h1>
+      <p className="mt-3 max-w-[52ch] text-lg text-ink-2">{a.line}</p>
     </div>
   );
 }

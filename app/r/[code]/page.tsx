@@ -52,7 +52,7 @@ async function Report({ code: raw, sample }: { code: string; sample: unknown }) 
       <LangProvider lang={lang} code={code}>
         <Card>
           <BusinessMarker business={company?.business ?? null} />
-          <h1 className="mb-3 text-[clamp(26px,5vw,36px)] tracking-[-0.02em]">{t.pendingTitle}</h1>
+          <h1 className="mb-3 display text-[clamp(26px,5vw,36px)]">{t.pendingTitle}</h1>
           <p className="mb-[22px] text-muted">{t.pendingSub}</p>
           <ButtonLink href={resumeHref}>{t.pendingCta}</ButtonLink>
         </Card>
@@ -70,8 +70,8 @@ async function Report({ code: raw, sample }: { code: string; sample: unknown }) 
         eyebrow={t.eyebrow}
         editHref={`${resumeHref}/q/${calculatorId(phase1)}`}
       />
-      <section className="mt-5 grid gap-3 rounded-panel border border-line bg-card p-[clamp(20px,4vw,28px)]">
-        <h2 className="text-xl">{t.continueTitle}</h2>
+      <section className="mt-5 grid gap-3 border-2 border-rule bg-card px-[18px] py-4 min-[561px]:px-7 min-[561px]:py-6">
+        <h2 className="text-lg uppercase">{t.continueTitle}</h2>
         <p className="text-muted">{open ? t.continueSubOpen : t.continueSub}</p>
         <div>
           <ButtonLink href={resumeHref} variant="line">
@@ -79,7 +79,7 @@ async function Report({ code: raw, sample }: { code: string; sample: unknown }) 
           </ButtonLink>
         </div>
       </section>
-      <p className="mt-4 text-[13px] text-muted">{open ? t.readOnlyOpen : t.readOnly}</p>
+      <p className="mt-4 text-sm text-muted">{open ? t.readOnlyOpen : t.readOnly}</p>
     </LangProvider>
   );
 }

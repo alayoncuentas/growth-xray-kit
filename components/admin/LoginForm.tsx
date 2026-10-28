@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { requestLink, type LoginState } from "@/app/admin/actions";
 import { Button } from "@/components/ui/Button";
+import { ErrorText, inputBase, labelClass } from "@/components/ui/field";
 
 type Copy = Record<"label" | "cta" | "sent" | "errorEmail" | "errorSend", string>;
 
@@ -12,14 +13,14 @@ export function LoginForm({ t, initialError }: { t: Copy; initialError?: string 
 
   if (state.sent) {
     return (
-      <p role="status" className="mt-[22px] rounded-card bg-accent-soft p-4">
+      <p role="status" className="mt-[22px] border-2 border-l-[6px] border-line border-l-accent bg-card px-4 py-3">
         {t.sent.replace("{email}", state.sent)}
       </p>
     );
   }
   return (
     <form action={action} noValidate className="mt-[22px] grid gap-1.5">
-      <label htmlFor="email" className="text-[13px] font-semibold">
+      <label htmlFor="email" className={labelClass}>
         {t.label}
       </label>
       <div className="flex flex-wrap gap-2.5">
@@ -32,16 +33,16 @@ export function LoginForm({ t, initialError }: { t: Copy; initialError?: string 
           defaultValue={state.email}
           aria-invalid={!!error}
           aria-describedby={error ? "email-err" : undefined}
-          className="min-w-0 flex-1 rounded-card border-[1.5px] border-line bg-paper px-3.5 py-3 text-ink"
+          className={`${inputBase} flex-1`}
         />
         <Button type="submit" disabled={pending}>
           {t.cta}
         </Button>
       </div>
       {error && (
-        <p id="email-err" className="text-[13px] text-bad">
+        <ErrorText id="email-err">
           {error}
-        </p>
+        </ErrorText>
       )}
     </form>
   );

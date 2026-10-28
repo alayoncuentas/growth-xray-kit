@@ -13,7 +13,7 @@ export function ConsentNote({ gift, inverse = false }: { gift: GiftKind; inverse
   const cfg = useConfig();
   const t = cfg.copy.capture;
   return (
-    <p className={`text-left text-[12px] leading-normal ${inverse ? "text-paper/70" : "text-muted"}`}>
+    <p className={`text-left text-sm leading-normal ${inverse ? "text-paper/75" : "text-muted"}`}>
       {fill(t.consent, { giftShort: cfg.copy.gifts[gift].short })}{" "}
       <a href="/privacy" className={`underline underline-offset-2 ${inverse ? "hover:text-paper" : "hover:text-ink"}`}>
         {t.privacy}

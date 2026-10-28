@@ -20,16 +20,16 @@ export function PillarBars({ scores }: { scores: PillarScores }) {
         {pillarsWeakestFirst(cfg, scores).map((p) => (
           <li
             key={p.id}
-            className="grid grid-cols-[110px_minmax(0,1fr)_34px] items-center gap-3 border-b border-line py-2 text-sm min-[441px]:grid-cols-[150px_minmax(0,1fr)_40px]"
+            className="grid min-h-11 grid-cols-[110px_minmax(0,1fr)_34px] items-center gap-3 border-b border-line py-1.5 text-[15px] min-[441px]:grid-cols-[150px_minmax(0,1fr)_40px]"
           >
             <span>{p.label}</span>
             <Bar value={p.score} tone={scoreTone(p.score)} />
-            <span className="text-right font-mono font-medium tabular-nums">{p.score}</span>
+            <span className="text-right font-bold tabular-nums">{p.score}</span>
           </li>
         ))}
       </ol>
       {locked.length > 0 && (
-        <p className="flex items-start gap-2 pt-3 text-sm text-muted">
+        <p className="flex items-start gap-2 pt-3 text-sm text-ink-2">
           <LockIcon className="mt-[3px] shrink-0" />
           <span>
             {fill(t.lockedSummary, {

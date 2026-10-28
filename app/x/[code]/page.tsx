@@ -4,7 +4,7 @@ import { CodeError } from "@/components/gate/CodeError";
 import { LinkOpened } from "@/components/gate/LinkOpened";
 import { PreviewChrome } from "@/components/preview/PreviewChrome";
 import { BusinessMarker } from "@/components/ui/BusinessMarker";
-import { ButtonLink } from "@/components/ui/Button";
+import { Arrow, ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
@@ -67,31 +67,31 @@ async function Welcome({ code: raw, frame }: { code: string; frame: boolean }) {
           <BusinessMarker business={co?.business ?? null} />
         </DiagnosticProvider>
         <Eyebrow>{named ? [co!.business, co!.city].filter(Boolean).join(" · ") : w.eyebrowGeneric}</Eyebrow>
-        <h1 className="mb-3 text-[clamp(30px,6vw,44px)] tracking-[-0.02em]">{title}</h1>
-        <p className="text-muted">{sub}</p>
+        <h1 className="mb-3 display text-[clamp(28px,6vw,40px)]">{title}</h1>
+        <p className="max-w-[60ch] text-ink-2">{sub}</p>
 
         <div className="mt-[22px] grid gap-3 min-[561px]:grid-cols-3">
           {w.promise.map((p: { k: string; text: string }) => (
-            <div key={p.k} className="border-t-2 border-accent pt-2.5 text-sm">
-              <b className="mb-1 block font-mono text-[13px] leading-[1.3] font-semibold text-accent">{p.k}</b>
+            <div key={p.k} className="border-t-2 border-rule pt-2.5 text-[15px]">
+              <b className="label-mono mb-1 block text-link">{p.k}</b>
               {p.text}
             </div>
           ))}
         </div>
 
         {o && (
-          <div className="mt-6 overflow-hidden rounded-card border border-line">
-            <div className="flex flex-wrap justify-between gap-2.5 bg-accent-soft px-4 py-3 font-mono text-xs leading-[1.3] font-medium tracking-[0.06em] uppercase">
+          <div className="mt-6 border-2 border-rule">
+            <div className="label-mono flex flex-wrap justify-between gap-2.5 bg-card-2 px-4 py-3">
               <span>{w.outsideTitle}</span>
               <span>{w.outsideBadge}</span>
             </div>
             <OutsideRow label={o.date}>
               {o.text}
               <br />
-              <strong className="text-leak">{o.reply}</strong> {fill(w.outsideReplyGap, { replyGap: o.replyGap })}
+              <strong className="underline decoration-highlight decoration-[3px] underline-offset-4">{o.reply}</strong> {fill(w.outsideReplyGap, { replyGap: o.replyGap })}
             </OutsideRow>
             <OutsideRow label={w.outsideReviewsLabel}>
-              {o.reviews}. <strong className="text-leak">{fill(w.outsideLatestReview, { lastReview: o.lastReview })}</strong>
+              {o.reviews}. <strong className="underline decoration-highlight decoration-[3px] underline-offset-4">{fill(w.outsideLatestReview, { lastReview: o.lastReview })}</strong>
             </OutsideRow>
           </div>
         )}
@@ -100,11 +100,14 @@ async function Welcome({ code: raw, frame }: { code: string; frame: boolean }) {
           <ButtonLink href="/" variant="ghost">
             {r.access.open ? w.backOpen : w.back}
           </ButtonLink>
-          <ButtonLink href={ctaHref}>{mode === "done" ? w.doneCta : mode === "resume" ? w.resumeCta : w.cta}</ButtonLink>
+          <ButtonLink href={ctaHref}>
+            {mode === "done" ? w.doneCta : mode === "resume" ? w.resumeCta : w.cta}
+            <Arrow />
+          </ButtonLink>
         </div>
         {mode !== "new" && (
           <p className="mt-4 text-right text-sm">
-            <Link href={firstHref} className="text-muted underline underline-offset-2 hover:text-ink">
+            <Link href={firstHref} className="inline-flex min-h-11 items-center text-ink-2 underline underline-offset-4 hover:text-ink">
               {mode === "done" ? w.doneReview : w.resumeFromStart}
             </Link>
           </p>
@@ -118,7 +121,7 @@ async function Welcome({ code: raw, frame }: { code: string; frame: boolean }) {
 function OutsideRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="grid gap-1 border-t border-line px-4 py-3.5 text-[15px] min-[481px]:grid-cols-[120px_1fr] min-[481px]:gap-3">
-      <span className="font-mono text-xs leading-normal font-medium tracking-[0.05em] text-muted uppercase">{label}</span>
+      <span className="label-mono leading-normal text-ink-2">{label}</span>
       <div>{children}</div>
     </div>
   );

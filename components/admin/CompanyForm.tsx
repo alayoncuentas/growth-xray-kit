@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { createCompanyAction, type CompanyFormState } from "@/app/admin/actions";
 import { Button } from "@/components/ui/Button";
 import { Field, inputClass } from "./fields";
+import { ErrorText } from "@/components/ui/field";
 
 // Textos del formulario: los pasa el servidor (config/team.config.json no debe llegar al bundle del cliente).
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -40,9 +41,9 @@ export function CompanyForm({
   return (
     <form action={action} noValidate className="mt-[22px] grid gap-4">
       {Object.keys(e).length > 0 && (
-        <p role="alert" className="text-sm text-bad">
+        <ErrorText role="alert">
           {t.errorGeneric}
-        </p>
+        </ErrorText>
       )}
       <Field name="name" label={t.name} error={e.name}>
         {input("name", { required: true, maxLength: 120, autoComplete: "organization" })}
@@ -73,7 +74,7 @@ export function CompanyForm({
             </option>
           ))}
         </select>
-        <p id="lang-note" className="text-[13px] text-muted">
+        <p id="lang-note" className="text-sm text-muted">
           {t.langNote}
         </p>
       </Field>
@@ -102,13 +103,13 @@ export function CompanyForm({
         </select>
       </Field>
 
-      <fieldset className="grid gap-4 rounded-card border border-line p-4">
-        <legend className="px-1 font-semibold">{t.outsideTitle}</legend>
-        <p className="-mt-1 text-[13px] text-muted">{t.outsideSub}</p>
+      <fieldset className="grid gap-4 border-2 border-line px-[18px] py-4">
+        <legend className="label-mono px-1 text-ink">{t.outsideTitle}</legend>
+        <p className="-mt-1 text-sm text-muted">{t.outsideSub}</p>
         {e.outside && (
-          <p id="outside-err" className="text-[13px] text-bad">
+          <ErrorText id="outside-err">
             {e.outside}
-          </p>
+          </ErrorText>
         )}
         <div className="grid gap-4 min-[561px]:grid-cols-2">
           {OUTSIDE.map((k) => (

@@ -9,13 +9,13 @@ export function AdCallout({ leak, adLeak }: { leak: number; adLeak: number }) {
   const m = useConfig().copy.money;
   const perThousand = adLeakPerThousand(leak);
   return (
-    <section className="rounded-panel border border-line bg-card p-5">
+    <section className="border-2 border-rule bg-card px-[18px] py-4 min-[561px]:px-6">
       {/* Barra de $1,000: la parte naranja es lo que paga consultas que se escapan. El texto dice lo mismo. */}
-      <div aria-hidden="true" className="mb-3 h-3 overflow-hidden rounded-[6px] bg-paper">
+      <div aria-hidden="true" className="mb-3 h-3 overflow-hidden bg-card-2">
         <i className="block h-full bg-leak" style={{ width: `${perThousand / 10}%` }} />
       </div>
-      <p className="text-[17px] font-semibold">{fill(m.adCallout, { perThousand: usd(perThousand) })}</p>
-      <p className="mt-1 text-[15px] text-muted">{fill(m.adCalloutDetail, { adLeak: usd(adLeak) })}</p>
+      <p className="max-w-[60ch] text-lg leading-snug">{fill(m.adCallout, { perThousand: usd(perThousand) })}</p>
+      <p className="mt-1 text-[15px] text-ink-2">{fill(m.adCalloutDetail, { adLeak: usd(adLeak) })}</p>
     </section>
   );
 }

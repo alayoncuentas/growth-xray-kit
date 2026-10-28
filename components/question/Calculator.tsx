@@ -19,12 +19,12 @@ export function Calculator({ code, question }: { code: string; question: Calcula
 
   return (
     <>
-      <div className="mt-5 grid gap-[18px] rounded-card border border-line bg-card p-5">
+      <div className="mt-5 grid gap-[18px] border-2 border-rule bg-card px-[18px] py-4">
         {question.fields.map((f) => (
           <div key={f.id} className="grid gap-1.5">
             <div className="flex justify-between gap-3 text-sm">
               <label htmlFor={`f_${f.id}`}>{f.label}</label>
-              <output htmlFor={`f_${f.id}`} className="whitespace-nowrap font-mono text-[15px] font-medium tabular-nums text-accent">
+              <output htmlFor={`f_${f.id}`} className="text-[15px] font-bold whitespace-nowrap text-link tabular-nums">
                 {fmt(f, c[f.id])}
               </output>
             </div>
@@ -39,16 +39,16 @@ export function Calculator({ code, question }: { code: string; question: Calcula
                 setCalc(code, f.id, Number(e.target.value));
                 queueSave(code, question.id, getDiagnostic(code).calc, SAVE_DELAY_MS);
               }}
-              className="w-full accent-accent"
+              className="min-h-11 w-full accent-accent"
             />
-            {f.note && <p className="-mt-0.5 text-[13px] text-muted">{f.note}</p>}
+            {f.note && <p className="-mt-1 text-sm text-muted">{f.note}</p>}
           </div>
         ))}
       </div>
       <div aria-live="polite">
         <MoneyAtStake calc={c} />
       </div>
-      {question.disclaimer && <p className="mt-2.5 text-[13px] text-muted">{question.disclaimer}</p>}
+      {question.disclaimer && <p className="mt-2.5 text-sm text-muted">{question.disclaimer}</p>}
     </>
   );
 }

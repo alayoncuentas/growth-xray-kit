@@ -8,15 +8,16 @@ import type { ArchetypeId } from "@/lib/types";
 import type { TeamFlag } from "@/lib/scoring";
 import { Flags } from "./TeamView";
 import { StatusBadge, when } from "./Status";
+import { Badge, type BadgeTone } from "@/components/ui/Badge";
 
 /** Lista de empresas. En el teléfono cada fila es una tarjeta; desde 860 px, una tabla. */
 export function LeadList({ leads }: { leads: LeadRow[] }) {
   const l = adminCopy.list;
-  if (!leads.length) return <p className="rounded-panel border border-line bg-card p-5 text-muted">{l.empty}</p>;
+  if (!leads.length) return <p className="border border-line bg-card p-5 text-muted">{l.empty}</p>;
 
   return (
-    <div className="overflow-hidden rounded-panel border border-line bg-card">
-      <div className="label-mono hidden grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1.1fr)_90px_90px_minmax(0,1.4fr)] gap-3 border-b border-line px-4 py-3 text-[11px] text-muted min-[860px]:grid">
+    <div className="overflow-hidden border border-line bg-card">
+      <div className="label-mono hidden grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1.1fr)_90px_90px_minmax(0,1.4fr)] gap-3 border-b border-line px-4 py-3 text-muted min-[860px]:grid">
         <span>{l.colBusiness}</span>
         <span>{l.colStatus}</span>
         <span>{l.colArchetype}</span>
@@ -32,25 +33,25 @@ export function LeadList({ leads }: { leads: LeadRow[] }) {
             <li key={lead.code} className="border-b border-line last:border-b-0">
               <Link
                 href={`/admin/c/${lead.code}`}
-                className="grid gap-2 px-4 py-3.5 hover:bg-paper/60 min-[860px]:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1.1fr)_90px_90px_minmax(0,1.4fr)] min-[860px]:items-center min-[860px]:gap-3"
+                className="grid gap-2 px-4 py-3.5 transition-colors duration-[140ms] ease-linear hover:bg-highlight/12 min-[860px]:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1.1fr)_90px_90px_minmax(0,1.4fr)] min-[860px]:items-center min-[860px]:gap-3"
               >
                 <span className="min-w-0">
                   <span className="flex min-w-0 items-center gap-2">
-                    <b className={`truncate ${lead.company?.name ? "" : "font-medium text-muted"}`}>{lead.company?.name ?? l.unnamed}</b>
+                    <b className={`truncate ${lead.company?.name ? "" : "font-semibold text-muted"}`}>{lead.company?.name ?? l.unnamed}</b>
                     {lead.source === "open" && (
-                      <span className="label-mono flex-none rounded-full border border-accent px-1.5 py-0.5 text-[10px] leading-none text-accent">
+                      <Badge tone="new" className="flex-none">
                         {adminCopy.sources.open}
-                      </span>
+                      </Badge>
                     )}
                     {/* Idioma en que respondió; si todavía no respondió, el del link. Fuera del texto truncado para que siempre se vea. */}
                     <span
                       title={lead.phase1?.lang ? fill(l.langTitle, { lang: adminCopy.langs[lead.phase1.lang] }) : `${adminCopy.detail.codeLang}: ${adminCopy.langs[lead.lang]}`}
-                      className="flex-none rounded border border-line px-1 font-mono text-[11px] leading-[1.4] text-muted"
+                      className="label-mono flex-none border-2 border-line px-1 leading-[1.4] text-ink-2"
                     >
                       {(lead.phase1?.lang ?? lead.lang).toUpperCase()}
                     </span>
                   </span>
-                  <span className="block truncate font-mono text-xs text-muted">
+                  <span className="block truncate text-sm text-muted">
                     {[
                       lead.code,
                       [lead.company?.city, lead.company?.state].filter(Boolean).join(", ") || null,
@@ -111,15 +112,15 @@ function GiftChip({ lead }: { lead: LeadRow }) {
   const l = adminCopy.list;
   const g = lead.gift!;
   const st = giftState(g, new Date());
-  const [tone, text] =
+  const [tone, text]: [BadgeTone, string] =
     st.state === "delivered"
-      ? ["border-good text-good", l.giftDelivered]
+      ? ["new", l.giftDelivered]
       : st.state === "overdue"
-        ? ["border-bad text-bad", l.giftOverdue]
-        : ["border-line text-muted", fill(l.giftLeft, { n: st.daysLeft })];
+        ? ["danger", l.giftOverdue]
+        : ["neutral", fill(l.giftLeft, { n: st.daysLeft })];
   return (
-    <span className={`label-mono rounded-full border px-2 py-1 text-[11px] leading-none ${tone}`} title={adminCopy.gifts[g.kind]}>
+    <Badge tone={tone} title={adminCopy.gifts[g.kind]}>
       {fill(l.giftChip, { kind: g.kind })} · {text}
-    </span>
+    </Badge>
   );
 }

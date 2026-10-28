@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { CodeForm } from "@/components/gate/CodeForm";
 import { StartForm } from "@/components/gate/StartForm";
-import { Button } from "@/components/ui/Button";
+import { Arrow, Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
@@ -36,22 +36,23 @@ async function Gate({ previewOpen }: { previewOpen: boolean }) {
     <LangProvider lang={lang}>
       <Card>
         <Eyebrow>{open ? s.eyebrow : g.eyebrow}</Eyebrow>
-        <h1 className="mb-3 text-[clamp(30px,6vw,44px)] tracking-[-0.02em]">{open ? s.title : g.title}</h1>
-        <p className="mb-[22px] text-muted">{open ? s.sub : g.sub}</p>
+        <h1 className="mb-3 display text-[clamp(28px,6vw,40px)]">{open ? s.title : g.title}</h1>
+        <p className="mb-[22px] max-w-[60ch] text-ink-2">{open ? s.sub : g.sub}</p>
         {open ? (
           <>
             {preview || !siteKey ? (
               <div className="grid gap-2.5">
                 <Button type="button" disabled className="w-full sm:w-auto sm:justify-self-start">
                   {s.cta}
+                  <Arrow />
                 </Button>
-                <p className="text-[13px] text-muted">{s.note}</p>
+                <p className="text-sm text-muted">{s.note}</p>
               </div>
             ) : (
               <StartForm siteKey={siteKey} />
             )}
-            <details className="group mt-6 border-t border-line pt-4">
-              <summary className="cursor-pointer text-[14px] font-semibold text-muted marker:text-muted hover:text-ink">
+            <details className="mt-6 border-t-2 border-rule pt-1">
+              <summary className="flex min-h-11 items-center text-sm font-bold text-ink-2 hover:text-ink">
                 {s.codeToggle}
               </summary>
               <CodeForm secondary />

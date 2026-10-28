@@ -46,7 +46,7 @@ export function ResultsView({
   if (!Object.keys(answers).length) {
     return (
       <Card>
-        <h1 className="mb-3 text-[clamp(26px,5vw,36px)] tracking-[-0.02em]">{open ? t.emptyTitleOpen : t.emptyTitle}</h1>
+        <h1 className="mb-3 display text-[clamp(26px,5vw,36px)]">{open ? t.emptyTitleOpen : t.emptyTitle}</h1>
         <p className="mb-[22px] text-muted">{t.emptySub}</p>
         <ButtonLink href={firstHref}>{t.emptyCta}</ButtonLink>
       </Card>
@@ -73,7 +73,7 @@ export function ResultsView({
   return (
     <>
       {unlockedTo && (
-        <p role="status" className="mb-5 rounded-card bg-accent-soft px-4 py-3 text-sm">
+        <p role="status" className="mb-5 border-2 border-l-[6px] border-line border-l-accent bg-card px-4 py-3 text-sm">
           {fill(cfg.copy.partial.after, { to: unlockedTo })}
         </p>
       )}

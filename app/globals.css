@@ -1,63 +1,98 @@
 @import "tailwindcss";
 
 /*
-  Sistema visual de Growth X-Ray, copiado de docs/prototype.html.
-  Los colores viven como variables CSS para que el modo oscuro cambie solo los valores;
-  @theme inline los expone como utilidades de Tailwind: bg-paper, text-ink, border-line, text-leak…
-  Tema: sigue al sistema por defecto; data-theme="light|dark" en <html> lo fuerza.
+  Sistema visual 123SPICE App (la parte de trabajo de la marca; comparte paleta, Host Grotesk, bordes rectos y
+  reglas de 2px con la landing). Los valores autoritativos son las variables --s123-*; los nombres de la app
+  (paper, card, ink, muted, accent…) son alias para que las utilidades de Tailwind sigan siendo las mismas:
+  bg-paper, text-ink, border-rule, bg-highlight…
+  Significado del color: turquesa = acción principal, enlaces y "correcto"; naranja = selección, destacado y avisos
+  (siempre con texto negro encima); rojo = destructivo, pérdida y errores. Nunca el color solo.
+  Tema: claro por defecto, sigue al sistema; data-theme="light|dark" en <html> lo fuerza.
 */
 
 :root {
-  --paper: #f1f5f4;
-  --card: #ffffff;
-  --ink: #132427;
-  --muted: #56696b;
-  --line: #d3dddc;
-  --accent: #0e5c61;
-  --accent-ink: #ffffff;
-  --accent-soft: #ddecea;
-  --leak: #a3540f; /* ≥ 4.5:1 sobre paper, card y leak-soft (AA en texto chico) */
-  --leak-soft: #f7e7d7;
-  --good: #2c7a4d;
-  --warn: #8f6116; /* ≥ 4.9:1 sobre paper y card */
-  --bad: #b0412c;
+  --s123-bg: #f7f5f1;
+  --s123-surface: #ffffff;
+  --s123-surface-2: #efede7;
+  --s123-ink: #111318;
+  --s123-ink-2: #4a4e58;
+  /* #6b6f79 daba 4.30:1 sobre surface-2: un tono más oscuro llega a ≥ 4.69:1 en todos los fondos claros */
+  --s123-ink-3: #656973;
+  --s123-rule-strong: #111318;
+  --s123-rule-soft: #d9d5cc;
+  --s123-primary: #0797a8;
+  --s123-on-primary: #111318;
+  --s123-link: #05707c; /* ≥ 4.96:1 en todos los fondos claros */
+  --s123-accent: #f28c00;
+  --s123-on-accent: #111318;
+  --s123-danger: #e83443;
+  --s123-danger-text: #b3202d; /* ≥ 5.67:1 */
+  --s123-focus: #111318;
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper: #0e1718;
-    --card: #162224;
-    --ink: #e4eded;
-    --muted: #93a6a7;
-    --line: #2a3b3d;
-    --accent: #62b8b1;
-    --accent-ink: #0b1a1b;
-    --accent-soft: #1a3335;
-    --leak: #e99a57;
-    --leak-soft: #3a2919;
-    --good: #6bc08d;
-    --warn: #e0b25b;
-    --bad: #e57b63;
+    --s123-bg: #111318;
+    --s123-surface: #181b22;
+    --s123-surface-2: #20242c;
+    --s123-ink: #f7f5f1;
+    --s123-ink-2: #cdd0d6;
+    --s123-ink-3: #9a9ea8;
+    /* #5c5c5c daba 2.3–2.8:1: los bordes de campos y paneles necesitan ≥ 3:1 */
+    --s123-rule-strong: #757575;
+    --s123-rule-soft: #343434;
+    /* #0797a8 daba 4.44:1 sobre surface-2: un tono más claro llega a ≥ 4.71:1 */
+    --s123-link: #1aa6b8;
+    --s123-danger-text: #ff6b76;
+    --s123-focus: #f28c00;
     color-scheme: dark;
   }
 }
 
 :root[data-theme="dark"] {
-  --paper: #0e1718;
-  --card: #162224;
-  --ink: #e4eded;
-  --muted: #93a6a7;
-  --line: #2a3b3d;
-  --accent: #62b8b1;
-  --accent-ink: #0b1a1b;
-  --accent-soft: #1a3335;
-  --leak: #e99a57;
-  --leak-soft: #3a2919;
-  --good: #6bc08d;
-  --warn: #e0b25b;
-  --bad: #e57b63;
+  --s123-bg: #111318;
+  --s123-surface: #181b22;
+  --s123-surface-2: #20242c;
+  --s123-ink: #f7f5f1;
+  --s123-ink-2: #cdd0d6;
+  --s123-ink-3: #9a9ea8;
+  --s123-rule-strong: #757575;
+  --s123-rule-soft: #343434;
+  --s123-link: #1aa6b8;
+  --s123-danger-text: #ff6b76;
+  --s123-focus: #f28c00;
   color-scheme: dark;
+}
+
+/* Alias de la app: los mismos en los dos temas, porque siguen a las variables --s123-*. */
+:root {
+  --paper: var(--s123-bg);
+  --card: var(--s123-surface);
+  --card-2: var(--s123-surface-2);
+  --ink: var(--s123-ink);
+  --ink-2: var(--s123-ink-2);
+  --muted: var(--s123-ink-3);
+  --line: var(--s123-rule-soft);
+  --rule: var(--s123-rule-strong);
+  --link: var(--s123-link);
+  --focus: var(--s123-focus);
+  /* Acción principal (rellenos): turquesa con texto negro. Matiz suave derivado con opacidad. */
+  --accent: var(--s123-primary);
+  --accent-ink: var(--s123-on-primary);
+  --accent-soft: color-mix(in srgb, var(--s123-primary) 12%, var(--s123-surface));
+  /* Destacado, selección y avisos: naranja con texto negro. */
+  --highlight: var(--s123-accent);
+  --highlight-ink: var(--s123-on-accent);
+  --highlight-soft: color-mix(in srgb, var(--s123-accent) 14%, var(--s123-surface));
+  /* Dinero que se escapa: el campo naranja del resumen clave. */
+  --leak: var(--s123-accent);
+  --leak-soft: var(--highlight-soft);
+  /* Puntajes (solo rellenos y bordes; el texto va en ink con su etiqueta): correcto, a mejorar, pérdida. */
+  --good: var(--s123-primary);
+  --warn: var(--s123-accent);
+  --bad: var(--s123-danger);
+  --danger: var(--s123-danger-text);
 }
 
 /* Variante dark: para los pocos casos que no se resuelven con tokens. */
@@ -75,42 +110,37 @@
 @theme inline {
   --color-paper: var(--paper);
   --color-card: var(--card);
+  --color-card-2: var(--card-2);
   --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
   --color-muted: var(--muted);
   --color-line: var(--line);
+  --color-rule: var(--rule);
+  --color-link: var(--link);
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
   --color-accent-soft: var(--accent-soft);
+  --color-highlight: var(--highlight);
+  --color-highlight-ink: var(--highlight-ink);
+  --color-highlight-soft: var(--highlight-soft);
   --color-leak: var(--leak);
   --color-leak-soft: var(--leak-soft);
   --color-good: var(--good);
   --color-warn: var(--warn);
   --color-bad: var(--bad);
+  --color-danger: var(--danger);
 
-  /* Las variables --font-* las define next/font en app/layout.tsx */
-  --font-display: var(--font-bricolage), "Avenir Next", system-ui, sans-serif;
-  --font-sans: var(--font-plex-sans), "Segoe UI", system-ui, sans-serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
+  /* Una sola familia (next/font define --font-host-grotesk en app/layout.tsx). */
+  --font-display: var(--font-host-grotesk), sans-serif;
+  --font-sans: var(--font-host-grotesk), sans-serif;
+  --font-mono: var(--font-host-grotesk), sans-serif;
 
-  /* Radios del prototipo: 10px para opciones/insights, 14px para paneles */
-  --radius-card: 10px;
-  --radius-panel: 14px;
+  /* Cuadrado siempre */
+  --radius-card: 0;
+  --radius-panel: 0;
 
-  /* Contenedores del prototipo */
   --container-interview: 680px;
   --container-report: 920px;
-
-  --animate-rise: rise 0.35s ease both;
-  @keyframes rise {
-    from {
-      opacity: 0.4;
-      transform: translateY(6px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
 }
 
 @layer base {
@@ -119,6 +149,7 @@
     color: var(--ink);
     font-family: var(--font-sans);
     font-size: 16px;
+    font-weight: 400;
     line-height: 1.55;
     padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px));
     padding-bottom: 48px;
@@ -128,12 +159,31 @@
   h3 {
     font-family: var(--font-display);
     font-weight: 700;
+    letter-spacing: -0.02em;
     line-height: 1.15;
     text-wrap: balance;
   }
+  /* Foco visible: 3px negro en claro (también sobre naranja), naranja en oscuro, con 3px de separación. */
   :focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
+  }
+  /* Divulgaciones: marcador propio + / − en lugar del triángulo. <summary> ya expone el estado abierto o cerrado. */
+  summary {
+    list-style: none;
+    cursor: pointer;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary::before {
+    content: "+";
+    display: inline-block;
+    width: 1.1em;
+    font-weight: 700;
+  }
+  details[open] > summary::before {
+    content: "−";
   }
   @media (prefers-reduced-motion: reduce) {
     *,
@@ -145,12 +195,30 @@
   }
 }
 
-/* Etiqueta mono en mayúsculas: se repite en todo el prototipo (eyebrow, chips, claves) */
+/* Etiquetas (labels, cabeceras, badges, eyebrows): 12px, 700, mayúsculas. El nombre se conserva por compatibilidad. */
 @utility label-mono {
-  font-family: var(--font-mono);
-  font-weight: 500;
-  font-size: 11px;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 12px;
   line-height: 1.3;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+/* Display: títulos de pantalla, estados vacíos y números grandes. 800, mayúsculas, interlineado 1. */
+@utility display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+
+/* Cifras grandes (numeral silencioso): display sin mayúsculas forzadas, con tabular-nums. */
+@utility numeral {
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
 }

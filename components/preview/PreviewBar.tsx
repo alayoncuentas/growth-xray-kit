@@ -8,7 +8,7 @@ import { replaceDiagnostic } from "@/lib/store";
 
 type Copy = Record<"label" | "jump" | "welcome" | "results" | "sample" | "reset" | "back", string>;
 
-const selectClass = "w-full min-w-0 cursor-pointer min-[560px]:w-[220px] rounded-full border border-paper/30 bg-transparent px-3 py-1.5 text-paper [&>option]:text-ink";
+const selectClass = "min-h-11 w-full min-w-0 cursor-pointer min-[560px]:w-[220px] border-2 border-paper/60 bg-transparent px-3 py-1.5 text-paper [&>option]:text-ink";
 
 /** Barra del modo recorrido: saltar a cualquier pantalla, cargar una muestra o empezar de cero. Nada se guarda. */
 export function PreviewBar({ code, knownIndustry, t }: { code: string; knownIndustry?: string | null; t: Copy }) {
@@ -21,7 +21,7 @@ export function PreviewBar({ code, knownIndustry, t }: { code: string; knownIndu
       <div aria-hidden className="h-40 min-[700px]:h-16" />
       <div role="region" aria-label={t.label} className="fixed inset-x-0 bottom-0 z-50 bg-ink text-paper">
         <div className="mx-auto flex max-w-report flex-wrap items-center gap-2 px-4 py-2.5 text-sm">
-          <span className="label-mono w-full text-[11px] text-paper/70 min-[700px]:w-auto">{t.label}</span>
+          <span className="label-mono w-full text-paper/75 min-[700px]:w-auto">{t.label}</span>
           <select aria-label={t.jump} value="" onChange={(e) => router.push(e.target.value)} className={selectClass}>
             <option value="" disabled>
               {t.jump}
@@ -60,11 +60,11 @@ export function PreviewBar({ code, knownIndustry, t }: { code: string; knownIndu
               replaceDiagnostic(code, { answers: {}, calc: {} });
               router.push(base);
             }}
-            className="cursor-pointer rounded-full border border-paper/30 px-3 py-1.5"
+            className="min-h-11 cursor-pointer border-2 border-paper/60 px-3 py-1.5 font-bold hover:bg-paper hover:text-ink"
           >
             {t.reset}
           </button>
-          <a href="/admin/preview" className="ml-auto underline underline-offset-2">
+          <a href="/admin/preview" className="ml-auto inline-flex min-h-11 items-center underline underline-offset-4">
             {t.back}
           </a>
         </div>

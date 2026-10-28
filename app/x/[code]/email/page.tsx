@@ -54,9 +54,9 @@ async function EmailStep({ code: raw, sample, frame, previewOpen }: { code: stri
     <LangProvider lang={lang} code={code}>
       <Card>
         <Eyebrow>{t.capture.eyebrow}</Eyebrow>
-        <h1 className="mb-3 text-[clamp(28px,5.5vw,40px)] tracking-[-0.02em]">{t.capture.title}</h1>
+        <h1 className="mb-3 display text-[clamp(28px,5.5vw,40px)]">{t.capture.title}</h1>
         <p className="mb-4 text-muted">{t.capture.sub}</p>
-        <p className="mb-[22px] rounded-card bg-accent-soft px-4 py-3 text-sm font-semibold">
+        <p className="mb-[22px] border-2 border-l-[6px] border-line border-l-highlight bg-highlight-soft px-4 py-3 text-[15px]">
           {fill(t.capture.gift, { giftTitle: t.gifts[gift].title })}
         </p>
         <EmailForm code={code} from="screen" gift={gift} />

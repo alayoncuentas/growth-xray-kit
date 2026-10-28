@@ -1,10 +1,10 @@
 // Formato de presentación. Funciones puras.
 
 /**
- * Ancho medio de un carácter de la cifra grande, en "em" (Bricolage Grotesque en negrita con tabular-nums).
- * Es un tope prudente: los dígitos miden ~0.6 em y "$" y "," menos.
+ * Ancho medio de un carácter de la cifra grande, en "em" (Host Grotesk 800, tracking -0.04em, tabular-nums).
+ * Medido en el navegador: ~0.53 em por carácter en "$63,000,000" y ~0.56 em en "$216,000"; 0.6 deja margen.
  */
-export const FIGURE_GLYPH_EM = 0.66;
+export const FIGURE_GLYPH_EM = 0.6;
 
 /** Tamaño de letra (px) para que `text` quepa en una línea de `width` px, sin pasar de `max`. */
 export function figurePx(text: string, width: number, max = 72): number {

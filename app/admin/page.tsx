@@ -33,14 +33,14 @@ async function Dashboard({ source, deleted }: { source: Source | null; deleted: 
   return (
     <div className="grid gap-5">
       {deleted && (
-        <p role="status" className="rounded-card border border-line bg-card px-4 py-3 text-sm">
+        <p role="status" className="border-2 border-l-[6px] border-line border-l-accent bg-card px-4 py-3 text-sm">
           {l.deleted}
         </p>
       )}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <Eyebrow>{l.eyebrow}</Eyebrow>
-          <h1 className="text-[clamp(28px,5vw,40px)] tracking-[-0.02em]">{l.title}</h1>
+          <h1 className="display text-[clamp(28px,5vw,40px)]">{l.title}</h1>
         </div>
         <div className="flex flex-wrap gap-2.5">
           {/* Descargas: <a> normal, no <Link>, para que el navegador guarde el archivo. Respetan el filtro de origen. */}
@@ -58,7 +58,7 @@ async function Dashboard({ source, deleted }: { source: Source | null; deleted: 
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <nav aria-label={l.filterLabel} className="inline-flex rounded-full border border-line p-0.5 text-sm">
+        <nav aria-label={l.filterLabel} className="flex text-sm">
           {[null, ...SOURCES].map((s) => {
             const active = s === source;
             return (
@@ -66,7 +66,7 @@ async function Dashboard({ source, deleted }: { source: Source | null; deleted: 
                 key={s ?? "all"}
                 href={s ? `/admin?source=${s}` : "/admin"}
                 aria-current={active ? "page" : undefined}
-                className={`rounded-full px-3 py-1 ${active ? "bg-ink text-paper" : "text-muted hover:text-ink"}`}
+                className={`flex min-h-11 items-center border-b-4 px-3 font-bold ${active ? "border-highlight text-ink" : "border-line text-ink-2 hover:text-ink"}`}
               >
                 {s ? adminCopy.sources[s] : l.filterAll}
               </Link>
@@ -74,8 +74,8 @@ async function Dashboard({ source, deleted }: { source: Source | null; deleted: 
           })}
         </nav>
         <p className="text-sm">
-          <span className="label-mono mr-2 text-[11px] text-muted">{l.giftsTitle}</span>
-          <span className={gifts.overdue ? "text-bad" : ""}>{fill(l.giftsSummary, gifts)}</span>
+          <span className="label-mono mr-2 text-ink-2">{l.giftsTitle}</span>
+          <span className={gifts.overdue ? "text-danger" : ""}>{fill(l.giftsSummary, gifts)}</span>
         </p>
       </div>
 

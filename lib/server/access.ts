@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { cookies, headers } from "next/headers";
 import { connection } from "next/server";
 import { DEFAULT_LANG, isLang, LANG_COOKIE, langFromAcceptLanguage, type Lang } from "@/lib/config";
+import { ADMIN_REQUEST_HEADER } from "@/lib/request-flags";
 import { previewCompany, previewVariant, type PreviewVariant } from "@/lib/preview";
 import type { Company, OutsideView } from "@/lib/types";
 import { getAdmin } from "./auth";
@@ -79,6 +80,15 @@ export async function cookieLang(): Promise<Lang | null> {
  */
 export async function browserLang(): Promise<Lang> {
   return (await cookieLang()) ?? langFromAcceptLanguage((await headers()).get("accept-language")) ?? DEFAULT_LANG;
+}
+
+/**
+ * Idioma del documento (<html lang> y encabezado), resuelto una sola vez por petición en el layout raíz y pasado
+ * como prop: en /admin, inglés (lo marca proxy.ts); en el resto, browserLang(). Las pantallas con código pueden
+ * tener otro idioma (el de la sesión o el código): <LangProvider> lo aplica después de montar.
+ */
+export async function documentLang(): Promise<Lang> {
+  return (await headers()).get(ADMIN_REQUEST_HEADER) ? "en" : browserLang();
 }
 
 interface CodeRow {

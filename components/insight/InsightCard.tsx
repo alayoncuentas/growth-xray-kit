@@ -10,8 +10,9 @@ export function Rich({ text }: { text: string }) {
 
 function Shell({ tag, myth = false, children }: { tag: string; myth?: boolean; children: React.ReactNode }) {
   return (
-    <div className={`mt-[22px] grid animate-rise gap-2.5 rounded-card px-[18px] pt-[18px] pb-4 ${myth ? "bg-leak-soft" : "border border-line bg-card"}`}>
-      <span className={`label-mono leading-none tracking-[0.09em] ${myth ? "text-leak" : "text-accent"}`}>{tag}</span>
+    // Aviso con barra lateral de 6px: turquesa para evidencia y espejos, naranja para mitos y el balde con agujeros.
+    <div className={`mt-[22px] grid gap-2.5 border-2 border-l-[6px] px-[18px] py-3.5 ${myth ? "border-highlight bg-highlight-soft" : "border-line border-l-accent bg-card"}`}>
+      <span className={`label-mono leading-none ${myth ? "text-ink" : "text-link"}`}>{tag}</span>
       {children}
     </div>
   );
@@ -21,12 +22,12 @@ function Source({ id, link = true }: { id: string; link?: boolean }) {
   const { evidence, copy } = useConfig();
   const e = evidence[id];
   return (
-    <p className="border-t border-dashed border-line pt-2 font-mono text-xs break-words text-muted">
+    <p className="border-t border-line pt-2 text-sm break-words text-muted">
       {copy.insight.source} {e.source}
       {link && (
         <>
           {" · "}
-          <a href={e.url} target="_blank" rel="noopener" className="underline">
+          <a href={e.url} target="_blank" rel="noopener" className="text-link underline underline-offset-2">
             {copy.insight.view}
           </a>
         </>
@@ -39,9 +40,9 @@ export function EvidenceCard({ id, lead, extraLead }: { id: string; lead?: strin
   const { evidence, copy } = useConfig();
   return (
     <Shell tag={copy.insight.evidenceTag}>
-      {lead && <p className="font-semibold">{lead}</p>}
+      {lead && <p className="text-lg leading-snug">{lead}</p>}
       <p>{evidence[id].text}</p>
-      {extraLead && <p className="font-semibold">{extraLead}</p>}
+      {extraLead && <p className="text-lg leading-snug">{extraLead}</p>}
       <Source id={id} />
     </Shell>
   );
@@ -64,10 +65,10 @@ export function MythCard({ id }: { id: string }) {
   const ev = m.evidence?.[0];
   return (
     <Shell tag={copy.insight.mythTag} myth>
-      <p className="font-display text-xl line-through decoration-leak decoration-2 opacity-85">“{m.myth}”</p>
+      <p className="font-display text-xl font-bold text-ink-2 line-through decoration-highlight decoration-[3px]">“{m.myth}”</p>
       <p>{m.reality}</p>
       {ev && <p>{evidence[ev].text}</p>}
-      {m.note && <p className="text-[13px] text-muted">{m.note}</p>}
+      {m.note && <p className="text-sm text-ink-2">{m.note}</p>}
       {ev && <Source id={ev} link={false} />}
     </Shell>
   );
@@ -76,9 +77,9 @@ export function MythCard({ id }: { id: string }) {
 function LeakyCard({ tag, lead, text, note }: { tag: string; lead: string; text: string; note?: string }) {
   return (
     <Shell tag={tag} myth>
-      <p className="font-semibold">{lead}</p>
+      <p className="text-lg leading-snug">{lead}</p>
       <p>{text}</p>
-      {note && <p className="text-[13px] text-muted">{note}</p>}
+      {note && <p className="text-sm text-ink-2">{note}</p>}
     </Shell>
   );
 }

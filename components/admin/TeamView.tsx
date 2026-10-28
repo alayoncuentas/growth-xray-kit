@@ -4,6 +4,7 @@ import { fill, phase1, usd } from "@/lib/config";
 import { phase1Result, teamScores } from "@/lib/scoring";
 import { team } from "@/lib/server/team";
 import type { Answers, CalcOverrides } from "@/lib/types";
+import { Badge } from "@/components/ui/Badge";
 
 /** "Vista del equipo" del prototipo: Need / Potential / Readiness, veredicto, alertas y datos para la llamada. */
 export function TeamView({ code, answers, calc }: { code: string; answers: Answers; calc: CalcOverrides }) {
@@ -18,21 +19,21 @@ export function TeamView({ code, answers, calc }: { code: string; answers: Answe
   ] as const;
 
   return (
-    <section className="grid gap-[18px] rounded-panel border-2 border-dashed border-line p-5">
-      <div className="label-mono text-xs text-accent">{team.title}</div>
+    <section className="grid gap-[18px] border-2 border-dashed border-rule px-[18px] py-4 min-[561px]:px-6">
+      <div className="label-mono text-link">{team.title}</div>
       <div className="grid gap-3.5 min-[561px]:grid-cols-3">
         {axes.map(([k, n]) => (
           <div key={k}>
-            <div className="label-mono text-[11px] text-muted">{team.axes[k].label}</div>
-            <div className="font-display text-[34px] leading-[1.1] font-bold tabular-nums">{n}</div>
+            <div className="label-mono text-muted">{team.axes[k].label}</div>
+            <div className="numeral mt-1 text-[34px]">{n}</div>
             <div className="mt-1.5">
               <Bar value={n} />
             </div>
-            <p className="mt-1.5 text-[13px] text-muted">{team.axes[k].note}</p>
+            <p className="mt-1.5 text-sm text-muted">{team.axes[k].note}</p>
           </div>
         ))}
       </div>
-      <p className="rounded-lg bg-accent-soft px-3.5 py-3 font-semibold">{team.verdicts[t.verdict]}</p>
+      <p className="bg-highlight px-[18px] py-3.5 text-lg leading-snug text-highlight-ink">{team.verdicts[t.verdict]}</p>
       {t.flags.length > 0 && <Flags flags={t.flags.map((f) => team.flags[f])} />}
       <dl className="grid grid-cols-[minmax(0,auto)_minmax(0,1fr)] gap-x-4 gap-y-2 text-sm">
         <dt className="text-muted">{team.kv.code}</dt>
@@ -54,9 +55,9 @@ export function Flags({ flags }: { flags: string[] }) {
   return (
     <div className="flex flex-wrap gap-2">
       {flags.map((f) => (
-        <span key={f} className="rounded-md bg-leak-soft px-2 py-1.5 font-mono text-xs leading-none font-medium text-leak">
+        <Badge key={f} tone="highlight">
           {f}
-        </span>
+        </Badge>
       ))}
     </div>
   );

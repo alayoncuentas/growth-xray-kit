@@ -120,7 +120,10 @@ export function setCurrentPage(page: { lang: Lang; code: string | null } | null)
   emit();
 }
 
-/** Idioma de la pantalla; hasta que la pantalla lo anuncia, el de la cookie (lo lee el servidor). */
+/**
+ * Idioma de la pantalla; hasta que la pantalla lo anuncia (después de montar), el que resolvió el servidor.
+ * En la hidratación siempre devuelve `fallback`, igual que el HTML del servidor.
+ */
 export function useCurrentLang(fallback: Lang): Lang {
   return useSyncExternalStore(
     subscribe,

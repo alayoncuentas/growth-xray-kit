@@ -1,20 +1,22 @@
 import "server-only";
 import type { CodeStatus } from "@/lib/admin";
 import { adminCopy } from "@/lib/server/team";
+import { Badge, type BadgeTone } from "@/components/ui/Badge";
 
-const tone: Record<CodeStatus, string> = {
-  sent: "border-line text-muted",
-  opened: "border-warn text-warn",
-  p1_done: "border-accent text-accent",
-  p2_done: "border-good text-good",
-  booked: "border-good bg-good text-paper",
+// Siempre con texto: neutro → activo (naranja) → completado (turquesa) → fase 2 (contorno de tinta) → cita (tinta llena).
+const tone: Record<CodeStatus, BadgeTone> = {
+  sent: "neutral",
+  opened: "highlight",
+  p1_done: "new",
+  p2_done: "strong",
+  booked: "solid",
 };
 
 export function StatusBadge({ status, expired = false }: { status: CodeStatus; expired?: boolean }) {
   return (
     <span className="inline-flex flex-wrap items-center gap-1.5">
-      <span className={`label-mono rounded-full border px-2 py-1 text-[11px] leading-none ${tone[status]}`}>{adminCopy.statuses[status]}</span>
-      {expired && <span className="label-mono text-[11px] text-bad">{adminCopy.list.expired}</span>}
+      <Badge tone={tone[status]}>{adminCopy.statuses[status]}</Badge>
+      {expired && <Badge tone="danger">{adminCopy.list.expired}</Badge>}
     </span>
   );
 }

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Insight } from "@/components/insight/InsightCard";
-import { Button, ButtonLink } from "@/components/ui/Button";
+import { Arrow, Button, ButtonLink } from "@/components/ui/Button";
 import { StepProgress } from "@/components/ui/StepProgress";
 import { getQuestion, isChoice } from "@/lib/config";
 import { nextAfter, progress, stepHref } from "@/lib/flow";
@@ -16,6 +16,7 @@ import { Calculator } from "./Calculator";
 import { OptionList } from "./OptionList";
 import { QuestionViewed } from "./QuestionViewed";
 import { SaveForLater } from "./SaveForLater";
+import { ErrorText } from "@/components/ui/field";
 
 const AUTO_ADVANCE_MS = 380;
 
@@ -105,7 +106,7 @@ export function QuestionScreen({
       <QuestionViewed code={code} qid={qid} />
       <StepProgress p={p} />
       <section>
-        <h1 className="mb-2 text-[clamp(24px,4.6vw,32px)] tracking-[-0.015em]">{q.prompt}</h1>
+        <h1 className="mb-2 text-[clamp(22px,4.4vw,30px)]">{q.prompt}</h1>
         {(q.sub || q.type === "calculator") && (
           <p className="mb-[22px] text-muted">{[q.sub, q.type === "calculator" ? q.prefillNote : null].filter(Boolean).join(" ")}</p>
         )}
@@ -130,6 +131,7 @@ export function QuestionScreen({
           ) : (
             <Button type="button" disabled={!answered || finishing} onClick={finish}>
               {p.next ? c.next : c.seeResults}
+              {!p.next && <Arrow />}
             </Button>
           )}
         </div>
@@ -137,9 +139,9 @@ export function QuestionScreen({
           <SaveForLater code={code} open={open} />
         </div>
         {saveFailed && (
-          <p role="status" className="mt-3 text-right text-[13px] text-bad">
+          <ErrorText role="status" className="mt-3 justify-end">
             {c.saveError}
-          </p>
+          </ErrorText>
         )}
       </section>
     </>

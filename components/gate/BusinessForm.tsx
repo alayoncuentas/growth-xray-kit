@@ -5,8 +5,8 @@ import { saveBusiness, type BusinessState } from "@/app/actions";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { MAX_BUSINESS_NAME } from "@/lib/open-entry";
 import { useConfig } from "@/lib/i18n";
+import { ErrorText, inputClass, labelClass } from "@/components/ui/field";
 
-const inputClass = "w-full min-w-0 rounded-card border-[1.5px] border-line bg-paper px-3.5 py-3 text-ink placeholder:text-muted placeholder:opacity-60";
 
 /** Datos del negocio (camino abierto): nombre obligatorio y web opcional. Valida en el servidor. */
 export function BusinessForm({ code, backHref, initial }: { code: string; backHref: string; initial: { name: string; website: string } }) {
@@ -19,7 +19,7 @@ export function BusinessForm({ code, backHref, initial }: { code: string; backHr
   return (
     <form action={action} noValidate className="mt-[22px] grid gap-4">
       <div className="grid gap-1.5">
-        <label htmlFor="name" className="text-[13px] font-semibold">
+        <label htmlFor="name" className={labelClass}>
           {t.nameLabel}
         </label>
         <input
@@ -37,13 +37,13 @@ export function BusinessForm({ code, backHref, initial }: { code: string; backHr
           className={inputClass}
         />
         {nameErr && (
-          <p id="name-err" className="text-[13px] text-bad">
+          <ErrorText id="name-err">
             {t.errorName}
-          </p>
+          </ErrorText>
         )}
       </div>
       <div className="grid gap-1.5">
-        <label htmlFor="website" className="text-[13px] font-semibold">
+        <label htmlFor="website" className={labelClass}>
           {t.websiteLabel}
         </label>
         <input
@@ -63,15 +63,15 @@ export function BusinessForm({ code, backHref, initial }: { code: string; backHr
           className={inputClass}
         />
         {webErr && (
-          <p id="website-err" className="text-[13px] text-bad">
+          <ErrorText id="website-err">
             {t.errorWebsite}
-          </p>
+          </ErrorText>
         )}
       </div>
       {state.error === "save" && (
-        <p role="alert" className="text-[13px] text-bad">
+        <ErrorText role="alert">
           {t.errorSave}
-        </p>
+        </ErrorText>
       )}
       <div className="mt-1 flex items-center justify-between gap-2.5">
         <ButtonLink href={backHref} variant="ghost">

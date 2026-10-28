@@ -17,18 +17,19 @@ export function MoneyHero({ calc, figureOnly = false, editHref = null }: { calc:
   const m = cfg.copy.money;
   const figure = usd(calc.annual);
   return (
-    <section className="rounded-panel bg-leak-soft p-[clamp(20px,4vw,32px)]">
-      <h2 className="label-mono text-xs text-ink">{cfg.copy.results.moneyTitle}</h2>
+    // Resumen clave: el campo naranja ancho del sistema, con todo el texto en negro (on-accent).
+    <section className="bg-leak px-[18px] py-5 text-highlight-ink min-[561px]:px-8 min-[561px]:py-7">
+      <h2 className="label-mono">{cfg.copy.results.moneyTitle}</h2>
       <div className="@container mt-2">
         <p
-          className="font-display leading-none font-bold tracking-[-0.02em] whitespace-nowrap text-leak tabular-nums"
+          className="numeral whitespace-nowrap"
           style={{ fontSize: figureFontSize(figure) }}
           data-hero-figure
         >
           {figure}
         </p>
       </div>
-      <p className="mt-1.5 text-lg font-semibold">{m.heroUnit}</p>
+      <p className="label-mono mt-2 text-sm">{m.heroUnit}</p>
       {!figureOnly && <HeroDetail calc={calc} editHref={editHref} />}
     </section>
   );
@@ -44,19 +45,19 @@ function HeroDetail({ calc, editHref }: { calc: CalcResult; editHref: string | n
   const missed = approx(calc.missed);
   return (
     <>
-      <p className="mt-3 max-w-[52ch] text-[17px]">{fill(line, { customers: Math.round(customers).toLocaleString("en-US") })}</p>
-      <p className="mt-1 max-w-[56ch] text-[15px] text-ink/80">{fill(m.heroCautious, { cautiousAnnual: usd(cautiousAnnual(calc)) })}</p>
-      <details className="group mt-4 border-t border-leak/25 pt-3">
-        <summary className="cursor-pointer text-[15px] font-semibold underline-offset-2 hover:underline">{m.howTitle}</summary>
-        <ol className="mt-3 grid list-decimal gap-1.5 pl-5 text-[15px] tabular-nums">
+      <p className="mt-4 max-w-[52ch] text-[17px]">{fill(line, { customers: Math.round(customers).toLocaleString("en-US") })}</p>
+      <p className="mt-1 max-w-[60ch] text-[15px]">{fill(m.heroCautious, { cautiousAnnual: usd(cautiousAnnual(calc)) })}</p>
+      <details className="mt-4 border-t-2 border-highlight-ink pt-1">
+        <summary className="flex min-h-11 items-center text-[15px] font-bold underline-offset-4 hover:underline">{m.howTitle}</summary>
+        <ol className="mt-1 grid list-decimal gap-1.5 pl-5 text-[15px] tabular-nums">
           <li>{fill(m.howMissed, { inquiries: calc.inquiries, leak: calc.leak, missed })}</li>
           <li>{fill(m.howMonthly, { missed, close: calc.close, value: usd(calc.value), monthly: usd(calc.monthly) })}</li>
           <li>{fill(m.howAnnual, { monthly: usd(calc.monthly), annual: usd(calc.annual) })}</li>
         </ol>
-        {disclaimer && <p className="mt-3 text-[13px] text-ink/80">{disclaimer}</p>}
+        {disclaimer && <p className="mt-3 max-w-[70ch] text-sm">{disclaimer}</p>}
         {editHref && (
-          <p className="mt-3 text-sm">
-            <Link href={editHref} className="font-semibold underline underline-offset-2">
+          <p className="mt-1 text-sm">
+            <Link href={editHref} className="inline-flex min-h-11 items-center font-bold underline underline-offset-4">
               {m.howEdit}
             </Link>
           </p>

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { setLang } from "@/app/actions";
 import { LANGS, type Lang } from "@/lib/config";
+import { segGroup, segItem } from "@/components/ui/segmented";
 
 /**
  * EN / ES de la vista previa: cambia la cookie de idioma de este navegador (la leen los marcos, que son las rutas reales)
@@ -13,7 +14,7 @@ export function PreviewLangSwitch({ lang, label, names }: { lang: Lang; label: s
   const router = useRouter();
   const [pending, start] = useTransition();
   return (
-    <div role="radiogroup" aria-label={label} className={`inline-flex rounded-full border border-line p-0.5 ${pending ? "opacity-60" : ""}`}>
+    <div role="radiogroup" aria-label={label} className={`${segGroup} ${pending ? "opacity-60" : ""}`}>
       {LANGS.map((l) => (
         <button
           key={l}
@@ -27,7 +28,7 @@ export function PreviewLangSwitch({ lang, label, names }: { lang: Lang; label: s
               router.refresh();
             })
           }
-          className={`label-mono cursor-pointer rounded-full px-3 py-1.5 text-[11px] leading-none ${lang === l ? "bg-ink text-paper" : "text-muted hover:text-ink"}`}
+          className={segItem(lang === l)}
         >
           {names[l]}
         </button>

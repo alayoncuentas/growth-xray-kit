@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import { deleteLeadAction, type DeleteLeadState } from "@/app/admin/actions";
 import { Button } from "@/components/ui/Button";
 import { confirmMatches } from "@/lib/admin";
-import { inputClass } from "./fields";
+import { ErrorText, inputBase } from "@/components/ui/field";
 
 /** "Delete lead": hay que escribir el nombre del negocio (o el código) para habilitar el botón. Lo valida el servidor. */
 export function DeleteLead({
@@ -37,16 +37,16 @@ export function DeleteLead({
           value={typed}
           onChange={(e) => setTyped(e.target.value)}
           aria-describedby={error ? "delete-err" : undefined}
-          className={`${inputClass} min-w-0 flex-1`}
+          className={`${inputBase} flex-1`}
         />
-        <Button type="submit" disabled={pending || !confirmMatches(typed, expected)} className="bg-bad! text-paper! disabled:opacity-40">
+        <Button type="submit" variant="danger" disabled={pending || !confirmMatches(typed, expected)}>
           {t.button}
         </Button>
       </div>
       {error && (
-        <p id="delete-err" role="alert" className="text-[13px] text-bad">
+        <ErrorText id="delete-err" role="alert">
           {error}
-        </p>
+        </ErrorText>
       )}
     </form>
   );

@@ -22,15 +22,24 @@ export function OptionList({
           type="button"
           aria-pressed={isSelected(o.id)}
           onClick={() => onToggle(o.id)}
-          className="group flex w-full cursor-pointer items-start gap-3 rounded-card border-[1.5px] border-line bg-card px-4 py-3.5 text-left transition-colors hover:border-accent aria-pressed:border-accent aria-pressed:bg-accent-soft"
+          className="group flex min-h-11 w-full cursor-pointer items-start gap-3 border-2 border-line bg-card px-4 py-3.5 text-left transition-colors duration-[140ms] ease-linear hover:border-rule hover:bg-highlight-soft aria-pressed:border-rule aria-pressed:bg-highlight aria-pressed:text-highlight-ink"
         >
+          {/* Marcador cuadrado con estado explícito: ✓ en selección múltiple, cuadro lleno en selección única. */}
           <span
             aria-hidden
-            className={`mt-[3px] size-[18px] flex-none border-[1.5px] border-muted group-aria-pressed:border-accent group-aria-pressed:bg-accent group-aria-pressed:shadow-[inset_0_0_0_3px_var(--card)] ${multi ? "rounded-sm" : "rounded-full"}`}
-          />
+            className="mt-[3px] grid size-[18px] flex-none place-items-center border-2 border-ink-2 bg-card text-ink group-aria-pressed:border-highlight-ink"
+          >
+            <svg viewBox="0 0 12 12" width="12" height="12" focusable="false" className="hidden group-aria-pressed:block">
+              {multi ? (
+                <path d="M2 6.5l2.5 2.5L10 3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" />
+              ) : (
+                <rect x="2" y="2" width="8" height="8" fill="currentColor" />
+              )}
+            </svg>
+          </span>
           <span>
-            <span className="font-medium">{o.label}</span>
-            {o.hint && <span className="block text-[13px] text-muted">{o.hint}</span>}
+            <span className="font-semibold">{o.label}</span>
+            {o.hint && <span className="block text-sm text-muted group-aria-pressed:text-highlight-ink">{o.hint}</span>}
           </span>
         </button>
       ))}

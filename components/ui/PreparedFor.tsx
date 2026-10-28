@@ -6,5 +6,5 @@ import { useCurrentBusiness } from "@/lib/store";
 export function PreparedFor({ lang }: { lang: Lang }) {
   const business = useCurrentBusiness();
   if (!business) return null;
-  return <span className="text-[13px] text-muted">{fill(getConfig(lang).copy.preparedFor, { business })}</span>;
+  return <span className="text-sm text-ink-2">{fill(getConfig(lang).copy.preparedFor, { business })}</span>;
 }

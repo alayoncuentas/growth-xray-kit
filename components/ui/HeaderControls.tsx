@@ -6,12 +6,17 @@ import { setLang } from "@/app/actions";
 import { getConfig, LANGS, type Lang } from "@/lib/config";
 import { getCurrentCode, setCurrentPage, useCurrentLang } from "@/lib/store";
 import { Chip } from "./Chip";
+import { segGroup, segItem } from "./segmented";
 import { PreparedFor } from "./PreparedFor";
 import { ThemeToggle } from "./ThemeToggle";
 
-/** Parte del encabezado que depende del idioma: "Phase 1", "Prepared for …", botón EN / ES y tema. */
-export function HeaderControls({ cookieLang }: { cookieLang: Lang }) {
-  const lang = useCurrentLang(cookieLang);
+/**
+ * Parte del encabezado que depende del idioma: "Phase 1", "Prepared for …", botón EN / ES y tema.
+ * `initialLang` lo resuelve el servidor; la hidratación usa ese mismo valor (useCurrentLang) y, ya montada, sigue al
+ * idioma que anuncia la pantalla.
+ */
+export function HeaderControls({ initialLang }: { initialLang: Lang }) {
+  const lang = useCurrentLang(initialLang);
   const admin = usePathname().startsWith("/admin"); // el panel sigue en inglés y no muestra el botón
   const shown = admin ? "en" : lang;
   return (
@@ -40,7 +45,7 @@ function LangSwitch({ lang }: { lang: Lang }) {
     });
   };
   return (
-    <div role="radiogroup" aria-label={t.label} className={`inline-flex rounded-full border border-line p-0.5 ${pending ? "opacity-60" : ""}`}>
+    <div role="radiogroup" aria-label={t.label} className={`${segGroup} ${pending ? "opacity-60" : ""}`}>
       {LANGS.map((l) => (
         <button
           key={l}
@@ -50,7 +55,7 @@ function LangSwitch({ lang }: { lang: Lang }) {
           aria-label={t.names[l]}
           lang={l}
           onClick={() => choose(l)}
-          className={`label-mono cursor-pointer rounded-full px-2.5 py-1 text-[11px] leading-none ${lang === l ? "bg-ink text-paper" : "text-muted hover:text-ink"}`}
+          className={segItem(lang === l)}
         >
           {l.toUpperCase()}
         </button>

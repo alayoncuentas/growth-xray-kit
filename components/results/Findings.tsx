@@ -2,6 +2,7 @@
 
 import { useConfig } from "@/lib/i18n";
 import type { NotYetId, Phase1PillarId } from "@/lib/types";
+import { Badge } from "@/components/ui/Badge";
 
 type Fix = { pillar: Phase1PillarId; score: number };
 
@@ -11,8 +12,8 @@ export function Findings({ fixes }: { fixes: Fix[] }) {
   const t = cfg.copy.results;
   if (!fixes.length) {
     return (
-      <section className="rounded-panel border border-line bg-card p-5">
-        <h2 className="mb-3.5 text-xl">{t.fixTitle}</h2>
+      <section className="border-2 border-rule bg-card px-[18px] py-3.5 min-[561px]:px-6 min-[561px]:py-5">
+        <h2 className="mb-3.5 text-lg uppercase">{t.fixTitle}</h2>
         <p>{t.noGaps}</p>
       </section>
     );
@@ -21,21 +22,23 @@ export function Findings({ fixes }: { fixes: Fix[] }) {
   const f = cfg.findings[first.pillar];
   return (
     <section className="grid gap-4">
-      <h2 className="text-xl">{t.fixTitle}</h2>
-      <article className="rounded-panel border-2 border-accent bg-card p-[clamp(20px,4vw,28px)]">
+      <h2 className="text-lg uppercase">{t.fixTitle}</h2>
+      <article className="border-2 border-t-[6px] border-rule border-t-highlight bg-card px-[18px] py-4 min-[561px]:px-7 min-[561px]:py-6">
         <div className="flex flex-wrap items-center gap-2.5">
-          <span className="label-mono text-xs text-accent">{t.startHere}</span>
+          <span className="label-mono text-ink">
+            {t.startHere} <span aria-hidden="true">→</span>
+          </span>
           <Severity score={first.score} />
         </div>
-        <h3 className="mt-2 text-[clamp(22px,4.5vw,28px)] tracking-[-0.015em]">{f.title}</h3>
-        <div className="mt-3.5 rounded-lg bg-accent-soft px-4 py-3">
-          <b className="label-mono mb-1.5 block font-semibold text-accent">{t.firstStep}</b>
+        <h3 className="mt-2.5 text-[clamp(22px,4.5vw,28px)]">{f.title}</h3>
+        <div className="mt-4 border-l-[6px] border-accent bg-accent-soft px-4 py-3">
+          <b className="label-mono mb-1.5 block text-link">{t.firstStep}</b>
           <p>{f.step}</p>
         </div>
       </article>
       {rest.length > 0 && (
-        <div className="rounded-panel border border-line bg-card p-5">
-          <h3 className="label-mono mb-1 text-muted">{t.thenTitle}</h3>
+        <div className="border-2 border-rule bg-card px-[18px] py-3.5 min-[561px]:px-6">
+          <h3 className="label-mono mb-1 text-ink-2">{t.thenTitle}</h3>
           <ol>
             {rest.map(({ pillar, score }) => (
               <li key={pillar} className="grid gap-1.5 border-b border-line py-3 last:border-b-0 last:pb-0">
@@ -54,11 +57,9 @@ function Severity({ score }: { score: number }) {
   const t = useConfig().copy.results;
   const high = score < 45;
   return (
-    <span
-      className={`justify-self-start rounded-full border px-[7px] py-1 font-mono text-[11px] leading-none font-medium tracking-[0.06em] uppercase ${high ? "border-bad text-bad" : "border-warn text-warn"}`}
-    >
+    <Badge tone={high ? "danger" : "highlight"} className="justify-self-start">
       {high ? t.severityHigh : t.severityMid}
-    </span>
+    </Badge>
   );
 }
 
@@ -66,13 +67,13 @@ function Severity({ score }: { score: number }) {
 export function NotYet({ items }: { items: NotYetId[] }) {
   const cfg = useConfig();
   return (
-    <details className="rounded-panel border border-line bg-card p-5">
-      <summary className="cursor-pointer">
-        <h2 className="inline text-xl">{cfg.copy.results.notYetTitle}</h2>
+    <details className="border-2 border-rule bg-card px-[18px] py-1.5 min-[561px]:px-6">
+      <summary className="flex min-h-11 items-center">
+        <h2 className="inline text-lg uppercase">{cfg.copy.results.notYetTitle}</h2>
       </summary>
-      <ul className="mt-3.5 grid gap-2.5">
+      <ul className="mt-1 mb-3 grid gap-2.5">
         {items.map((id) => (
-          <li key={id} className="relative pl-[22px] text-[15px] before:absolute before:top-2.5 before:left-0.5 before:h-0.5 before:w-2.5 before:bg-muted">
+          <li key={id} className="relative pl-[22px] text-[15px] before:absolute before:top-2.5 before:left-0.5 before:h-0.5 before:w-2.5 before:bg-ink-2">
             {cfg.notYet[id]}
           </li>
         ))}

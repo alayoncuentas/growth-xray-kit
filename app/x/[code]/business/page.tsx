@@ -34,8 +34,8 @@ async function Business({ code: raw, frame }: { code: string; frame: boolean }) 
   return (
     <LangProvider lang={lang} code={code}>
       <Card>
-        <h1 className="mb-2 text-[clamp(26px,5vw,36px)] tracking-[-0.02em]">{t.title}</h1>
-        <p className="text-muted">{t.sub}</p>
+        <h1 className="mb-2 display text-[clamp(26px,5vw,36px)]">{t.title}</h1>
+        <p className="text-ink-2">{t.sub}</p>
         <BusinessForm
           code={code}
           backHref={stepHref(code, { kind: "question", qid: INDUSTRY_QID })}

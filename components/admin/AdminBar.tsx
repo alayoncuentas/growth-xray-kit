@@ -10,17 +10,17 @@ export async function AdminBar() {
   const admin = await getAdmin();
   if (!admin) return null;
   return (
-    <div className="mb-5 flex flex-wrap items-center gap-3 border-b border-line pb-3 text-sm">
-      <Link href="/admin" className="font-semibold">
+    <div className="mb-5 flex flex-wrap items-center gap-x-4 gap-y-1 border-b-2 border-rule pb-2 text-sm">
+      <Link href="/admin" className="flex min-h-11 items-center font-bold">
         {adminCopy.brand}
       </Link>
-      <Link href="/admin/preview" className="text-muted underline underline-offset-2 hover:text-ink">
+      <Link href="/admin/preview" className="flex min-h-11 items-center text-ink-2 underline underline-offset-4 hover:text-ink">
         {adminCopy.preview.nav}
       </Link>
       <span className="flex-1" />
-      <span className="text-muted">{fill(adminCopy.signedInAs, { email: admin.email })}</span>
+      <span className="text-ink-2">{fill(adminCopy.signedInAs, { email: admin.email })}</span>
       <form action={signOut}>
-        <button type="submit" className="cursor-pointer text-muted underline underline-offset-2 hover:text-ink">
+        <button type="submit" className="min-h-11 cursor-pointer text-ink-2 underline underline-offset-4 hover:text-ink">
           {adminCopy.signOut}
         </button>
       </form>

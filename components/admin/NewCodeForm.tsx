@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { newCodeAction, type NewCodeState } from "@/app/admin/actions";
 import { buttonClass } from "@/components/ui/Button";
 import { inputClass } from "./fields";
+import { ErrorText, labelClass } from "@/components/ui/field";
 
 type Copy = { newCode: string; newCodeEmail: string; expiresDays: string; expiresNever: string; errorEmail: string };
 
@@ -12,7 +13,7 @@ export function NewCodeForm({ fromCode, t, expiryChoices }: { fromCode: string; 
   const [state, action, pending] = useActionState<NewCodeState, FormData>(newCodeAction.bind(null, fromCode), {});
   return (
     <form action={action} className="grid gap-2.5">
-      <label htmlFor="nc-email" className="text-[13px] font-semibold">
+      <label htmlFor="nc-email" className={labelClass}>
         {t.newCodeEmail}
       </label>
       <input id="nc-email" name="email" type="email" className={inputClass} />
@@ -24,7 +25,7 @@ export function NewCodeForm({ fromCode, t, expiryChoices }: { fromCode: string; 
         ))}
         <option value="never">{t.expiresNever}</option>
       </select>
-      {state.error && <p className="text-[13px] text-bad">{t.errorEmail}</p>}
+      {state.error && <ErrorText>{t.errorEmail}</ErrorText>}
       <button type="submit" disabled={pending} className={buttonClass("line", "justify-self-start")}>
         {t.newCode}
       </button>

@@ -7,6 +7,10 @@ import { buttonClass } from "@/components/ui/Button";
 import { fill } from "@/lib/config";
 import { useConfig } from "@/lib/i18n";
 import { flushSaves } from "@/lib/sync";
+import { ErrorText, inputBase, labelClass } from "@/components/ui/field";
+
+// Botón secundario sobre el bloque de tinta (UnlockPanel): borde y texto claros; hover: relleno claro.
+const INVERSE_LINE = "border-paper! text-paper! hover:bg-paper! hover:text-ink!";
 
 /**
  * "Save and finish later": termina de guardar lo pendiente y envía por correo el link para retomar.
@@ -38,7 +42,7 @@ export function SaveForLater({ code, tone = "default", open = false }: { code: s
     const error = state.status === "needEmail" && state.error === "email";
     return (
       <form action={action} className="grid w-full gap-1.5">
-        <label htmlFor="later-email" className="text-[13px] font-semibold">
+        <label htmlFor="later-email" className={inverse ? "label-mono text-paper" : labelClass}>
           {t.askEmail}
         </label>
         <div className="flex flex-wrap gap-2">
@@ -50,16 +54,16 @@ export function SaveForLater({ code, tone = "default", open = false }: { code: s
             required
             aria-invalid={error}
             aria-describedby={error ? "later-err" : undefined}
-            className="min-w-0 flex-1 rounded-card border-[1.5px] border-line bg-paper px-3 py-2.5 text-ink"
+            className={`${inputBase} flex-1`}
           />
-          <button type="submit" disabled={pending} className={buttonClass(inverse ? "line" : "primary", inverse ? "border-paper/40! text-paper!" : "")}>
+          <button type="submit" disabled={pending} className={buttonClass(inverse ? "line" : "primary", inverse ? INVERSE_LINE : "")}>
             {pending ? t.sending : t.submit}
           </button>
         </div>
         {error && (
-          <p id="later-err" className={`text-[13px] ${inverse ? "text-paper" : "text-bad"}`}>
+          <ErrorText id="later-err" className={inverse ? "text-paper!" : ""}>
             {t.errorEmail}
-          </p>
+          </ErrorText>
         )}
         <ConsentNote gift={state.gift} inverse={inverse} />
       </form>
@@ -75,15 +79,15 @@ export function SaveForLater({ code, tone = "default", open = false }: { code: s
             disabled={pending}
             className={
               inverse
-                ? buttonClass("line", "border-paper/40! text-paper!")
-                : `cursor-pointer text-sm underline underline-offset-2 disabled:opacity-50 ${muted} hover:text-ink`
+                ? buttonClass("line", INVERSE_LINE)
+                : `min-h-11 cursor-pointer text-sm underline underline-offset-4 disabled:opacity-50 ${muted} hover:text-ink`
             }
           >
             {pending ? t.sending : t.cta}
           </button>
         </form>
       )}
-      <p role="status" className={`text-[13px] ${muted}`}>
+      <p role="status" className={`text-sm ${muted}`}>
         {message}
       </p>
     </div>

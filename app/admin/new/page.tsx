@@ -27,7 +27,7 @@ async function NewCompany() {
   return (
     <Card className="mt-0">
       <Eyebrow>{t.eyebrow}</Eyebrow>
-      <h1 className="mb-3 text-[clamp(28px,5vw,40px)] tracking-[-0.02em]">{t.title}</h1>
+      <h1 className="mb-3 display text-[clamp(28px,5vw,40px)]">{t.title}</h1>
       <p className="text-muted">{t.sub}</p>
       <CompanyForm
         t={t}

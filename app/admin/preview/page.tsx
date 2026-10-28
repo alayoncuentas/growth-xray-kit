@@ -92,7 +92,7 @@ async function Preview() {
       <header className="grid gap-4">
         <div>
           <Eyebrow>{p.eyebrow}</Eyebrow>
-          <h1 className="mb-2 text-[clamp(28px,5vw,40px)] tracking-[-0.02em]">{p.title}</h1>
+          <h1 className="mb-2 display text-[clamp(28px,5vw,40px)]">{p.title}</h1>
           <p className="max-w-[640px] text-muted">{p.sub}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -100,10 +100,10 @@ async function Preview() {
           <ThemeSwitch label={p.theme} />
           <span className="text-sm text-muted">{p.lang}</span>
           <PreviewLangSwitch lang={lang} label={p.lang} names={p.langNames} />
-          <span className="basis-full text-[13px] text-muted">{p.langNote}</span>
+          <span className="basis-full text-sm text-muted">{p.langNote}</span>
         </div>
-        <nav aria-label={p.indexTitle} className="rounded-panel border border-line bg-card p-4 text-sm">
-          <div className="label-mono mb-2 text-[11px] text-muted">{p.indexTitle}</div>
+        <nav aria-label={p.indexTitle} className="border-2 border-rule bg-card px-[18px] py-3.5 text-sm">
+          <div className="label-mono mb-2 text-ink-2">{p.indexTitle}</div>
           <ol className="grid gap-1.5">
             <li>
               <a href="#walk" className="underline underline-offset-2">
@@ -117,7 +117,7 @@ async function Preview() {
               <ol className="mt-1.5 flex flex-wrap gap-1.5">
                 {list.map((s) => (
                   <li key={s.id}>
-                    <a href={`#s-${s.id}`} className="block rounded-full border border-line px-2 py-1 font-mono text-xs hover:border-accent">
+                    <a href={`#s-${s.id}`} className="block border-2 border-line px-2 py-1 text-xs font-bold hover:border-rule hover:bg-highlight/12">
                       {s.id}
                     </a>
                   </li>
@@ -131,7 +131,7 @@ async function Preview() {
               <ol className="mt-1.5 flex flex-wrap gap-1.5">
                 {SAMPLE_IDS.map((id) => (
                   <li key={id}>
-                    <a href={`#a-${id}`} className="block rounded-full border border-line px-2 py-1 text-xs hover:border-accent">
+                    <a href={`#a-${id}`} className="block border-2 border-line px-2 py-1 text-xs font-bold hover:border-rule hover:bg-highlight/12">
                       {phase1.archetypes[id].name}
                     </a>
                   </li>
@@ -142,8 +142,8 @@ async function Preview() {
         </nav>
       </header>
 
-      <section id="walk" className="grid scroll-mt-4 gap-3 rounded-panel border border-accent bg-accent-soft p-5">
-        <h2 className="text-xl">{p.sections.walk}</h2>
+      <section id="walk" className="grid scroll-mt-4 gap-3 border-2 border-l-[6px] border-rule border-l-accent bg-card px-[18px] py-4">
+        <h2 className="text-lg uppercase">{p.sections.walk}</h2>
         <p className="max-w-[640px] text-sm">{p.trySub}</p>
         <div className="flex flex-wrap items-center gap-2.5">
           <a href={`/x/${preview.code}`} target="_blank" rel="noreferrer" className={buttonClass("primary")}>
@@ -157,11 +157,11 @@ async function Preview() {
 
       <section id="map" className="grid scroll-mt-4 gap-8">
         <div>
-          <h2 className="mb-1.5 text-2xl">{p.sections.map}</h2>
+          <h2 className="mb-1.5 text-2xl uppercase">{p.sections.map}</h2>
           <p className="max-w-[640px] text-sm text-muted">{p.mapSub}</p>
         </div>
         {list.map((s, i) => (
-          <article key={s.id} id={`s-${s.id}`} className="grid scroll-mt-4 gap-3 border-t border-line pt-6">
+          <article key={s.id} id={`s-${s.id}`} className="grid scroll-mt-4 gap-3 border-t-2 border-rule pt-6">
             <ScreenHeader n={i + 1} id={s.id} part={s.part} label={s.label} src={s.src} />
             <PhoneFrame key={lang} src={s.src} title={`${s.id} · ${s.label}`} />
             {s.question && <InsightVariants q={s.question} lang={lang} />}
@@ -171,7 +171,7 @@ async function Preview() {
 
       <section id="archetypes" className="grid scroll-mt-4 gap-8">
         <div>
-          <h2 className="mb-1.5 text-2xl">{p.sections.archetypes}</h2>
+          <h2 className="mb-1.5 text-2xl uppercase">{p.sections.archetypes}</h2>
           <p className="max-w-[640px] text-sm text-muted">{p.archetypesSub}</p>
         </div>
         {SAMPLE_IDS.map((id) => (
@@ -186,8 +186,8 @@ function ScreenHeader({ n, id, part, label, src }: { n: number; id: string; part
   return (
     <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
       <span className="font-mono text-xs text-muted tabular-nums">{String(n).padStart(2, "0")}</span>
-      <code className="rounded bg-accent-soft px-1.5 py-0.5 font-mono text-sm">{id}</code>
-      {part && <span className="label-mono text-[11px] text-accent">{part}</span>}
+      <code className="bg-card-2 px-1.5 py-0.5 text-sm font-bold">{id}</code>
+      {part && <span className="label-mono text-link">{part}</span>}
       <span className="basis-full text-sm min-[700px]:basis-auto">{label}</span>
       <a href={unframed(src)} target="_blank" rel="noreferrer" className="ml-auto text-sm text-muted underline underline-offset-2">
         {adminCopy.preview.open}
@@ -202,15 +202,15 @@ function InsightVariants({ q, lang }: { q: Question; lang: Lang }) {
   if (!isChoice(q)) return <p className="text-sm text-muted">{p.calcNote}</p>;
   const cases = insightCases(getConfig(lang), q, previewCompany("outside", lang).outside?.lastReview ?? "");
   return (
-    <details open className="rounded-panel border border-line bg-card p-4">
-      <summary className="cursor-pointer font-semibold">{p.insightsTitle}</summary>
+    <details open className="border-2 border-line bg-card px-[18px] py-1.5">
+      <summary className="flex min-h-11 items-center font-bold">{p.insightsTitle}</summary>
       <ul className="mt-3 grid gap-4 min-[860px]:grid-cols-2">
         {cases.map((c) => (
           <li key={`${c.optionId}-${c.context ?? "all"}`} className="grid content-start gap-1.5">
             <div className="text-sm">
               <code className="mr-1.5 font-mono text-xs text-muted">{c.optionId}</code>
               <b>{c.optionLabel}</b>
-              {c.context && <span className="label-mono ml-1.5 text-[11px] text-accent">· {p.contexts[c.context]}</span>}
+              {c.context && <span className="label-mono ml-1.5 text-link">· {p.contexts[c.context]}</span>}
             </div>
             {c.view ? (
               <div className="max-w-[368px] [&>*]:mt-0">
@@ -234,7 +234,7 @@ function Archetype({ id, lang }: { id: ArchetypeId; lang: Lang }) {
   const s = sampleState(id);
   const src = X(preview.code, "/results", `&sample=${id}`);
   return (
-    <article id={`a-${id}`} className="grid scroll-mt-4 gap-3 border-t border-line pt-6">
+    <article id={`a-${id}`} className="grid scroll-mt-4 gap-3 border-t-2 border-rule pt-6">
       <div className="flex flex-wrap items-baseline gap-3">
         <h3 className="text-xl">{phase1.archetypes[id].name}</h3>
         <code className="font-mono text-xs text-muted">sample={id}</code>
@@ -246,8 +246,8 @@ function Archetype({ id, lang }: { id: ArchetypeId; lang: Lang }) {
         <PhoneFrame key={lang} src={src} title={`${phase1.copy.results.eyebrow} · ${phase1.archetypes[id].name}`} />
         <div className="grid gap-4 min-[920px]:sticky min-[920px]:top-4">
           <TeamView code={preview.code} answers={s.answers} calc={s.calc} />
-          <details className="rounded-panel border border-line bg-card p-4 text-sm">
-            <summary className="cursor-pointer font-semibold">{adminCopy.preview.sampleAnswers}</summary>
+          <details className="border-2 border-line bg-card px-[18px] py-1.5 text-sm">
+            <summary className="flex min-h-11 items-center font-bold">{adminCopy.preview.sampleAnswers}</summary>
             <dl className="mt-3 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1">
               {phase1.questions.map((q) => {
                 const a = q.type === "calculator" ? null : s.answers[q.id];

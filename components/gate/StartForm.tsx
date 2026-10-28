@@ -2,9 +2,10 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { startOpen, type StartState } from "@/app/actions";
-import { Button } from "@/components/ui/Button";
+import { Arrow, Button } from "@/components/ui/Button";
 import { useConfig, useLang } from "@/lib/i18n";
 import { TURNSTILE_ACTION, UTM_KEYS } from "@/lib/open-entry";
+import { ErrorText } from "@/components/ui/field";
 
 // Widget de Cloudflare Turnstile (modo Managed). El token va al servidor, que lo valida antes de crear la sesión.
 const SCRIPT = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
@@ -112,13 +113,14 @@ export function StartForm({ siteKey }: { siteKey: string }) {
       <div ref={box} />
       <Button type="submit" disabled={pending || !token} className="w-full sm:w-auto sm:justify-self-start">
         {s.cta}
+        <Arrow />
       </Button>
       {error ? (
-        <p role="alert" className="text-[13px] text-bad">
+        <ErrorText role="alert">
           {error}
-        </p>
+        </ErrorText>
       ) : (
-        <p className="text-[13px] text-muted" aria-live="polite">
+        <p className="text-sm text-muted" aria-live="polite">
           {token ? s.note : s.verifying}
         </p>
       )}

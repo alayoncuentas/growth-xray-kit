@@ -2,6 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 import { getConfig, type Lang } from "@/lib/config";
+import { segGroup, segItem } from "./segmented";
 
 type Theme = "system" | "light" | "dark";
 const KEY = "gxr-theme";
@@ -57,9 +58,12 @@ export function ThemeToggle({ lang }: { lang: Lang }) {
       type="button"
       onClick={() => write(next)}
       aria-label={`${copy.theme.label}: ${copy.theme[theme]}`}
-      className="label-mono flex items-center gap-1.5 rounded-full border border-line px-2.5 py-1.5 leading-none text-muted hover:border-accent hover:text-ink"
+      className="label-mono flex min-h-10 min-w-11 items-center justify-center gap-1.5 border-2 border-rule px-2.5 leading-none text-ink-2 transition-colors duration-[140ms] ease-linear hover:bg-highlight-soft hover:text-ink"
     >
-      <span aria-hidden className="size-2.5 rounded-full border border-current bg-[linear-gradient(90deg,currentColor_50%,transparent_50%)]" />
+      <svg aria-hidden="true" focusable="false" viewBox="0 0 16 16" width="16" height="16" className="flex-none">
+        <rect x="2" y="2" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" />
+        <rect x="2" y="2" width="6" height="12" fill="currentColor" />
+      </svg>
       {/* En el teléfono, solo el ícono: así el encabezado (con EN / ES) entra en una línea. */}
       <span aria-hidden className="max-[479px]:hidden">
         {copy.theme[theme]}
@@ -73,7 +77,7 @@ export function ThemeSwitch({ label }: { label: string }) {
   const copy = getConfig("en").copy;
   const theme = useSyncExternalStore(subscribe, read, () => "system" as Theme);
   return (
-    <div role="radiogroup" aria-label={label} className="inline-flex rounded-full border border-line p-0.5">
+    <div role="radiogroup" aria-label={label} className={segGroup}>
       {ORDER.map((t) => (
         <button
           key={t}
@@ -81,7 +85,7 @@ export function ThemeSwitch({ label }: { label: string }) {
           role="radio"
           aria-checked={theme === t}
           onClick={() => write(t)}
-          className={`label-mono cursor-pointer rounded-full px-3 py-1.5 text-[11px] leading-none ${theme === t ? "bg-ink text-paper" : "text-muted hover:text-ink"}`}
+          className={segItem(theme === t)}
         >
           {copy.theme[t]}
         </button>

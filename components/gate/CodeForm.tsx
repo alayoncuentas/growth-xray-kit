@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { submitCode, type CodeFormState } from "@/app/actions";
 import { Button } from "@/components/ui/Button";
 import { useConfig } from "@/lib/i18n";
+import { ErrorText, inputBase, labelClass } from "@/components/ui/field";
 
 /** Ingreso con código. En el inicio abierto va como opción secundaria: sin foco automático y con "Continue". */
 export function CodeForm({ secondary = false }: { secondary?: boolean }) {
@@ -14,7 +15,7 @@ export function CodeForm({ secondary = false }: { secondary?: boolean }) {
 
   return (
     <form action={action} noValidate className={`${secondary ? "mt-3" : "mt-[22px]"} grid gap-1.5`}>
-      <label htmlFor="code" className="text-[13px] font-semibold">
+      <label htmlFor="code" className={labelClass}>
         {g.label}
       </label>
       <div className="flex flex-wrap gap-2.5">
@@ -30,18 +31,18 @@ export function CodeForm({ secondary = false }: { secondary?: boolean }) {
           defaultValue={state.code ?? ""}
           aria-invalid={!!error}
           aria-describedby={error ? "code-err" : undefined}
-          className="min-w-0 flex-1 rounded-card border-[1.5px] border-line bg-paper px-3.5 py-3 font-mono text-lg leading-none font-medium tracking-[0.08em] text-ink uppercase placeholder:text-muted placeholder:opacity-60"
+          className={`${inputBase} flex-1 text-lg leading-none font-semibold tracking-[0.08em] uppercase tabular-nums`}
         />
         <Button type="submit" disabled={pending}>
           {secondary ? start.codeCta : g.cta}
         </Button>
       </div>
       {error && (
-        <p id="code-err" className="text-[13px] text-bad">
+        <ErrorText id="code-err">
           {error}
-        </p>
+        </ErrorText>
       )}
-      <p className="text-[13px] text-muted">{g.resumeHint}</p>
+      <p className="text-sm text-muted">{g.resumeHint}</p>
     </form>
   );
 }

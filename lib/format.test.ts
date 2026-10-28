@@ -17,7 +17,7 @@ describe("cifra grande en una línea", () => {
   });
 
   it("en CSS: tope en px y el resto relativo al contenedor", () => {
-    expect(figureFontSize("$63,000,000")).toBe("min(72px, 13.77cqi)");
+    expect(figureFontSize("$63,000,000")).toBe("min(72px, 15.15cqi)");
     expect(figureFontSize("$9,000", 56)).toMatch(/^min\(56px, [\d.]+cqi\)$/);
   });
 });
