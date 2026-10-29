@@ -48,7 +48,7 @@
         "ads": "1_3"
       },
       "calc": {
-        "inquiries": 120,
+        "weekly": 28,
         "value": 2500
       }
     },
@@ -71,7 +71,7 @@
         "ads": "1_3"
       },
       "calc": {
-        "inquiries": 100
+        "weekly": 23
       }
     },
     "secret": {
@@ -93,7 +93,7 @@
         "ads": "0"
       },
       "calc": {
-        "inquiries": 40,
+        "weekly": 9,
         "value": 3000
       }
     },
@@ -116,7 +116,7 @@
         "ads": "lt1"
       },
       "calc": {
-        "inquiries": 30,
+        "weekly": 7,
         "value": 5000
       }
     },
@@ -138,7 +138,7 @@
         "ads": "0"
       },
       "calc": {
-        "inquiries": 15,
+        "weekly": 3,
         "value": 800
       }
     }

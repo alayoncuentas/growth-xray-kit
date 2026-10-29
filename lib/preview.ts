@@ -45,10 +45,15 @@ export function sampleState(id: ArchetypeId): { answers: Answers; calc: CalcOver
   return { answers: { ...s.answers }, calc: { ...s.calc } };
 }
 
-/** Calculadora en sus máximos (?calc=max en la vista previa): la cifra anual más larga, para ver que cabe en una línea. */
+/**
+ * Calculadora en sus máximos (?calc=max en la vista previa): la cifra anual más larga ($650,000,000), para ver que
+ * cabe en una línea. Las cantidades dependen entre sí (sin seguimiento ≤ atendidas), así que no basta con poner cada
+ * campo en su máximo: todas las consultas sin respuesta y ninguna atendida.
+ */
 export function maxCalc(cfg: Phase1Config): CalcOverrides {
   const q = cfg.questions.find((x): x is CalculatorQuestion => x.type === "calculator");
-  return Object.fromEntries((q?.fields ?? []).map((f) => [f.id, f.max]));
+  const max = (id: string) => q?.fields.find((f) => f.id === id)?.max ?? 0;
+  return { weekly: max("weekly"), unanswered: max("weekly"), noFollowup: 0, closeOf10: max("closeOf10"), value: max("value") };
 }
 
 // ---------- variantes de insights ----------

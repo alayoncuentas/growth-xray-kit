@@ -63,7 +63,7 @@ async function Results({
   let gift: Gift | null = null;
   if (preview) {
     initial = await initialState(r.access, sample);
-    // ?calc=max: la calculadora en sus máximos ($63,000,000 al año), para revisar que la cifra cabe en una línea.
+    // ?calc=max: la calculadora en sus máximos ($650,000,000 al año), para revisar que la cifra cabe en una línea.
     if (previewMax) initial = { ...initial, calc: maxCalc(phase1) };
   } else {
     const saved = await loadPhase1(code);

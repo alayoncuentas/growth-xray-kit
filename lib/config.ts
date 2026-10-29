@@ -1,6 +1,6 @@
 import en from "@/config/phase1.config.json";
 import es from "@/config/phase1.config.es.json";
-import type { ChoiceQuestion, Phase1Config, Question } from "./types";
+import type { CalculatorField, CalculatorQuestion, ChoiceQuestion, Phase1Config, Question } from "./types";
 
 // Idiomas de la interfaz pública. Los dos configs tienen la misma estructura (ids, opciones, puntajes):
 // solo cambian los textos (lo verifica lib/config.test.ts). El panel /admin sigue en inglés.
@@ -38,6 +38,13 @@ export function fill(template: string, vars: Record<string, string | number>): s
 
 // Montos en dólares con el formato de EE. UU. en los dos idiomas ($1,500): el público vive allí.
 export const usd = (n: number) => "$" + Math.round(n).toLocaleString("en-US");
+
+/** Valor de un campo de la calculadora como se muestra: "$1,500", "2 of 10" o "12". */
+export function calcFieldText(q: CalculatorQuestion, f: CalculatorField, value: number): string {
+  if (f.unit === "USD") return usd(value);
+  if (f.unit === "of10") return fill(q.ui.outOf10, { n: value });
+  return value.toLocaleString("en-US");
+}
 
 /** Cookie con el idioma elegido con el botón EN / ES (también la leen los marcos de /admin/preview). */
 export const LANG_COOKIE = "gxr-lang";

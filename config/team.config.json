@@ -113,6 +113,7 @@
       "notAsked": "Skipped (known from the code)",
       "unanswered": "—",
       "calcDefault": "default",
+      "calcSuggested": "suggested",
       "eventsTitle": "Activity",
       "noEvents": "No activity yet.",
       "companyTitle": "Company",
@@ -221,7 +222,7 @@
         "emailInvited": "Email screen · invited without an email (gift B)",
         "partial": "Summary · open entry without an email",
         "resultsGiftB": "Results · with an email (gift B)",
-        "resultsMax": "Results · widest figure ($63,000,000 a year, calculator at its maximums)"
+        "resultsMax": "Results · widest figure ($650,000,000 a year, calculator at its maximums)"
       },
       "partLabel": "Part {n} · {label}",
       "mapSub": "In order. Question screens use a business without a known industry, so the industry question appears too; with a code that includes the industry it's skipped.",

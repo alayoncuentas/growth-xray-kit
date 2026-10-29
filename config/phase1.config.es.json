@@ -612,12 +612,53 @@
       "sub": "Con estimaciones aproximadas basta. Puedes ajustar cada valor.",
       "fields": [
         {
-          "id": "inquiries",
-          "label": "Consultas nuevas al mes",
-          "min": 5,
+          "id": "weekly",
+          "label": "Consultas nuevas en una semana normal",
+          "unit": "count",
+          "min": 1,
           "max": 500,
-          "step": 5,
-          "default": 60
+          "step": 1,
+          "default": 15,
+          "bySize": {
+            "1": 8,
+            "2_5": 15,
+            "6_15": 30,
+            "16_50": 60,
+            "50p": 120
+          },
+          "note": "Llamadas, mensajes y formularios. Cuenta personas, no mensajes: si alguien llama y también llena tu formulario, cuenta una vez."
+        },
+        {
+          "id": "unanswered",
+          "label": "Cuántas se quedan sin respuesta el mismo día",
+          "unit": "count",
+          "min": 0,
+          "max": 500,
+          "step": 1,
+          "default": "suggested",
+          "maxFrom": "weekly",
+          "note": "Incluye las que llegan de noche o en fin de semana."
+        },
+        {
+          "id": "noFollowup",
+          "label": "De las que sí atiendes, a cuántas cotizaciones no les das seguimiento",
+          "unit": "count",
+          "min": 0,
+          "max": 500,
+          "step": 1,
+          "default": "suggested",
+          "maxFrom": "answered",
+          "note": "Se envía la cotización y nadie vuelve a contactar a la persona."
+        },
+        {
+          "id": "closeOf10",
+          "label": "De cada 10 consultas que atiendes bien, ¿cuántas compran?",
+          "unit": "of10",
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "default": 2,
+          "note": "Si no lo sabes, empieza con un número bajo."
         },
         {
           "id": "value",
@@ -627,30 +668,16 @@
           "max": 25000,
           "step": 50,
           "default": 1500
-        },
-        {
-          "id": "leak",
-          "label": "Consultas que no reciben respuesta ni seguimiento a tiempo",
-          "unit": "%",
-          "min": 0,
-          "max": 70,
-          "step": 1,
-          "default": "fromAnswers",
-          "note": "Estimado a partir de tus respuestas sobre rapidez de respuesta, fuera de horario y seguimiento."
-        },
-        {
-          "id": "close",
-          "label": "Porcentaje de consultas con seguimiento que se convierten en clientes",
-          "unit": "%",
-          "min": 5,
-          "max": 60,
-          "step": 1,
-          "default": 20,
-          "note": "Si no lo sabes, 20% es un punto de partida prudente para muchos servicios locales."
         }
       ],
-      "prefillNote": "Completamos el porcentaje sin seguimiento a partir de tus respuestas.",
-      "disclaimer": "Esto es una estimación, no una promesa. Supone que las consultas que se escapan se cerrarían en la misma proporción que las que sí reciben seguimiento. Por eso también mostramos un escenario prudente en el que solo se recupera una cuarta parte."
+      "prefillNote": "Sugerimos las consultas sin respuesta y sin seguimiento a partir de tus respuestas sobre rapidez, fuera de horario y seguimiento. Cámbialas si conoces las cifras reales.",
+      "disclaimer": "Esto es una estimación, no una promesa. Supone que las consultas que se escapan comprarían en la misma proporción que las que atiendes bien. Por eso también mostramos un escenario prudente en el que solo se recupera una cuarta parte.",
+      "ui": {
+        "suggested": "Sugerido",
+        "outOf10": "{n} de 10",
+        "decrease": "Menos",
+        "increase": "Más"
+      }
     }
   ],
   "archetypes": {
@@ -815,8 +842,8 @@
       "heroCustomersFew": "Menos de un cliente al año que sí habría pagado.",
       "heroCautious": "Escenario prudente: recuperar solo una cuarta parte suma {cautiousAnnual} al año.",
       "howTitle": "Cómo lo calculamos",
-      "howMissed": "{inquiries} consultas al mes × {leak}% que se escapan = unas {missed} consultas al mes sin respuesta ni seguimiento a tiempo.",
-      "howMonthly": "{missed} × {close}% que normalmente cerrarías × {value} por cliente nuevo = {monthly} al mes.",
+      "howMissed": "{unanswered} sin respuesta el mismo día + {noFollowup} cotizaciones sin seguimiento = {lostWeek} consultas por semana. × 4.33 semanas = unas {missed} al mes.",
+      "howMonthly": "{missed} × {closeOf10} de cada 10 que comprarían × {value} por cliente nuevo = {monthly} al mes.",
       "howAnnual": "{monthly} × 12 meses = {annual} al año.",
       "howEdit": "Cambiar los números",
       "adCallout": "De cada $1,000 que inviertes en anuncios, unos {perThousand} pagan consultas que no reciben respuesta ni seguimiento a tiempo.",

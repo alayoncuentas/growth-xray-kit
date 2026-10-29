@@ -612,12 +612,53 @@
       "sub": "Rough estimates are fine. You can adjust every value.",
       "fields": [
         {
-          "id": "inquiries",
-          "label": "New inquiries per month",
-          "min": 5,
+          "id": "weekly",
+          "label": "New inquiries in a normal week",
+          "unit": "count",
+          "min": 1,
           "max": 500,
-          "step": 5,
-          "default": 60
+          "step": 1,
+          "default": 15,
+          "bySize": {
+            "1": 8,
+            "2_5": 15,
+            "6_15": 30,
+            "16_50": 60,
+            "50p": 120
+          },
+          "note": "Calls, texts, and form fills. Count people, not messages: someone who calls and also fills out your form counts once."
+        },
+        {
+          "id": "unanswered",
+          "label": "How many don't get a reply the same day",
+          "unit": "count",
+          "min": 0,
+          "max": 500,
+          "step": 1,
+          "default": "suggested",
+          "maxFrom": "weekly",
+          "note": "Include the ones that come in at night or on weekends."
+        },
+        {
+          "id": "noFollowup",
+          "label": "Of the ones you do answer, how many quotes never get a follow-up",
+          "unit": "count",
+          "min": 0,
+          "max": 500,
+          "step": 1,
+          "default": "suggested",
+          "maxFrom": "answered",
+          "note": "A quote or estimate goes out and nobody reaches out again."
+        },
+        {
+          "id": "closeOf10",
+          "label": "Out of 10 inquiries you handle well, how many buy?",
+          "unit": "of10",
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "default": 2,
+          "note": "If you're not sure, start low."
         },
         {
           "id": "value",
@@ -627,30 +668,16 @@
           "max": 25000,
           "step": 50,
           "default": 1500
-        },
-        {
-          "id": "leak",
-          "label": "Inquiries that don't get a timely reply or follow-up",
-          "unit": "%",
-          "min": 0,
-          "max": 70,
-          "step": 1,
-          "default": "fromAnswers",
-          "note": "Estimated from your answers about reply speed, after-hours and follow-up."
-        },
-        {
-          "id": "close",
-          "label": "Share of followed-up inquiries that become customers",
-          "unit": "%",
-          "min": 5,
-          "max": 60,
-          "step": 1,
-          "default": 20,
-          "note": "If you don't know, 20% is a cautious starting point for many local services."
         }
       ],
-      "prefillNote": "We pre-filled the follow-up gap from your answers.",
-      "disclaimer": "This is an estimate, not a promise. It assumes the inquiries that slip through would close at the same rate as the ones you follow up. That's why we also show a cautious scenario where only a quarter is recovered."
+      "prefillNote": "We suggested the unanswered and no-follow-up counts from your answers about reply speed, after-hours, and follow-up. Change them if you know the real numbers.",
+      "disclaimer": "This is an estimate, not a promise. It assumes the inquiries that slip through would buy at the same rate as the ones you handle well. That's why we also show a cautious scenario where only a quarter is recovered.",
+      "ui": {
+        "suggested": "Suggested",
+        "outOf10": "{n} of 10",
+        "decrease": "Less",
+        "increase": "More"
+      }
     }
   ],
   "archetypes": {
@@ -815,8 +842,8 @@
       "heroCustomersFew": "Less than one customer a year who would have paid.",
       "heroCautious": "Cautious scenario: recovering just a quarter adds {cautiousAnnual} a year.",
       "howTitle": "How we calculate it",
-      "howMissed": "{inquiries} inquiries a month × {leak}% that slip through = about {missed} inquiries a month without a timely reply or follow-up.",
-      "howMonthly": "{missed} × {close}% you'd normally close × {value} per new customer = {monthly} a month.",
+      "howMissed": "{unanswered} with no same-day reply + {noFollowup} quotes with no follow-up = {lostWeek} inquiries a week. × 4.33 weeks = about {missed} a month.",
+      "howMonthly": "{missed} × {closeOf10} out of 10 who'd buy × {value} per new customer = {monthly} a month.",
       "howAnnual": "{monthly} × 12 months = {annual} a year.",
       "howEdit": "Change the numbers",
       "adCallout": "For every $1,000 you spend on ads, about {perThousand} pays for inquiries that don't get a timely reply or follow-up.",

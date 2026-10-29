@@ -45,7 +45,7 @@ Definida completamente en `phase1.config.json`. Resumen:
 | 1. Your business | industry*, team, channels | — |
 | 2. When someone reaches out | busy, speed, afterhours | HBR 2011; InsideSales 2013 |
 | 3. After the first contact | tracking, followup, reviews, away, ads | espejo de canales; mito "they'll call back"; BrightLocal 2026; espejo del dueño; balde con agujeros |
-| 4. Your numbers | calculadora (consultas/mes, valor del cliente, % que se escapa, tasa de cierre) | dinero en juego + escenario cauteloso (25%) |
+| 4. Your numbers | calculadora (por semana normal: consultas, sin respuesta el mismo día, cotizaciones sin seguimiento; de cada 10 bien atendidas cuántas compran; valor del cliente) | dinero en juego + escenario cauteloso (25%) |
 
 \* Se omite si el código ya trae el rubro.
 
@@ -54,28 +54,67 @@ Definida completamente en `phase1.config.json`. Resumen:
 Cada opción aporta un puntaje a uno o más pilares; el pilar es el promedio de sus aportes.
 Pilares de la fase 2: `retention`, `visibility`, `readiness` (se muestran en gris con candado en la fase 1).
 
-### Porcentaje que se escapa (valor por defecto de la calculadora)
+### Calculadora: entradas
+Cantidades que el dueño puede contar, en una semana normal (`config/phase1.config.json`, pregunta `numbers`):
 ```
-base por followup: auto 8 | set 15 | once 30 | wait 40   (sin respuesta: 25)
-+ afterhours: none/dk +8, auto +3
-+ speed: next/dk +7, day +3
-+ busy = d: +5
-límites: 5–65 %
+weekly      consultas nuevas            1–500   campo con − / +   inicial según team (abajo)
+unanswered  sin respuesta el mismo día  0–weekly                  sugerido desde las respuestas
+noFollowup  de las atendidas, cotizaciones sin seguimiento
+                                        0–(weekly − unanswered)   sugerido desde las respuestas
+closeOf10   de cada 10 bien atendidas, cuántas compran
+                                        1–10    deslizador        inicial 2 (supuesto editable, no estadística)
+value       valor de un cliente nuevo   $100–$25,000 (paso 50)    inicial $1,500
 ```
+Consultas iniciales por tamaño (`team`): 1 → 8 · 2_5 → 15 · 6_15 → 30 · 16_50 → 60 · 50p → 120 · sin respuesta → 15.
+El servidor valida solo los límites absolutos (weekly ≤ 500, etc.); los límites cruzados los aplica `calcValues`, y la
+pantalla guarda los valores ya recortados. Una consulta cuenta una sola vez: sin seguimiento sale solo de las atendidas.
+
+### Cantidades sugeridas (valores iniciales de unanswered y noFollowup)
+Heurísticas para empezar, no estadísticas; en pantalla y en /admin se marcan como sugeridas hasta que el dueño las mueve.
+Las tres preguntas de demora describen el mismo hueco: se combinan como unión, no se suman.
+```
+u = 1 − (1 − speed)(1 − afterhours)(1 − busy),  tope 0.60
+    speed:      5m .02 · 1h .05 · day .10 · next .40 · dk .25 · (sin respuesta) .15
+    afterhours: book 0 · auto .05 · none .10 · dk .12 · (sin respuesta) 0
+    busy:       c .03 · d .05 · (otras) 0
+unanswered = round(weekly × u)
+noFollowup = round((weekly − unanswered) × f)
+    f (followup): auto .03 · set .08 · once .20 · wait .35 · (sin respuesta) .15
+```
+Mientras el dueño no las mueve, siguen a `weekly`.
+
 Cálculo:
 ```
-missed   = inquiries × leak%
-monthly  = missed × close% × value
+lostWeek = unanswered + noFollowup
+missed   = lostWeek × 52/12          (consultas perdidas al mes; el texto dice "× 4.33")
+monthly  = missed × closeOf10/10 × value
+annual   = monthly × 12              (= lostWeek × 52 × closeOf10/10 × value, exacto)
 cautious = monthly × 0.25
+leak%    = lostWeek / weekly         (solo para el aviso de anuncios)
 adLeak   = adSpend × leak%
 ```
 Cifras derivadas que muestra la pantalla de resultados (solo presentación; `lib/scoring.ts`):
 ```
-annual          = monthly × 12          (cifra principal, también en el parcial)
-customers/year  = missed × close% × 12  (< 1 → "less than one"; redondeado = 1 → singular)
+annual          = monthly × 12                    (cifra principal, también en el parcial)
+customers/year  = lostWeek × 52 × closeOf10/10    (< 1 → "less than one"; redondeado = 1 → singular)
 cautious/year   = cautious × 12
-per $1,000 ads  = 1,000 × leak%         (se omite si adSpend = 0)
+per $1,000 ads  = 1,000 × lostWeek / weekly       (se omite si adSpend = 0; es otra vista del mismo dinero, no se suma)
 ```
+Cifra más larga posible: weekly 500, todas sin respuesta, 10 de 10, $25,000 → $650,000,000 al año (12 caracteres;
+`?calc=max` en /admin/preview).
+
+### Resultados guardados con la calculadora anterior
+Hasta el 2026-10-29 se guardaba `{inquiries (al mes), value, leak %, close %}`. Las filas no se reescriben: se convierten
+al leer (`migrateCalc` en `lib/answers.ts`), solo con lo que el usuario había movido:
+```
+weekly    = round(inquiries × 12/52)            (1–500)
+closeOf10 = round(close / 10)                   (1–10)
+lostWeek  = round(weekly × leak%)               repartido entre unanswered y noFollowup en la proporción sugerida
+value     igual
+```
+`/api/answer` acepta el formato anterior tal cual (pestañas abiertas antes del cambio); el siguiente guardado escribe el
+nuevo. `scores.monthly_at_stake` se actualiza con la siguiente respuesta de cada sesión.
+
 Pilares en la pantalla de resultados: de menor a mayor puntaje (empates en el orden del config); los de la fase 2 en una sola fila gris con candado.
 
 ### Arquetipos (orden de evaluación)
@@ -88,7 +127,7 @@ Pilares en la pantalla de resultados: de menor a mayor puntaje (empates en el or
 ### Calificación interna (vista del equipo; provisional, calibrar con datos reales)
 ```
 Need      = 100 − índice promedio
-Potential = inquiries(≥100:40, ≥50:30, ≥20:20, else 10)
+Potential = inquiries/mes = weekly × 52/12 (≥100:40, ≥50:30, ≥20:20, else 10)
           + value(≥5000:35, ≥1000:28, ≥300:18, else 8)
           + (ads > 0 ? 15 : 0) + (team > 1 ? 10 : 0)          tope 100
 Readiness = 40 + (ads > 0 ? 20) + (tracking crm|sheet ? 15) + (team > 1 ? 10)   tope 85 (preliminar)

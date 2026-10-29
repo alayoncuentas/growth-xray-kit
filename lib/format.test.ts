@@ -3,12 +3,16 @@ import { approx, FIGURE_GLYPH_EM, figureFontSize, figurePx } from "./format";
 import { usd } from "./config";
 
 describe("cifra grande en una línea", () => {
-  it("la cifra más larga posible ($63,000,000) cabe en ~328 px (pantalla de 400 px)", () => {
-    const text = usd(63_000_000);
-    expect(text).toBe("$63,000,000");
-    const px = figurePx(text, 328);
+  // Ancho del contenedor de la cifra: pantalla − 2 × 16 px de margen − 2 × 18 px de relleno de la sección.
+  it.each([
+    [320, 252],
+    [400, 332],
+  ])("la cifra más larga posible ($650,000,000) cabe en una pantalla de %i px (%i px de contenedor)", (_screen, width) => {
+    const text = usd(650_000_000);
+    expect(text).toBe("$650,000,000");
+    const px = figurePx(text, width);
     expect(px).toBeLessThan(72);
-    expect(px * FIGURE_GLYPH_EM * text.length).toBeLessThanOrEqual(328);
+    expect(px * FIGURE_GLYPH_EM * text.length).toBeLessThanOrEqual(width);
   });
 
   it("las cifras cortas llegan al tope", () => {

@@ -8,7 +8,7 @@ import { cautiousAnnual, customersBucket, lostCustomersPerYear, type CalcResult 
 import type { CalculatorQuestion } from "@/lib/types";
 
 /**
- * Cifra principal de los resultados: el dinero en juego al año, en una línea aunque sea $63,000,000 a 400 px
+ * Cifra principal de los resultados: el dinero en juego al año, en una línea aunque sea $650,000,000 a 320 px
  * (tamaño relativo al contenedor, lib/format.ts). Completo: clientes al año, escenario prudente y "How we calculate it".
  * Parcial (`figureOnly`): solo la cifra y su unidad (docs/OPEN_ENTRY.md decisión 2).
  */
@@ -50,8 +50,8 @@ function HeroDetail({ calc, editHref }: { calc: CalcResult; editHref: string | n
       <details className="mt-4 border-t-2 border-highlight-ink pt-1">
         <summary className="flex min-h-11 items-center text-[15px] font-bold underline-offset-4 hover:underline">{m.howTitle}</summary>
         <ol className="mt-1 grid list-decimal gap-1.5 pl-5 text-[15px] tabular-nums">
-          <li>{fill(m.howMissed, { inquiries: calc.inquiries, leak: calc.leak, missed })}</li>
-          <li>{fill(m.howMonthly, { missed, close: calc.close, value: usd(calc.value), monthly: usd(calc.monthly) })}</li>
+          <li>{fill(m.howMissed, { unanswered: calc.unanswered, noFollowup: calc.noFollowup, lostWeek: calc.lostWeek, missed })}</li>
+          <li>{fill(m.howMonthly, { missed, closeOf10: calc.closeOf10, value: usd(calc.value), monthly: usd(calc.monthly) })}</li>
           <li>{fill(m.howAnnual, { monthly: usd(calc.monthly), annual: usd(calc.annual) })}</li>
         </ol>
         {disclaimer && <p className="mt-3 max-w-[70ch] text-sm">{disclaimer}</p>}

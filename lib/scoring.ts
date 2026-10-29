@@ -4,7 +4,9 @@
 import type {
   Answers,
   ArchetypeId,
+  CalcFieldId,
   CalcOverrides,
+  CalculatorField,
   CalculatorQuestion,
   IndexBand,
   NotYetId,
@@ -69,18 +71,33 @@ export function scoreTone(s: number): "good" | "warn" | "bad" {
   return s >= 70 ? "good" : s >= 45 ? "warn" : "bad";
 }
 
-// ---------- porcentaje que se escapa ----------
+// ---------- cantidades sugeridas ----------
+// Valores iniciales de "sin respuesta el mismo día" y "cotizaciones sin seguimiento" (docs/SPEC.md §3).
+// Son heurísticas para empezar, no estadísticas: el dueño las ve marcadas como sugeridas y puede cambiarlas.
 
-const LEAK_BASE: Record<string, number> = { auto: 8, set: 15, once: 30, wait: 40 };
-const LEAK_AFTERHOURS: Record<string, number> = { none: 8, dk: 8, auto: 3 };
-const LEAK_SPEED: Record<string, number> = { next: 7, dk: 7, day: 3 };
+// Las tres preguntas de demora describen el mismo hueco: se combinan como unión, 1 − Π(1 − p), no se suman.
+const DELAY_SPEED: Record<string, number> = { "5m": 0.02, "1h": 0.05, day: 0.1, next: 0.4, dk: 0.25 };
+const DELAY_SPEED_UNANSWERED = 0.15;
+const DELAY_AFTERHOURS: Record<string, number> = { book: 0, auto: 0.05, none: 0.1, dk: 0.12 };
+const DELAY_BUSY: Record<string, number> = { c: 0.03, d: 0.05 };
+const UNANSWERED_CAP = 0.6;
+// Proporción de las consultas atendidas cuya cotización queda sin seguimiento.
+const NO_FOLLOWUP: Record<string, number> = { auto: 0.03, set: 0.08, once: 0.2, wait: 0.35 };
+const NO_FOLLOWUP_UNANSWERED = 0.15;
 
-export function leakFromAnswers(answers: Answers): number {
-  let l = LEAK_BASE[single(answers, "followup") ?? ""] ?? 25;
-  l += LEAK_AFTERHOURS[single(answers, "afterhours") ?? ""] ?? 0;
-  l += LEAK_SPEED[single(answers, "speed") ?? ""] ?? 0;
-  if (single(answers, "busy") === "d") l += 5;
-  return Math.max(5, Math.min(65, l));
+/** Proporción de consultas de la semana sin respuesta el mismo día, según speed, afterhours y busy (tope 60 %). */
+export function unansweredShare(answers: Answers): number {
+  const ps = [
+    DELAY_SPEED[single(answers, "speed") ?? ""] ?? DELAY_SPEED_UNANSWERED,
+    DELAY_AFTERHOURS[single(answers, "afterhours") ?? ""] ?? 0,
+    DELAY_BUSY[single(answers, "busy") ?? ""] ?? 0,
+  ];
+  return Math.min(UNANSWERED_CAP, 1 - ps.reduce((acc, p) => acc * (1 - p), 1));
+}
+
+/** Proporción de las consultas atendidas cuya cotización no recibe seguimiento, según followup. */
+export function noFollowupShare(answers: Answers): number {
+  return NO_FOLLOWUP[single(answers, "followup") ?? ""] ?? NO_FOLLOWUP_UNANSWERED;
 }
 
 export function adSpend(cfg: Phase1Config, answers: Answers): number {
@@ -89,11 +106,25 @@ export function adSpend(cfg: Phase1Config, answers: Answers): number {
 
 // ---------- calculadora ----------
 
+/** 52 semanas / 12 meses (≈ 4.33). Con la fracción exacta, la cifra anual es lostWeek × 52 × cierre × valor. */
+export const WEEKS_PER_MONTH = 52 / 12;
+
 export interface CalcResult {
-  inquiries: number;
+  /** Entradas del dueño (o sus valores iniciales), ya dentro de sus límites. */
+  weekly: number;
+  unanswered: number;
+  noFollowup: number;
+  closeOf10: number;
   value: number;
+  /** Cuáles de las dos cantidades vienen de la sugerencia (el dueño no las movió). */
+  suggested: { unanswered: boolean; noFollowup: boolean };
+  /** Consultas perdidas por semana: unanswered + noFollowup. */
+  lostWeek: number;
+  /** Equivalentes que usan la vista del equipo y el aviso de anuncios: consultas al mes, % perdido, % de cierre. */
+  inquiries: number;
   leak: number;
   close: number;
+  /** Consultas perdidas al mes. */
   missed: number;
   monthly: number;
   cautious: number;
@@ -103,31 +134,63 @@ export interface CalcResult {
 
 export const CAUTIOUS_SHARE = 0.25;
 
-export function calcValues(cfg: Phase1Config, answers: Answers, overrides: CalcOverrides = {}): CalcResult {
+const clamp = (x: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, x));
+
+function calculatorQuestionOf(cfg: Phase1Config): CalculatorQuestion {
   const q = cfg.questions.find((x): x is CalculatorQuestion => x.type === "calculator");
   if (!q) throw new Error("Config has no calculator question");
-  const v = {} as Record<"inquiries" | "value" | "leak" | "close", number>;
-  for (const f of q.fields) {
-    v[f.id] = overrides[f.id] ?? (f.default === "fromAnswers" ? leakFromAnswers(answers) : f.default);
-  }
-  const missed = (v.inquiries * v.leak) / 100;
-  const monthly = missed * (v.close / 100) * v.value;
+  return q;
+}
+
+/** Valor inicial de un campo numérico fijo: según el tamaño del equipo si el config lo define, si no `default`. */
+export function initialValue(f: CalculatorField, answers: Answers): number {
+  if (f.default === "suggested") throw new Error(`${f.id} is suggested from the answers`);
+  return f.bySize?.[single(answers, "team") ?? ""] ?? f.default;
+}
+
+export function calcValues(cfg: Phase1Config, answers: Answers, overrides: CalcOverrides = {}): CalcResult {
+  const fields = Object.fromEntries(calculatorQuestionOf(cfg).fields.map((f) => [f.id, f])) as Record<CalcFieldId, CalculatorField>;
+  const fixed = (id: "weekly" | "closeOf10" | "value") => {
+    const f = fields[id];
+    return clamp(overrides[id] ?? initialValue(f, answers), f.min, f.max);
+  };
+  const weekly = fixed("weekly");
+  const closeOf10 = fixed("closeOf10");
+  const value = fixed("value");
+  // Una consulta cuenta una sola vez: sin seguimiento solo puede salir de las que sí se atendieron.
+  const unanswered = clamp(overrides.unanswered ?? Math.round(weekly * unansweredShare(answers)), 0, weekly);
+  const answered = weekly - unanswered;
+  const noFollowup = clamp(overrides.noFollowup ?? Math.round(answered * noFollowupShare(answers)), 0, answered);
+
+  const lostWeek = unanswered + noFollowup;
+  // Enteros hasta la última división, para que la cifra anual sea exacta.
+  const annual = (lostWeek * 52 * closeOf10 * value) / 10;
+  const monthly = annual / 12;
   return {
-    ...v,
-    missed,
+    weekly,
+    unanswered,
+    noFollowup,
+    closeOf10,
+    value,
+    suggested: { unanswered: overrides.unanswered === undefined, noFollowup: overrides.noFollowup === undefined },
+    lostWeek,
+    inquiries: weekly * WEEKS_PER_MONTH,
+    leak: (lostWeek / weekly) * 100,
+    close: closeOf10 * 10,
+    missed: lostWeek * WEEKS_PER_MONTH,
     monthly,
     cautious: monthly * CAUTIOUS_SHARE,
-    annual: monthly * 12,
-    adLeak: (adSpend(cfg, answers) * v.leak) / 100,
+    annual,
+    adLeak: (adSpend(cfg, answers) * lostWeek) / weekly,
   };
 }
 
 // ---------- cifras derivadas para la pantalla de resultados ----------
 // Solo presentan de otra forma lo que ya da calcValues; no cambian ningún cálculo (docs/SPEC.md §3).
 
-/** Clientes al año ligados a las consultas que se escapan: missed × close% × 12. Sin redondear (ver customersBucket). */
+/** Clientes al año ligados a las consultas que se escapan: lostWeek × 52 × closeOf10/10. Sin redondear (ver customersBucket). */
 export function lostCustomersPerYear(c: CalcResult): number {
-  return ((c.missed * c.close) / 100) * 12;
+  return (c.lostWeek * 52 * c.closeOf10) / 10;
 }
 
 /** Qué frase usar para los clientes al año: menos de uno, uno (redondeado) o varios. */
@@ -136,7 +199,7 @@ export function customersBucket(n: number): "few" | "one" | "many" {
   return Math.round(n) === 1 ? "one" : "many";
 }
 
-/** De cada $1,000 en anuncios, cuánto paga consultas que se escapan (= 1,000 × leak%). */
+/** De cada $1,000 en anuncios, cuánto paga consultas que se escapan (= 1,000 × lostWeek / weekly). */
 export function adLeakPerThousand(leak: number): number {
   return Math.round(leak * 10);
 }

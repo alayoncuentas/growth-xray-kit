@@ -8,7 +8,7 @@ import { getConfig, langFromAcceptLanguage, LANGS } from "./config";
 // se desalineó del inglés (o al revés).
 
 /** Claves cuyo valor (texto o lista de textos) no se traduce: ids, referencias, fuentes y urls. */
-const FIXED = new Set(["id", "version", "type", "section", "kind", "evidence", "myth", "flag", "unit", "url", "source", "brand", "signoff", "placeholder", "default", "options", "en", "es"]);
+const FIXED = new Set(["id", "version", "type", "section", "kind", "evidence", "myth", "flag", "unit", "url", "source", "brand", "signoff", "placeholder", "default", "maxFrom", "options", "en", "es"]);
 /** Excepciones: con el mismo nombre de clave, estos sí son textos traducibles. */
 const TEXT = [/^myths\.\w+\.myth$/, /^copy\.insight\.source$/];
 
@@ -76,6 +76,18 @@ describe("config en / es", () => {
     expect(es1.copy.gate.title).not.toBe(getConfig("en").copy.gate.title);
     // Las fuentes de las estadísticas quedan en su idioma original.
     for (const k of Object.keys(es1.evidence)) expect(es1.evidence[k].source).toBe(getConfig("en").evidence[k].source);
+  });
+
+  it("calculadora: los valores iniciales por tamaño usan los ids de la pregunta de equipo", () => {
+    for (const l of LANGS) {
+      const c = getConfig(l);
+      const team = c.questions.find((q) => q.id === "team");
+      const ids = team && team.type !== "calculator" ? team.options.map((o) => o.id).sort() : [];
+      for (const q of c.questions) {
+        if (q.type !== "calculator") continue;
+        for (const f of q.fields) if (f.bySize) expect(Object.keys(f.bySize).sort(), `${l}.${f.id}`).toEqual(ids);
+      }
+    }
   });
 
   it("getConfig devuelve cada idioma", () => {

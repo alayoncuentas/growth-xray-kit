@@ -13,7 +13,7 @@ export function figurePx(text: string, width: number, max = 72): number {
 
 /**
  * El mismo cálculo en CSS, relativo al ancho del contenedor (`cqi`; el padre necesita `container-type: inline-size`).
- * Así la cifra de 11 caracteres ($63,000,000) entra en una línea a 400 px y las cortas llegan a `max`.
+ * Así la cifra más larga (12 caracteres, $650,000,000) entra en una línea a 320 px y las cortas llegan a `max`.
  */
 export function figureFontSize(text: string, max = 72): string {
   const cqi = Math.floor((100 / (FIGURE_GLYPH_EM * Math.max(1, text.length))) * 100) / 100;

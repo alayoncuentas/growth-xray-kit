@@ -1,16 +1,14 @@
 "use client";
 
 import { MoneyAtStake } from "@/components/results/MoneyAtStake";
-import { phase1, usd } from "@/lib/config";
+import { calcFieldText, phase1 } from "@/lib/config";
 import { calcValues } from "@/lib/scoring";
 import { getDiagnostic, setCalc, useDiagnostic } from "@/lib/store";
 import { queueSave } from "@/lib/sync";
-import type { CalculatorField, CalculatorQuestion } from "@/lib/types";
+import type { CalculatorQuestion } from "@/lib/types";
 
 // Los sliders cambian muchas veces por segundo: se guarda el último valor tras una pausa.
 const SAVE_DELAY_MS = 600;
-
-const fmt = (f: CalculatorField, x: number) => (f.unit === "USD" ? usd(x) : f.unit === "%" ? `${x}%` : String(x));
 
 /** Sliders con el % que se escapa pre-calculado desde las respuestas; el dinero se recalcula en vivo. */
 export function Calculator({ code, question }: { code: string; question: CalculatorQuestion }) {
@@ -25,7 +23,7 @@ export function Calculator({ code, question }: { code: string; question: Calcula
             <div className="flex justify-between gap-3 text-sm">
               <label htmlFor={`f_${f.id}`}>{f.label}</label>
               <output htmlFor={`f_${f.id}`} className="text-[15px] font-bold whitespace-nowrap text-link tabular-nums">
-                {fmt(f, c[f.id])}
+                {calcFieldText(question, f, c[f.id])}
               </output>
             </div>
             <input

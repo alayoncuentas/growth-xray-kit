@@ -13,7 +13,7 @@ import { LoadingCard } from "@/components/ui/Loading";
 import { markGiftDeliveredAction } from "@/app/admin/actions";
 import { deleteConfirmation, EXPIRY_CHOICES, giftState, utmEntries } from "@/lib/admin";
 import { splitAnswers } from "@/lib/answers";
-import { fill, getQuestion, isChoice, phase1, usd } from "@/lib/config";
+import { calcFieldText, fill, getQuestion, isChoice, phase1 } from "@/lib/config";
 import { calcValues, visibleQuestions } from "@/lib/scoring";
 import { getLead, type LeadDetail } from "@/lib/server/admin-data";
 import { appOrigin } from "@/lib/server/origin";
@@ -192,8 +192,10 @@ function Answers({ lead }: { lead: LeadDetail }) {
               {q.fields.map((f) => (
                 <li key={f.id}>
                   {f.label}:{" "}
-                  <b className="font-mono font-semibold">{f.unit === "USD" ? usd(c[f.id]) : f.unit === "%" ? `${c[f.id]}%` : c[f.id]}</b>
-                  {saved.calc[f.id] === undefined && <span className="text-muted"> ({d.calcDefault})</span>}
+                  <b className="font-mono font-semibold">{calcFieldText(q, f, c[f.id])}</b>
+                  {saved.calc[f.id] === undefined && (
+                    <span className="text-muted"> ({f.default === "suggested" ? d.calcSuggested : d.calcDefault})</span>
+                  )}
                 </li>
               ))}
             </ul>

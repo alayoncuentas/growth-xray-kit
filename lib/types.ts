@@ -59,14 +59,23 @@ export interface Insight {
   variants?: Record<string, { tag?: string; lead?: string; text: string; myth?: string }>;
 }
 
+export type CalcFieldId = "weekly" | "unanswered" | "noFollowup" | "closeOf10" | "value";
+
 export interface CalculatorField {
-  id: "inquiries" | "value" | "leak" | "close";
+  id: CalcFieldId;
   label: string;
-  unit?: "USD" | "%";
+  /** count: cantidad con botones − / + · of10: "n de 10" (deslizador) · USD: dinero (deslizador). */
+  unit: "count" | "of10" | "USD";
+  /** Límites absolutos (los valida el servidor). */
   min: number;
   max: number;
   step: number;
-  default: number | "fromAnswers";
+  /** Número fijo, o "suggested": se sugiere desde las respuestas (lib/scoring.ts) hasta que el dueño lo mueve. */
+  default: number | "suggested";
+  /** Valor inicial según la respuesta de `team` (id de opción → valor); si falta, `default`. */
+  bySize?: Record<string, number>;
+  /** El máximo real depende de otro campo: las consultas de la semana, o las que sí se atienden. */
+  maxFrom?: "weekly" | "answered";
   note?: string;
 }
 
@@ -88,6 +97,8 @@ export interface CalculatorQuestion extends BaseQuestion {
   fields: CalculatorField[];
   prefillNote?: string;
   disclaimer?: string;
+  /** Textos de los controles: marca de valor sugerido, "n de 10", y nombres de los botones − / +. */
+  ui: { suggested: string; outOf10: string; decrease: string; increase: string };
 }
 
 export type Question = ChoiceQuestion | CalculatorQuestion;
@@ -129,7 +140,7 @@ export interface Phase1Config {
 export type Answers = Record<string, string | string[] | undefined>;
 
 /** Valores que el usuario movió en la calculadora. */
-export type CalcOverrides = Partial<Record<CalculatorField["id"], number>>;
+export type CalcOverrides = Partial<Record<CalcFieldId, number>>;
 
 export type PillarScores = Partial<Record<PillarId, number>>;
 
