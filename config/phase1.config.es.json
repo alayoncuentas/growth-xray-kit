@@ -842,7 +842,7 @@
       "heroCustomersFew": "Menos de un cliente al año que sí habría pagado.",
       "heroCautious": "Escenario prudente: recuperar solo una cuarta parte suma {cautiousAnnual} al año.",
       "howTitle": "Cómo lo calculamos",
-      "howMissed": "{unanswered} sin respuesta el mismo día + {noFollowup} cotizaciones sin seguimiento = {lostWeek} consultas por semana. × 4.33 semanas = unas {missed} al mes.",
+      "howMissed": "{unanswered} sin respuesta el mismo día + {noFollowup} cotizaciones sin seguimiento = {lostWeek} consultas por semana × 4.33 semanas = unas {missed} al mes.",
       "howMonthly": "{missed} × {closeOf10} de cada 10 que comprarían × {value} por cliente nuevo = {monthly} al mes.",
       "howAnnual": "{monthly} × 12 meses = {annual} al año.",
       "howEdit": "Cambiar los números",

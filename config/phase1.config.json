@@ -842,7 +842,7 @@
       "heroCustomersFew": "Less than one customer a year who would have paid.",
       "heroCautious": "Cautious scenario: recovering just a quarter adds {cautiousAnnual} a year.",
       "howTitle": "How we calculate it",
-      "howMissed": "{unanswered} with no same-day reply + {noFollowup} quotes with no follow-up = {lostWeek} inquiries a week. × 4.33 weeks = about {missed} a month.",
+      "howMissed": "{unanswered} with no same-day reply + {noFollowup} quotes with no follow-up = {lostWeek} inquiries a week × 4.33 weeks = about {missed} a month.",
       "howMonthly": "{missed} × {closeOf10} out of 10 who'd buy × {value} per new customer = {monthly} a month.",
       "howAnnual": "{monthly} × 12 months = {annual} a year.",
       "howEdit": "Change the numbers",

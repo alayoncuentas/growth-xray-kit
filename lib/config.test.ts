@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import en from "@/config/phase1.config.json";
 import es from "@/config/phase1.config.es.json";
-import { getConfig, langFromAcceptLanguage, LANGS } from "./config";
+import { fill, getConfig, langFromAcceptLanguage, LANGS } from "./config";
 
 // Los dos idiomas deben tener exactamente la misma estructura: mismas claves, mismos ids, opciones, puntajes,
 // valores, evidencia (fuente y url) y reglas. Solo cambian los textos. Si este test falla, el config en español
@@ -88,6 +88,16 @@ describe("config en / es", () => {
         for (const f of q.fields) if (f.bySize) expect(Object.keys(f.bySize).sort(), `${l}.${f.id}`).toEqual(ids);
       }
     }
+  });
+
+  it("desglose de la calculadora: la semana y el × 4.33 van en la misma frase", () => {
+    const v = { unanswered: 3, noFollowup: 2, lostWeek: 5, missed: "21.7" };
+    expect(fill(getConfig("en").copy.money.howMissed, v)).toBe(
+      "3 with no same-day reply + 2 quotes with no follow-up = 5 inquiries a week × 4.33 weeks = about 21.7 a month.",
+    );
+    expect(fill(getConfig("es").copy.money.howMissed, v)).toBe(
+      "3 sin respuesta el mismo día + 2 cotizaciones sin seguimiento = 5 consultas por semana × 4.33 semanas = unas 21.7 al mes.",
+    );
   });
 
   it("getConfig devuelve cada idioma", () => {
