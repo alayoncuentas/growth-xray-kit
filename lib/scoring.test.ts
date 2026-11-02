@@ -6,17 +6,23 @@ import {
   archetype,
   averageIndex,
   calcValues,
+  capacityNote,
   cautiousAnnual,
   customersBucket,
   indexBand,
   lockedPillars,
   lostCustomersPerYear,
+  moneyTone,
   noFollowupShare,
   notYet,
   phase1Result,
   pillarScores,
   pillarsWeakestFirst,
   rankFixes,
+  scaleConfirmed,
+  situation,
+  SMALL_STAKES_ANNUAL,
+  stepPlan,
   teamScores,
   unansweredShare,
   visibleQuestions,
@@ -209,6 +215,146 @@ describe("notYet", () => {
   it("siempre incluye customApp", () => {
     expect(notYet({ pipeline: 95 }, 90, 0, "ready")).toEqual(["customApp"]);
   });
+  it("con demanda baja no dice \"more advertising\"", () => {
+    expect(notYet({ pipeline: 60 }, 50, 0, "silent", "demand")).toEqual(["customApp"]);
+    expect(notYet({ pipeline: 60 }, 50, 0, "silent", "offer")).toEqual(["moreAds", "customApp"]);
+  });
+});
+
+// Calculadora con las cantidades fijadas: semana, sin respuesta, sin seguimiento, de cada 10, valor.
+const nums = (weekly: number, unanswered: number, noFollowup: number, value = 1500, closeOf10 = 2) =>
+  calcValues(cfg, {}, { weekly, unanswered, noFollowup, value, closeOf10 });
+
+describe("situation", () => {
+  it("el tope de dinero es $30,000 al año", () => {
+    expect(SMALL_STAKES_ANNUAL).toBe(30_000);
+  });
+
+  // Tabla del análisis (2026-11-02): 8 consultas por semana con 1 perdida.
+  it.each([
+    ["8, 1 perdida, $1,500, 2 de 10 (el caso)", nums(8, 1, 0), 15_600, "demand"],
+    ["8, 0 perdidas", nums(8, 0, 0), 0, "demand"],
+    ["10, 1 perdida", nums(10, 0, 1), 15_600, "demand"],
+    ["8, 2 perdidas", nums(8, 1, 1), 31_200, "leak"],
+    ["8, 1 perdida, 4 de 10", nums(8, 1, 0, 1500, 4), 31_200, "leak"],
+    ["8, 1 perdida, ticket alto $5,000", nums(8, 1, 0, 5000), 52_000, "leak"],
+    ["12, 1 perdida", nums(12, 1, 0), 15_600, "leak"],
+    ["18, 1 perdida", nums(18, 1, 0), 15_600, "leak"],
+    ["perfil una persona (8, 2 + 1)", nums(8, 2, 1), 46_800, "leak"],
+  ] as const)("%s", (_, c, annual, expected) => {
+    expect(c.annual).toBe(annual);
+    expect(situation(c, 50)).toBe(expected);
+  });
+
+  it("demand: ≤ 4 consultas con poco en juego; borde de 4 y 5 consultas", () => {
+    expect(situation(nums(4, 1, 0), 50)).toBe("demand");
+    expect(situation(nums(4, 1, 0, 1900, 3), 50)).toBe("demand"); // $29,640
+    expect(situation(nums(5, 1, 1), 50)).toBe("leak"); // 5 por semana y 2 perdidas: $31,200
+    expect(situation(nums(5, 1, 1, 1000), 50)).toBe("leak"); // $20,800, pero 5 consultas y 2 perdidas: ni ≤ 4 ni ≤ 1 perdida
+    expect(situation(nums(5, 1, 0, 1000), 50)).toBe("demand"); // 5 consultas y 1 perdida
+  });
+
+  it("borde del dinero: $29,640 es demand, $30,420 no", () => {
+    expect(nums(4, 1, 0, 1900, 3).annual).toBe(29_640);
+    expect(nums(4, 1, 0, 1950, 3).annual).toBe(30_420);
+    expect(situation(nums(4, 1, 0, 1950, 3), 50)).toBe("leak");
+    expect(situation(nums(8, 1, 0, 1950, 3), 50)).toBe("leak");
+  });
+
+  it("ticket alto con pocas consultas: leak (1 perdida ya son $52,000)", () => {
+    expect(nums(3, 1, 0, 5000).annual).toBe(52_000);
+    expect(situation(nums(3, 1, 0, 5000), 50)).toBe("leak");
+  });
+
+  it("offer: ≥ 5 consultas, valor < $300 y poco en juego; bordes de $299/$300", () => {
+    expect(situation(nums(5, 1, 1, 250), 50)).toBe("offer");
+    expect(situation(nums(15, 3, 2, 299), 50)).toBe("offer");
+    expect(situation(nums(15, 3, 2, 300), 50)).toBe("leak");
+    // demand gana: 4 consultas con valor bajo
+    expect(situation(nums(4, 1, 1, 250), 50)).toBe("demand");
+  });
+
+  it("scale confirmado: ≥ 20 consultas, ≤ 10 % perdidas e índice ≥ 70", () => {
+    const ok = nums(20, 1, 1, 5000); // 10 %, $104,000
+    expect(situation(ok, 70)).toBe("scale");
+    expect(scaleConfirmed(ok, 70)).toBe(true);
+    expect(situation(ok, 69)).toBe("leak");
+    expect(situation(nums(20, 2, 1, 5000), 80)).toBe("leak"); // 15 %
+    expect(situation(nums(19, 1, 0, 5000), 80)).toBe("leak"); // 19 por semana
+    expect(scaleConfirmed(nums(19, 1, 0, 5000), 80)).toBe(false);
+  });
+
+  it("con 0 perdidas nunca es leak", () => {
+    expect(situation(nums(15, 0, 0), 40)).toBe("scale");
+    expect(scaleConfirmed(nums(15, 0, 0), 40)).toBe(false);
+    expect(situation(nums(30, 0, 0), 80)).toBe("scale");
+    expect(scaleConfirmed(nums(30, 0, 0), 80)).toBe(true);
+    expect(situation(nums(15, 0, 0, 200), 40)).toBe("offer");
+    expect(situation(nums(8, 0, 0), 90)).toBe("demand");
+    for (const weekly of [1, 4, 5, 10, 11, 19, 20, 100, 500]) {
+      for (const value of [100, 299, 300, 25_000]) expect(situation(nums(weekly, 0, 0, value), 30)).not.toBe("leak");
+    }
+  });
+});
+
+describe("moneyTone y capacityNote", () => {
+  it("panel naranja solo en leak con $30,000 o más", () => {
+    expect(moneyTone("leak", nums(8, 1, 1))).toBe("leak"); // $31,200
+    expect(moneyTone("leak", nums(12, 1, 0))).toBe("neutral"); // $15,600
+    expect(moneyTone("scale", nums(20, 1, 1, 5000))).toBe("neutral");
+    expect(moneyTone("demand", nums(3, 0, 0))).toBe("neutral");
+  });
+  it("nota de capacidad en demand si trabaja solo o el pilar del dueño ≤ 25", () => {
+    expect(capacityNote("demand", { team: "1" }, {})).toBe(true);
+    expect(capacityNote("demand", { team: "2_5" }, { owner: 25 })).toBe(true);
+    expect(capacityNote("demand", { team: "2_5" }, { owner: 50 })).toBe(false);
+    expect(capacityNote("leak", { team: "1" }, {})).toBe(false);
+  });
+});
+
+describe("stepPlan", () => {
+  const ps = { access: 37, pipeline: 15, followup: 35, reputation: 50, owner: 25 };
+  const fixes = rankFixes(ps, "silent"); // pipeline, owner, followup
+
+  it("leak: el pilar más débil primero y el resto en \"Then\"", () => {
+    expect(stepPlan("leak", false, ps, fixes)).toEqual({
+      first: { kind: "pillar", pillar: "pipeline", score: 15 },
+      then: [
+        { pillar: "owner", score: 25 },
+        { pillar: "followup", score: 35 },
+      ],
+    });
+  });
+
+  it("scale sin confirmar: los pilares, no el paso de escalar", () => {
+    expect(stepPlan("scale", false, ps, fixes).first).toEqual({ kind: "pillar", pillar: "pipeline", score: 15 });
+    expect(stepPlan("scale", false, {}, []).first).toBeNull();
+  });
+
+  it("scale confirmado y offer: el paso de la situación y hasta 2 en \"Then\"", () => {
+    expect(stepPlan("scale", true, ps, fixes)).toEqual({ first: { kind: "situation", situation: "scale" }, then: fixes.slice(0, 2) });
+    expect(stepPlan("offer", false, ps, fixes).first).toEqual({ kind: "situation", situation: "offer" });
+    expect(stepPlan("offer", false, ps, fixes).then).toHaveLength(2);
+  });
+
+  it("demand: la reputación primero si está < 70; si no, el paso de demanda", () => {
+    const plan = stepPlan("demand", false, ps, fixes);
+    expect(plan.first).toEqual({ kind: "pillar", pillar: "reputation", score: 50 });
+    expect(plan.then.map((f) => f.pillar)).toEqual(["pipeline", "owner"]);
+    const strong = { ...ps, reputation: 70 };
+    expect(stepPlan("demand", false, strong, rankFixes(strong, "silent")).first).toEqual({ kind: "situation", situation: "demand" });
+  });
+});
+
+describe("phase1Result: situación", () => {
+  it("incluye la situación, el plan y el tono de la cifra", () => {
+    const r = phase1Result(cfg, { team: "1" }, { weekly: 3, unanswered: 0, noFollowup: 0 });
+    expect(r.situation).toBe("demand");
+    expect(r.moneyTone).toBe("neutral");
+    expect(r.capacityNote).toBe(true);
+    expect(phase1Result(cfg, leakyDental).situation).toBe("leak");
+    expect(phase1Result(cfg, leakyDental).moneyTone).toBe("leak");
+  });
 });
 
 describe("teamScores", () => {
@@ -235,15 +381,47 @@ describe("teamScores", () => {
     const ps = pillarScores(cfg, a);
     const c = calcValues(cfg, a, { weekly: 2, value: 200 }); // ≈ 9 al mes
     const t = teamScores(cfg, a, ps, averageIndex(ps), c);
-    expect(t.verdict).toBe("prepare");
-    expect(t.flags).toEqual(["unmeasured", "lowVolume", "ownerBottleneck", "solo"]);
+    // demand: veredicto propio, y demandLimited reemplaza a lowVolume
+    expect(t.verdict).toBe("demand");
+    expect(t.flags).toEqual(["unmeasured", "demandLimited", "ownerBottleneck", "solo"]);
+  });
+
+  it("demand no llega a \"high\" aunque el ticket sea alto", () => {
+    // 3 por semana, 0 perdidas, $10,000, con anuncios y equipo: Potential 10 + 35 + 15 + 10 = 70
+    const a: Answers = { team: "2_5", ads: "1_3", tracking: "crm" };
+    const c = calcValues(cfg, a, { weekly: 3, unanswered: 0, noFollowup: 0, value: 10000 });
+    const t = teamScores(cfg, a, {}, 30, c);
+    expect(t.potential).toBe(70);
+    expect(t.verdict).toBe("demand");
+  });
+
+  it("offer: veredicto propio y alerta lowTicket", () => {
+    const a: Answers = { team: "2_5", ads: "1_3", tracking: "crm" };
+    const c = calcValues(cfg, a, { weekly: 30, unanswered: 5, noFollowup: 3, value: 150 }); // $24,960
+    const t = teamScores(cfg, a, {}, 30, c);
+    expect(t.verdict).toBe("offer");
+    expect(t.flags).toContain("lowTicket");
+    expect(t.flags).not.toContain("demandLimited");
+  });
+
+  it("scaleReady solo si el índice y el volumen lo confirman", () => {
+    const a: Answers = { team: "6_15" };
+    expect(teamScores(cfg, a, {}, 80, nums(30, 1, 1, 2500)).flags).toContain("scaleReady");
+    expect(teamScores(cfg, a, {}, 40, nums(15, 0, 0)).flags).not.toContain("scaleReady");
+  });
+
+  it("lowVolume sigue cuando hay pocas consultas pero mucho en juego (no es demand)", () => {
+    const t = teamScores(cfg, {}, {}, 50, nums(3, 1, 0, 5000));
+    expect(t.flags).toContain("lowVolume");
+    expect(t.flags).not.toContain("demandLimited");
   });
 
   it("selective y low cuando Need < 50", () => {
     const a: Answers = { team: "6_15", ads: "3_10" };
     const hi = calcValues(cfg, a, { weekly: 28, value: 6000 } /* ≈ 121 al mes */);
     expect(teamScores(cfg, a, {}, 80, hi).verdict).toBe("selective");
-    const lo = calcValues(cfg, {}, { weekly: 2, value: 200 });
+    // 15 por semana, 5 perdidas, $1,500: leak con Potential 30 + 28 = 58
+    const lo = nums(15, 3, 2);
     expect(teamScores(cfg, {}, {}, 80, lo).verdict).toBe("low");
   });
 

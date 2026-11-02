@@ -57,9 +57,10 @@ Se calcula con la vista del equipo (`lib/scoring.ts`), pero el prospecto nunca v
 
 | Regalo | Regla | Plazo |
 |---|---|---|
-| **A** · Free response-time test + website review | Potential ≥ 60 **y** Need ≥ 50 | 3 días hábiles |
+| **A** · Free response-time test + website review | situación `leak` **y** Potential ≥ 60 **y** Need ≥ 50 | 3 días hábiles |
 | **B** · Free Google reviews audit | todos los demás | 2 días hábiles |
 
+- Situación (`docs/SPEC.md` §3): en `demand`, `offer` y `scale` el regalo es siempre B; la auditoría de reseñas encaja con un mensaje de visibilidad, y la prueba de tiempo de respuesta solo tiene sentido cuando la fuga es la oportunidad (cambio aprobado el 2026-11-02). Un regalo ya ofrecido queda fijo.
 - Los plazos van en el config (no en el código).
 - **Ofrecido** = cuando el código tiene correo y se muestra el regalo. Se registra el evento `gift_offered` con `{ gift: "A" | "B", due_at }`.
 - **Panel**: cada regalo pendiente muestra cuántos días hábiles le quedan; si está vencido, en rojo. Botón "Mark delivered", que registra `gift_delivered`.
@@ -211,7 +212,7 @@ After:       Unlocked. We sent your results to {to}.
 
 ### Regalos
 ```
-A · Potential ≥ 60 and Need ≥ 50
+A · Situation leak, Potential ≥ 60 and Need ≥ 50
   Title:   Free response-time test + website review
   Short:   free response-time test
   Text:    We'll contact your business the way a new customer would, time how

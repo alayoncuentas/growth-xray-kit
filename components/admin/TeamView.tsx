@@ -42,6 +42,8 @@ export function TeamView({ code, answers, calc }: { code: string; answers: Answe
         <dd>
           {usd(res.calc.monthly)} ({team.kv.cautious}: {usd(res.calc.cautious)})
         </dd>
+        <dt className="text-muted">{team.kv.situation}</dt>
+        <dd>{team.situations[res.situation]}</dd>
         <dt className="text-muted">{team.kv.ads}</dt>
         <dd>{res.spend ? `${usd(res.spend)}/mo` : team.kv.noAds}</dd>
         <dt className="text-muted">{team.kv.opening}</dt>

@@ -5,11 +5,15 @@ import { sampleState } from "./preview";
 
 describe("regalo según calificación", () => {
   it("A con Potential ≥ 60 y Need ≥ 50; B el resto (bordes incluidos)", () => {
-    expect(giftFor({ potential: 60, need: 50 })).toBe("A");
-    expect(giftFor({ potential: 100, need: 100 })).toBe("A");
-    expect(giftFor({ potential: 59, need: 100 })).toBe("B");
-    expect(giftFor({ potential: 100, need: 49 })).toBe("B");
-    expect(giftFor({ potential: 0, need: 0 })).toBe("B");
+    expect(giftFor({ potential: 60, need: 50 }, "leak")).toBe("A");
+    expect(giftFor({ potential: 100, need: 100 }, "leak")).toBe("A");
+    expect(giftFor({ potential: 59, need: 100 }, "leak")).toBe("B");
+    expect(giftFor({ potential: 100, need: 49 }, "leak")).toBe("B");
+    expect(giftFor({ potential: 0, need: 0 }, "leak")).toBe("B");
+  });
+
+  it("A solo en leak: en demand, offer y scale siempre B", () => {
+    for (const sit of ["demand", "offer", "scale"] as const) expect(giftFor({ potential: 100, need: 100 }, sit)).toBe("B");
   });
 
   it("se calcula con las respuestas y no depende del idioma", () => {

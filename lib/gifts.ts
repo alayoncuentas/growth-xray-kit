@@ -2,22 +2,25 @@
 // Se decide con la vista del equipo, pero el prospecto nunca ve Need, Potential ni Readiness: solo qué regalo le tocó.
 
 // Con extensión .ts: lo carga lib/admin.ts desde scripts/admin-link.mts, con Node directo (lib/scripts.test.ts).
-import { phase1Result, teamScores } from "./scoring.ts";
+import { phase1Result, teamScores, type Situation } from "./scoring.ts";
 import type { Answers, CalcOverrides, Phase1Config } from "./types";
 
 export type GiftKind = "A" | "B";
 
 export const isGiftKind = (v: unknown): v is GiftKind => v === "A" || v === "B";
 
-/** A (response-time test + website review): Potential ≥ 60 y Need ≥ 50. B (Google reviews audit): el resto. */
-export function giftFor(t: { need: number; potential: number }): GiftKind {
-  return t.potential >= 60 && t.need >= 50 ? "A" : "B";
+/**
+ * A (response-time test + website review): solo si la situación es leak, con Potential ≥ 60 y Need ≥ 50.
+ * B (Google reviews audit): el resto; en demand, offer y scale siempre B (encaja con el mensaje de visibilidad).
+ */
+export function giftFor(t: { need: number; potential: number }, sit: Situation): GiftKind {
+  return sit === "leak" && t.potential >= 60 && t.need >= 50 ? "A" : "B";
 }
 
 /** El regalo que tocaría con estas respuestas (antes de ofrecerlo; una vez ofrecido queda fijo). */
 export function giftForAnswers(cfg: Phase1Config, answers: Answers, calc: CalcOverrides): GiftKind {
   const res = phase1Result(cfg, answers, calc);
-  return giftFor(teamScores(cfg, answers, res.pillars, res.avg, res.calc));
+  return giftFor(teamScores(cfg, answers, res.pillars, res.avg, res.calc), res.situation);
 }
 
 // ---------- plazos en días hábiles (decisión 3) ----------

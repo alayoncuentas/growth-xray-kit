@@ -124,6 +124,31 @@ Pilares en la pantalla de resultados: de menor a mayor puntaje (empates en el or
 
 "What to fix, in order": pilares < 70, priorizando los del arquetipo y luego de menor a mayor; máximo 3. El primero muestra "Your first step".
 
+### Situación (dónde está la oportunidad según los números)
+Capa aparte del arquetipo: el arquetipo describe el sistema según las respuestas; la situación decide el mensaje
+principal, el primer paso y el regalo según la calculadora (`situation()` en `lib/scoring.ts`). Nunca cambia el índice
+ni los pilares. Se evalúa en orden; gana la primera que se cumple:
+```
+demand  annual < $30,000  y  (weekly ≤ 4  o  (weekly ≤ 10 y lostWeek ≤ 1))
+offer   annual < $30,000  y  weekly ≥ 5  y  value < $300
+scale   lostWeek = 0  o  (índice ≥ 70 y weekly ≥ 20 y leak% ≤ 10)
+leak    todo lo demás
+```
+- Con 0 perdidas nunca es `leak`. Si además se cumple índice ≥ 70, weekly ≥ 20 y leak% ≤ 10, el `scale` está
+  **confirmado**; si no, el texto solo repite lo que el dueño declaró y el primer paso sale de los pilares.
+- Primer paso ("Start here"):
+  - `leak` y `scale` sin confirmar: el pilar más débil (como arriba).
+  - `demand`: el hallazgo de reputación si ese pilar está < 70 (es visibilidad); si no, el paso de demanda.
+  - `offer` y `scale` confirmado: el paso de la situación.
+  - Cuando el primer paso no es el primer pilar de la lista, "Then" lleva hasta 2.
+- Cifra: va en el panel naranja solo en `leak` con annual ≥ $30,000; en el resto, en un panel neutro. El aviso de
+  anuncios solo aparece en `leak`. En `demand` no se muestra "More advertising" en "What you probably don't need yet".
+- En `demand`, si trabaja solo (`team = 1`) o owner ≤ 25, se agrega la nota de capacidad ("si tu agenda ya está
+  llena…"), para no leer poco volumen como falta de clientes.
+
+> El tope de $30,000 al año (`SMALL_STAKES_ANNUAL`) y los demás umbrales son constantes en `lib/scoring.ts` y una
+> hipótesis: calibrarlos con los primeros 30 diagnósticos reales.
+
 ### Calificación interna (vista del equipo; provisional, calibrar con datos reales)
 ```
 Need      = 100 − índice promedio
@@ -133,12 +158,16 @@ Potential = inquiries/mes = weekly × 52/12 (≥100:40, ≥50:30, ≥20:20, else
 Readiness = 40 + (ads > 0 ? 20) + (tracking crm|sheet ? 15) + (team > 1 ? 10)   tope 85 (preliminar)
 ```
 Veredicto:
+- situación `demand` → **Primero demanda** (con ticket alto, Potential podría dar "Alta prioridad")
+- situación `offer` → **Primero la oferta**
 - Need ≥ 50 y Potential ≥ 60 → Readiness ≥ 55 ? **Alta prioridad** : **Nutrir**
 - Need ≥ 50 → **Preparar primero**
 - Potential ≥ 60 → **Optimización selectiva**
 - otro → **Bajo encaje por ahora**
 
-Alertas: no mide tiempo de respuesta · volumen bajo (<20/mes) · paga por leads que se pierden · dueño cuello de botella (owner ≤ 25) · trabaja solo.
+Alertas: no mide tiempo de respuesta · demanda limitada (situación `demand`; reemplaza a volumen bajo) · volumen bajo
+(<20/mes, si no es `demand`) · valor bajo por cliente (`offer`) · listo para más volumen (`scale` confirmado) · paga
+por leads que se pierden · dueño cuello de botella (owner ≤ 25) · trabaja solo.
 
 > Los pesos y umbrales son una hipótesis inicial. Después de 30 diagnósticos reales, comparar los puntajes con quién avanzó a llamada y quién cerró, y ajustar.
 

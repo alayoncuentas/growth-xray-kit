@@ -256,20 +256,92 @@ export function rankFixes(ps: PillarScores, arch: ArchetypeId): { pillar: Phase1
     .map(([pillar, score]) => ({ pillar, score }));
 }
 
-/** "What you probably don't need yet": máximo 3 (adBudget y moreAds son excluyentes, así que customApp siempre entra). */
-export function notYet(ps: PillarScores, avg: number, spend: number, arch: ArchetypeId): NotYetId[] {
+/**
+ * "What you probably don't need yet": máximo 3 (adBudget y moreAds son excluyentes, así que customApp siempre entra).
+ * Con demanda baja no se dice "More advertising… fix the system first": contradice el mensaje principal.
+ */
+export function notYet(ps: PillarScores, avg: number, spend: number, arch: ArchetypeId, sit: Situation = "leak"): NotYetId[] {
   const out: NotYetId[] = [];
   if ((ps.pipeline ?? 100) < 50) out.push("platform");
   if (spend > 0 && arch === "leaky") out.push("adBudget");
-  if (spend === 0 && avg < 60) out.push("moreAds");
+  if (spend === 0 && avg < 60 && sit !== "demand") out.push("moreAds");
   out.push("customApp");
   return out.slice(0, 3);
 }
 
+// ---------- situación: dónde está la oportunidad según los números ----------
+// Capa aparte del arquetipo (que describe el sistema según las respuestas): decide el mensaje principal, el primer
+// paso y el regalo. Umbrales en docs/SPEC.md §3; son una hipótesis a calibrar con los primeros 30 diagnósticos.
+
+export type Situation = "leak" | "demand" | "offer" | "scale";
+
+/** Dinero en juego al año por debajo del cual cerrar fugas no es la oportunidad principal. */
+export const SMALL_STAKES_ANNUAL = 30_000;
+/** demand: muy pocas consultas (≤ 4 por semana ≈ 17 al mes), o pocas (≤ 10) y a lo sumo 1 perdida. */
+export const DEMAND_MAX_WEEKLY = 4;
+export const DEMAND_LOW_LOSS_MAX_WEEKLY = 10;
+export const DEMAND_LOW_LOSS_MAX_LOST = 1;
+/** offer: consultas normales y cada cliente nuevo vale poco. */
+export const OFFER_MIN_WEEKLY = 5;
+export const OFFER_MAX_VALUE = 300;
+/** scale confirmado: volumen, poca fuga y respuestas que dicen que el sistema funciona. */
+export const SCALE_MIN_WEEKLY = 20;
+export const SCALE_MAX_LEAK = 10;
+export const SCALE_MIN_INDEX = 70;
+
+/** El índice y el volumen confirman que el sistema atrapa lo que llega (no solo lo que declaró el dueño). */
+export function scaleConfirmed(c: CalcResult, avg: number): boolean {
+  return avg >= SCALE_MIN_INDEX && c.weekly >= SCALE_MIN_WEEKLY && c.leak <= SCALE_MAX_LEAK;
+}
+
+/**
+ * Primera regla que se cumple: demand → offer → scale → leak. Con 0 perdidas nunca es leak (si no es demand ni offer,
+ * es scale: lo que el dueño declaró, aunque el índice no lo confirme).
+ */
+export function situation(c: CalcResult, avg: number): Situation {
+  const small = c.annual < SMALL_STAKES_ANNUAL;
+  const fewInquiries =
+    c.weekly <= DEMAND_MAX_WEEKLY || (c.weekly <= DEMAND_LOW_LOSS_MAX_WEEKLY && c.lostWeek <= DEMAND_LOW_LOSS_MAX_LOST);
+  if (small && fewInquiries) return "demand";
+  if (small && c.weekly >= OFFER_MIN_WEEKLY && c.value < OFFER_MAX_VALUE) return "offer";
+  if (c.lostWeek === 0 || scaleConfirmed(c, avg)) return "scale";
+  return "leak";
+}
+
+/** La cifra va en el panel naranja solo cuando cerrar fugas es el mensaje y hay dinero de verdad en juego. */
+export function moneyTone(sit: Situation, c: CalcResult): "leak" | "neutral" {
+  return sit === "leak" && c.annual >= SMALL_STAKES_ANNUAL ? "leak" : "neutral";
+}
+
+/** Con demanda baja, una nota sobre capacidad: a quien trabaja solo o depende de sí mismo puede faltarle tiempo, no clientes. */
+export function capacityNote(sit: Situation, answers: Answers, ps: PillarScores): boolean {
+  return sit === "demand" && (single(answers, "team") === "1" || (ps.owner ?? 100) <= 25);
+}
+
+type Fix = { pillar: Phase1PillarId; score: number };
+export type FirstStep = { kind: "pillar"; pillar: Phase1PillarId; score: number } | { kind: "situation"; situation: Exclude<Situation, "leak"> };
+
+const THEN_WITH_SITUATION_STEP = 2;
+
+/**
+ * "Start here" y "Then". leak, y scale sin confirmar: el pilar más débil primero (rankFixes), como siempre.
+ * demand: si la reputación está por debajo de 70, su hallazgo (es visibilidad); si no, el paso de demanda.
+ * offer y scale confirmado: el paso de la situación. Cuando el primero no sale de los pilares, "Then" lleva hasta 2.
+ */
+export function stepPlan(sit: Situation, confirmed: boolean, ps: PillarScores, fixes: Fix[]): { first: FirstStep | null; then: Fix[] } {
+  const fromPillars = () => (fixes.length ? { first: { kind: "pillar" as const, ...fixes[0] }, then: fixes.slice(1) } : { first: null, then: [] });
+  if (sit === "leak" || (sit === "scale" && !confirmed)) return fromPillars();
+  if (sit === "demand" && (ps.reputation ?? 100) < 70) {
+    const score = ps.reputation as number;
+    return { first: { kind: "pillar", pillar: "reputation", score }, then: fixes.filter((f) => f.pillar !== "reputation").slice(0, THEN_WITH_SITUATION_STEP) };
+  }
+  return { first: { kind: "situation", situation: sit }, then: fixes.slice(0, THEN_WITH_SITUATION_STEP) };
+}
+
 // ---------- vista del equipo (solo /admin) ----------
 
-export type Verdict = "high" | "nurture" | "prepare" | "selective" | "low";
-export type TeamFlag = "unmeasured" | "lowVolume" | "payingLeak" | "ownerBottleneck" | "solo";
+export type Verdict = "high" | "nurture" | "prepare" | "selective" | "low" | "demand" | "offer";
+export type TeamFlag = "unmeasured" | "lowVolume" | "demandLimited" | "lowTicket" | "scaleReady" | "payingLeak" | "ownerBottleneck" | "solo";
 
 export interface TeamScores {
   need: number;
@@ -298,15 +370,23 @@ export function teamScores(cfg: Phase1Config, answers: Answers, ps: PillarScores
     40 + (spend > 0 ? 20 : 0) + (tracking === "crm" || tracking === "sheet" ? 15 : 0) + (hasTeam ? 10 : 0),
   );
 
+  // demand y offer tienen veredicto propio: con ticket alto, demand podría llegar a "high" por Potential.
+  const sit = situation(c, avg);
   let verdict: Verdict;
-  if (need >= 50 && potential >= 60) verdict = readiness >= 55 ? "high" : "nurture";
+  if (sit === "demand") verdict = "demand";
+  else if (sit === "offer") verdict = "offer";
+  else if (need >= 50 && potential >= 60) verdict = readiness >= 55 ? "high" : "nurture";
   else if (need >= 50) verdict = "prepare";
   else if (potential >= 60) verdict = "selective";
   else verdict = "low";
 
   const flags: TeamFlag[] = [];
   if (single(answers, "speed") === "dk") flags.push("unmeasured");
-  if (c.inquiries < 20) flags.push("lowVolume");
+  // demandLimited reemplaza a lowVolume (no se acumulan alertas sobre lo mismo).
+  if (sit === "demand") flags.push("demandLimited");
+  else if (c.inquiries < 20) flags.push("lowVolume");
+  if (sit === "offer") flags.push("lowTicket");
+  if (sit === "scale" && scaleConfirmed(c, avg)) flags.push("scaleReady");
   if (isLeaking(ps, spend)) flags.push("payingLeak");
   if ((ps.owner ?? 100) <= 25) flags.push("ownerBottleneck");
   if (team === "1") flags.push("solo");
@@ -321,14 +401,24 @@ export function phase1Result(cfg: Phase1Config, answers: Answers, overrides: Cal
   const avg = averageIndex(pillars);
   const spend = adSpend(cfg, answers);
   const arch = archetype(pillars, avg, spend);
+  const calc = calcValues(cfg, answers, overrides);
+  const sit = situation(calc, avg);
+  const confirmed = sit === "scale" && scaleConfirmed(calc, avg);
+  const fixes = rankFixes(pillars, arch);
   return {
     pillars,
     avg,
     band: indexBand(avg),
     spend,
     archetype: arch,
-    fixes: rankFixes(pillars, arch),
-    notYet: notYet(pillars, avg, spend, arch),
-    calc: calcValues(cfg, answers, overrides),
+    situation: sit,
+    /** scale: el índice y el volumen lo confirman; si no, el texto solo repite lo que declaró el dueño. */
+    scaleConfirmed: confirmed,
+    fixes,
+    steps: stepPlan(sit, confirmed, pillars, fixes),
+    notYet: notYet(pillars, avg, spend, arch, sit),
+    moneyTone: moneyTone(sit, calc),
+    capacityNote: capacityNote(sit, answers, pillars),
+    calc,
   };
 }

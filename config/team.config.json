@@ -20,18 +20,30 @@
     "nurture": "Nurture. High need and potential, readiness unclear. Phase 2 should confirm budget and decision-maker.",
     "prepare": "Prepare first. Real problems, but volume or deal value may not justify a full build yet.",
     "selective": "Selective optimization. Sell one targeted improvement, not a full system.",
-    "low": "Low fit for now. Keep in a light nurture sequence."
+    "low": "Low fit for now. Keep in a light nurture sequence.",
+    "demand": "Demand first. Few inquiries and little at stake: the fit is visibility, not a capture system.",
+    "offer": "Offer first. Inquiries arrive but each customer is worth little: pricing or packaging before a system."
   },
   "flags": {
     "unmeasured": "Doesn't measure response time",
     "lowVolume": "Low inquiry volume",
+    "demandLimited": "Demand-limited: few inquiries, little at stake",
+    "lowTicket": "Low value per customer",
+    "scaleReady": "System works; ready for more volume",
     "payingLeak": "Paying for leaking leads",
     "ownerBottleneck": "Owner bottleneck",
     "solo": "Solo operator"
   },
+  "situations": {
+    "leak": "Leak · closing gaps is the main opportunity",
+    "demand": "Demand · few inquiries, little at stake",
+    "offer": "Offer · low value per customer",
+    "scale": "Scale · little slips through"
+  },
   "kv": {
     "code": "Access code",
     "monthly": "Monthly at stake",
+    "situation": "Situation",
     "cautious": "cautious",
     "ads": "Ad spend",
     "noAds": "None",
