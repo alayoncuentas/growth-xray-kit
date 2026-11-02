@@ -11,14 +11,32 @@ import type { CalculatorQuestion } from "@/lib/types";
  * Cifra principal de los resultados: el dinero en juego al año, en una línea aunque sea $650,000,000 a 320 px
  * (tamaño relativo al contenedor, lib/format.ts). Completo: clientes al año, escenario prudente y "How we calculate it".
  * Parcial (`figureOnly`): solo la cifra y su unidad (docs/OPEN_ENTRY.md decisión 2).
+ * `tone` (lib/scoring.ts moneyTone): naranja solo cuando cerrar fugas es el mensaje y hay dinero de verdad en juego;
+ * si no, panel neutro, con `context` debajo de la cifra cuando la oportunidad principal está en otro lado.
  */
-export function MoneyHero({ calc, figureOnly = false, editHref = null }: { calc: CalcResult; figureOnly?: boolean; editHref?: string | null }) {
+export function MoneyHero({
+  calc,
+  figureOnly = false,
+  editHref = null,
+  tone = "leak",
+  context = null,
+}: {
+  calc: CalcResult;
+  figureOnly?: boolean;
+  editHref?: string | null;
+  tone?: "leak" | "neutral";
+  context?: string | null;
+}) {
   const cfg = useConfig();
   const m = cfg.copy.money;
   const figure = usd(calc.annual);
+  const leak = tone === "leak";
   return (
-    // Resumen clave: el campo naranja ancho del sistema, con todo el texto en negro (on-accent).
-    <section className="bg-leak px-[18px] py-5 text-highlight-ink min-[561px]:px-8 min-[561px]:py-7">
+    // Resumen clave: el campo naranja ancho del sistema, con todo el texto en negro (on-accent); neutro, una tarjeta.
+    <section
+      className={`px-[18px] py-5 min-[561px]:px-8 min-[561px]:py-7 ${leak ? "bg-leak text-highlight-ink" : "border-2 border-rule bg-card text-ink"}`}
+      data-tone={tone}
+    >
       <h2 className="label-mono">{cfg.copy.results.moneyTitle}</h2>
       <div className="@container mt-2">
         <p
@@ -30,12 +48,13 @@ export function MoneyHero({ calc, figureOnly = false, editHref = null }: { calc:
         </p>
       </div>
       <p className="label-mono mt-2 text-sm">{m.heroUnit}</p>
-      {!figureOnly && <HeroDetail calc={calc} editHref={editHref} />}
+      {context && <p className="mt-3 max-w-[52ch] text-[17px] font-bold">{context}</p>}
+      {!figureOnly && <HeroDetail calc={calc} editHref={editHref} rule={leak ? "border-highlight-ink" : "border-rule"} />}
     </section>
   );
 }
 
-function HeroDetail({ calc, editHref }: { calc: CalcResult; editHref: string | null }) {
+function HeroDetail({ calc, editHref, rule }: { calc: CalcResult; editHref: string | null; rule: string }) {
   const cfg = useConfig();
   const m = cfg.copy.money;
   const customers = lostCustomersPerYear(calc);
@@ -47,7 +66,7 @@ function HeroDetail({ calc, editHref }: { calc: CalcResult; editHref: string | n
     <>
       <p className="mt-4 max-w-[52ch] text-[17px]">{fill(line, { customers: Math.round(customers).toLocaleString("en-US") })}</p>
       <p className="mt-1 max-w-[60ch] text-[15px]">{fill(m.heroCautious, { cautiousAnnual: usd(cautiousAnnual(calc)) })}</p>
-      <details className="mt-4 border-t-2 border-highlight-ink pt-1">
+      <details className={`mt-4 border-t-2 pt-1 ${rule}`}>
         <summary className="flex min-h-11 items-center text-[15px] font-bold underline-offset-4 hover:underline">{m.howTitle}</summary>
         <ol className="mt-1 grid list-decimal gap-1.5 pl-5 text-[15px] tabular-nums">
           <li>{fill(m.howMissed, { unanswered: calc.unanswered, noFollowup: calc.noFollowup, lostWeek: calc.lostWeek, missed })}</li>

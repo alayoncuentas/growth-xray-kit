@@ -5,10 +5,23 @@ import { buttonClass } from "@/components/ui/Button";
 import { SaveForLater } from "@/components/question/SaveForLater";
 import { fill } from "@/lib/config";
 import { useConfig } from "@/lib/i18n";
+import type { Situation } from "@/lib/scoring";
 
-/** Bloque oscuro de invitación a la fase 2 (invierte paper/ink). */
-export function UnlockPanel({ code, open = false }: { code: string; open?: boolean }) {
+/** Bloque oscuro de invitación a la fase 2 (invierte paper/ink). El título depende de la situación (docs/SPEC.md §3). */
+export function UnlockPanel({
+  code,
+  open = false,
+  situation = "leak",
+  confirmed = false,
+}: {
+  code: string;
+  open?: boolean;
+  situation?: Situation;
+  /** scale confirmado: puede decir "Your system works"; si no, solo lo que declaró el dueño. */
+  confirmed?: boolean;
+}) {
   const u = useConfig().copy.unlock;
+  const title = situation === "leak" ? u.title : situation === "scale" && !confirmed ? u.titles.scaleDeclared : u.titles[situation];
   // Mensaje de la fase 2 después del clic; antes, a qué código quedaron guardadas las respuestas
   // (en el camino abierto, sin mostrar el código).
   const [pending, setPending] = useState(false);
@@ -16,7 +29,7 @@ export function UnlockPanel({ code, open = false }: { code: string; open?: boole
   return (
     <section className="mt-5 grid gap-3.5 bg-ink px-[18px] py-5 text-paper min-[561px]:px-8 min-[561px]:py-7">
       <div className="label-mono text-paper/75">{u.eyebrow}</div>
-      <h2 className="text-[clamp(22px,4vw,28px)] uppercase">{u.title}</h2>
+      <h2 className="text-[clamp(22px,4vw,28px)] uppercase">{title}</h2>
       <ul className="grid list-[square] gap-1.5 pl-[18px] marker:text-highlight">
         {u.bullets.map((b: string) => (
           <li key={b}>{b}</li>

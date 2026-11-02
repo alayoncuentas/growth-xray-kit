@@ -3,18 +3,20 @@
 import { Panel } from "@/components/ui/Card";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { useConfig } from "@/lib/i18n";
-import { phase1Result } from "@/lib/scoring";
-import type { Answers, CalcOverrides, Company } from "@/lib/types";
+import { phase1Result, type Situation } from "@/lib/scoring";
+import type { Answers, CalcOverrides, Company, Phase1Config } from "@/lib/types";
 import { AdCallout } from "./AdCallout";
 import { ArchetypeHeader } from "./ArchetypeHeader";
 import { Findings, NotYet } from "./Findings";
 import { IndexMeter } from "./IndexMeter";
 import { MoneyHero } from "./MoneyHero";
 import { PillarBars } from "./PillarBars";
+import { SituationCard } from "./SituationCard";
 
 /**
  * Resultado de la fase 1 (sin estado): lo comparten la pantalla de resultados y el informe de solo lectura /r/[code].
- * Orden: arquetipo, cifra anual, anuncios, índice y pilares, qué corregir y lo que todavía no hace falta.
+ * Orden: arquetipo, situación (si la oportunidad no es cerrar fugas), cifra anual, anuncios (solo en leak), índice y
+ * pilares, primer paso y lo que todavía no hace falta (docs/SPEC.md §3).
  * Nunca incluye la vista del equipo.
  */
 export function ResultsBody({
@@ -43,8 +45,11 @@ export function ResultsBody({
       <ArchetypeHeader archetype={res.archetype} />
 
       <div className="grid gap-5">
-        <MoneyHero calc={res.calc} editHref={editHref} />
-        {res.spend > 0 && <AdCallout leak={res.calc.leak} adLeak={res.calc.adLeak} />}
+        {res.situation !== "leak" && (
+          <SituationCard situation={res.situation} confirmed={res.scaleConfirmed} capacity={res.capacityNote} calc={res.calc} />
+        )}
+        <MoneyHero calc={res.calc} editHref={editHref} tone={res.moneyTone} context={moneyContext(cfg, res.situation)} />
+        {res.spend > 0 && res.situation === "leak" && <AdCallout leak={res.calc.leak} adLeak={res.calc.adLeak} />}
         <div className="grid gap-5 min-[761px]:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
           <Panel>
             <IndexMeter avg={res.avg} band={res.band} />
@@ -53,9 +58,14 @@ export function ResultsBody({
             <PillarBars scores={res.pillars} />
           </Panel>
         </div>
-        <Findings fixes={res.fixes} />
+        <Findings first={res.steps.first} then={res.steps.then} />
         <NotYet items={res.notYet} />
       </div>
     </>
   );
+}
+
+/** Línea bajo la cifra cuando la oportunidad principal está en otro lado (demand y offer, con poco en juego). */
+export function moneyContext(cfg: Phase1Config, sit: Situation): string | null {
+  return sit === "demand" || sit === "offer" ? cfg.copy.situation.moneyContext : null;
 }

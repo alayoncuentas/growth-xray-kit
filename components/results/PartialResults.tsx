@@ -10,10 +10,12 @@ import { ArchetypeHeader } from "./ArchetypeHeader";
 import { EmailForm } from "./EmailForm";
 import { IndexMeter } from "./IndexMeter";
 import { MoneyHero } from "./MoneyHero";
+import { moneyContext } from "./ResultsBody";
+import { SituationCard } from "./SituationCard";
 
 /**
  * Resultado parcial (camino abierto sin correo, docs/OPEN_ENTRY.md decisión 2): arquetipo, índice y la cifra principal
- * del dinero en juego (anual, sin desglose). Los clientes al año, el escenario prudente, "How we calculate it", los
+ * del dinero en juego (anual, sin desglose), y el titular de la situación si la oportunidad no es cerrar fugas. Los clientes al año, el escenario prudente, "How we calculate it", los
  * anuncios, los pilares, los hallazgos, el primer paso, el informe y el regalo se desbloquean con el correo.
  */
 export function PartialResults({ code, answers, calc, company, gift }: { code: string; answers: Answers; calc: CalcOverrides; company: Company | null; gift: GiftKind }) {
@@ -30,14 +32,15 @@ export function PartialResults({ code, answers, calc, company, gift }: { code: s
       <ArchetypeHeader archetype={res.archetype} />
 
       <div className="grid gap-5">
-        <MoneyHero calc={res.calc} figureOnly />
+        <MoneyHero calc={res.calc} figureOnly tone={res.moneyTone} context={moneyContext(cfg, res.situation)} />
+        {res.situation !== "leak" && <SituationCard situation={res.situation} confirmed={res.scaleConfirmed} capacity={false} calc={res.calc} compact />}
         <section className="border-2 border-rule bg-card px-[18px] py-3.5 min-[561px]:px-6 min-[561px]:py-5">
           <IndexMeter avg={res.avg} band={res.band} />
         </section>
       </div>
 
       <section className="mt-5 grid gap-3.5 border-2 border-t-[6px] border-rule border-t-accent bg-card px-[18px] py-5 min-[561px]:px-8 min-[561px]:py-7">
-        <h2 className="text-[clamp(22px,4vw,28px)] uppercase">{p.title}</h2>
+        <h2 className="text-[clamp(22px,4vw,28px)] uppercase">{res.situation === "leak" ? p.title : p.titleStep}</h2>
         <p className="max-w-[60ch] text-ink-2">{fill(p.text, { giftShort: cfg.copy.gifts[gift].short })}</p>
         <EmailForm code={code} from="partial" gift={gift} />
       </section>

@@ -7,6 +7,7 @@ import type { ResultsMode } from "@/lib/flow";
 import type { GiftKind } from "@/lib/gifts";
 import { useConfig } from "@/lib/i18n";
 import { calculatorId, firstQuestion } from "@/lib/flow";
+import { phase1Result } from "@/lib/scoring";
 import { useDiagnostic } from "@/lib/store";
 import type { Company } from "@/lib/types";
 import { GiftPanel } from "./GiftPanel";
@@ -53,6 +54,7 @@ export function ResultsView({
     );
   }
 
+  const res = phase1Result(cfg, answers, calc);
   const redo = (
     <div className="mt-[26px]">
       <ButtonLink href={firstHref} variant="ghost">
@@ -82,7 +84,7 @@ export function ResultsView({
 
       {offered && <GiftPanel kind={offered.kind} to={offered.to} />}
 
-      <UnlockPanel code={code} open={open} />
+      <UnlockPanel code={code} open={open} situation={res.situation} confirmed={res.scaleConfirmed} />
 
       {redo}
     </>

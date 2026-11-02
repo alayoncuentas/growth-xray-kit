@@ -858,6 +858,7 @@
       "lockedSummary": "{n} áreas más se abren en la fase 2: {list}.",
       "moneyTitle": "Dinero que se queda sobre la mesa",
       "fixTitle": "Qué corregir, en orden",
+      "stepsTitle": "Por dónde empezar",
       "startHere": "Empieza por aquí",
       "thenTitle": "Después",
       "severityHigh": "Alto impacto",
@@ -870,6 +871,32 @@
       "emptyTitleOpen": "Todavía no tenemos respuestas.",
       "emptySub": "Empieza el diagnóstico y tus resultados aparecerán aquí. Tus respuestas se guardan sobre la marcha.",
       "emptyCta": "Empezar el diagnóstico"
+    },
+    "situation": {
+      "numbersTitle": "Lo que dicen tus números",
+      "moneyContext": "Por ahora es poco. Tu oportunidad principal está en otro lado.",
+      "demand": {
+        "title": "Hoy, la brecha más grande es cuántas personas te encuentran.",
+        "text": "Con unas {weekly} consultas en una semana normal, cerrar todas las fugas sumaría unos {annual} al año. La siguiente ganancia viene de que más personas te encuentren y te elijan.",
+        "textNone": "Con unas {weekly} consultas en una semana normal, pocas o ninguna se escapan. La siguiente ganancia viene de que más personas te encuentren y te elijan.",
+        "capacity": "Si tu agenda ya está llena, la ganancia está en el valor de cada trabajo, no en más consultas.",
+        "stepTitle": "Hace falta que más personas te encuentren y te elijan.",
+        "step": "Haz que sea más fácil encontrarte y elegirte: un perfil de Google Business completo, con fotos y horarios al día, y una solicitud de reseña después de cada trabajo para que los clientes nuevos vean opiniones recientes."
+      },
+      "offer": {
+        "title": "Las consultas llegan, pero cada cliente nuevo deja poco.",
+        "text": "Con unos {value} por cliente nuevo, incluso un sistema bien llevado deja poco en juego. La siguiente ganancia viene de lo que ofreces y de cómo lo cobras.",
+        "stepTitle": "Cada cliente nuevo podría valer más.",
+        "step": "Revisa tu oferta: un paquete, un trabajo mínimo o un servicio adicional que suba lo que gasta un cliente nuevo la primera vez."
+      },
+      "scale": {
+        "title": "Tu sistema atrapa lo que llega. Puede con más.",
+        "titleDeclared": "Tus números dejan espacio para más.",
+        "text": "De tus {weekly} consultas por semana, unas {lostWeek} se escapan. La siguiente ganancia viene de atraer más, no de tapar agujeros.",
+        "textNone": "Según tu cuenta, no se escapa ninguna. La siguiente ganancia viene de atraer más.",
+        "stepTitle": "Atrae más, un canal medido a la vez.",
+        "step": "Suma volumen donde puedas medirlo: un canal a la vez, viendo qué consultas se convierten en clientes antes de subir el presupuesto."
+      }
     },
     "capture": {
       "eyebrow": "Tus resultados están listos",
@@ -888,6 +915,7 @@
     },
     "partial": {
       "title": "Mira qué corregir primero",
+      "titleStep": "Mira tu primer paso",
       "text": "Deja tu correo para desbloquear tus hallazgos, tu primer paso y tu {giftShort}. También te enviaremos un enlace privado a tus resultados.",
       "after": "Listo. Enviamos tus resultados a {to}."
     },
@@ -911,6 +939,12 @@
     "unlock": {
       "eyebrow": "Fase 2 · Unos 20 minutos · Pausa cuando quieras",
       "title": "Ya sabes dónde está la fuga. La fase 2 te dice exactamente cómo cerrarla.",
+      "titles": {
+        "demand": "Ya sabes dónde está la oportunidad. La fase 2 revisa tu visibilidad y qué corregir primero.",
+        "offer": "Ya sabes dónde está la oportunidad. La fase 2 revisa el valor de cada cliente y qué cambiar primero.",
+        "scale": "Tu sistema funciona. La fase 2 muestra dónde te conviene sumar volumen.",
+        "scaleDeclared": "Ya sabes dónde está la oportunidad. La fase 2 muestra dónde te conviene sumar volumen."
+      },
       "bullets": [
         "Desbloquea las tres áreas en gris: retención y valor del cliente, visibilidad del negocio y preparación.",
         "Un plan paso a paso en tres etapas, con lo que conviene configurar primero y lo que puede esperar.",

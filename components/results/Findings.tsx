@@ -3,14 +3,18 @@
 import { useConfig } from "@/lib/i18n";
 import type { NotYetId, Phase1PillarId } from "@/lib/types";
 import { Badge } from "@/components/ui/Badge";
+import type { FirstStep } from "@/lib/scoring";
 
 type Fix = { pillar: Phase1PillarId; score: number };
 
-/** "What to fix, in order": el primero como tarjeta grande con el primer paso; los demás como lista corta. */
-export function Findings({ fixes }: { fixes: Fix[] }) {
+/**
+ * "What to fix, in order": el primer paso como tarjeta grande; los demás como lista corta ("Then").
+ * El primer paso sale de un pilar o, según la situación (lib/scoring.ts stepPlan), del paso de demanda, oferta o escala.
+ */
+export function Findings({ first, then }: { first: FirstStep | null; then: Fix[] }) {
   const cfg = useConfig();
   const t = cfg.copy.results;
-  if (!fixes.length) {
+  if (!first) {
     return (
       <section className="border-2 border-rule bg-card px-[18px] py-3.5 min-[561px]:px-6 min-[561px]:py-5">
         <h2 className="mb-3.5 text-lg uppercase">{t.fixTitle}</h2>
@@ -18,17 +22,16 @@ export function Findings({ fixes }: { fixes: Fix[] }) {
       </section>
     );
   }
-  const [first, ...rest] = fixes;
-  const f = cfg.findings[first.pillar];
+  const f = first.kind === "pillar" ? cfg.findings[first.pillar] : { title: cfg.copy.situation[first.situation].stepTitle, step: cfg.copy.situation[first.situation].step };
   return (
     <section className="grid gap-4">
-      <h2 className="text-lg uppercase">{t.fixTitle}</h2>
+      <h2 className="text-lg uppercase">{first.kind === "pillar" ? t.fixTitle : t.stepsTitle}</h2>
       <article className="border-2 border-t-[6px] border-rule border-t-highlight bg-card px-[18px] py-4 min-[561px]:px-7 min-[561px]:py-6">
         <div className="flex flex-wrap items-center gap-2.5">
           <span className="label-mono text-ink">
             {t.startHere} <span aria-hidden="true">→</span>
           </span>
-          <Severity score={first.score} />
+          {first.kind === "pillar" && <Severity score={first.score} />}
         </div>
         <h3 className="mt-2.5 text-[clamp(22px,4.5vw,28px)]">{f.title}</h3>
         <div className="mt-4 border-l-[6px] border-accent bg-accent-soft px-4 py-3">
@@ -36,11 +39,11 @@ export function Findings({ fixes }: { fixes: Fix[] }) {
           <p>{f.step}</p>
         </div>
       </article>
-      {rest.length > 0 && (
+      {then.length > 0 && (
         <div className="border-2 border-rule bg-card px-[18px] py-3.5 min-[561px]:px-6">
           <h3 className="label-mono mb-1 text-ink-2">{t.thenTitle}</h3>
           <ol>
-            {rest.map(({ pillar, score }) => (
+            {then.map(({ pillar, score }) => (
               <li key={pillar} className="grid gap-1.5 border-b border-line py-3 last:border-b-0 last:pb-0">
                 <Severity score={score} />
                 <span className="font-display text-[17px] leading-snug font-bold">{cfg.findings[pillar].title}</span>

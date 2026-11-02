@@ -858,6 +858,7 @@
       "lockedSummary": "{n} more areas open in Phase 2: {list}.",
       "moneyTitle": "Money on the table",
       "fixTitle": "What to fix, in order",
+      "stepsTitle": "Where to start",
       "startHere": "Start here",
       "thenTitle": "Then",
       "severityHigh": "High impact",
@@ -870,6 +871,32 @@
       "emptyTitleOpen": "We don't have any answers yet.",
       "emptySub": "Start the diagnostic and your results will show up here. Your answers save as you go.",
       "emptyCta": "Start the diagnostic"
+    },
+    "situation": {
+      "numbersTitle": "What your numbers say",
+      "moneyContext": "Small for now. Your main opportunity is somewhere else.",
+      "demand": {
+        "title": "Right now, the bigger gap is how many people find you.",
+        "text": "With about {weekly} inquiries in a normal week, closing every gap would add about {annual} a year. The next gain comes from more people finding and choosing you.",
+        "textNone": "With about {weekly} inquiries in a normal week, few or none slip through. The next gain comes from more people finding and choosing you.",
+        "capacity": "If your calendar is already full, the gain is in the value of each job, not in more inquiries.",
+        "stepTitle": "More people need to find and choose you.",
+        "step": "Make it easier to find and choose you: a complete Google Business Profile with current photos and hours, and a review request after every job so new customers see recent proof."
+      },
+      "offer": {
+        "title": "Inquiries come in, but each new customer brings in little.",
+        "text": "At about {value} per new customer, even a well-run system leaves little on the table. The next gain comes from what you offer and how you price it.",
+        "stepTitle": "Each new customer could be worth more.",
+        "step": "Review your offer: a package, a minimum job, or an add-on that raises what a new customer spends the first time."
+      },
+      "scale": {
+        "title": "Your system catches what comes in. It can handle more.",
+        "titleDeclared": "Your numbers leave room for more.",
+        "text": "Of your {weekly} inquiries a week, about {lostWeek} slip through. The next gain comes from bringing in more, not from plugging holes.",
+        "textNone": "By your count, nothing slips through. The next gain comes from bringing in more.",
+        "stepTitle": "Bring in more, one measured channel at a time.",
+        "step": "Add volume where you can measure it: one channel at a time, tracking which inquiries become customers before raising the budget."
+      }
     },
     "capture": {
       "eyebrow": "Your results are ready",
@@ -888,6 +915,7 @@
     },
     "partial": {
       "title": "See what to fix first",
+      "titleStep": "See your first step",
       "text": "Add your email to unlock your findings, your first step and your {giftShort}. We'll also send you a private link to your results.",
       "after": "Unlocked. We sent your results to {to}."
     },
@@ -911,6 +939,12 @@
     "unlock": {
       "eyebrow": "Phase 2 · About 20 minutes · Pause any time",
       "title": "You know where the leak is. Phase 2 tells you exactly how to close it.",
+      "titles": {
+        "demand": "You know where the opportunity is. Phase 2 looks at your visibility and what to fix first.",
+        "offer": "You know where the opportunity is. Phase 2 looks at customer value and what to change first.",
+        "scale": "Your system works. Phase 2 shows where more volume will pay off.",
+        "scaleDeclared": "You know where the opportunity is. Phase 2 shows where more volume will pay off."
+      },
       "bullets": [
         "Unlocks the three gray areas: retention and customer value, business visibility, and readiness.",
         "A step-by-step plan in three phases, with what to set up first and what can wait.",

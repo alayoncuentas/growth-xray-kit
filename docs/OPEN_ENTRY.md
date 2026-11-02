@@ -9,7 +9,7 @@ El camino con código de invitación (`/x/[code]`) se mantiene igual.
 ### Decisiones tomadas al planear la construcción (2026-10-26)
 
 1. **Base de desarrollo aparte**: las pruebas con el flag encendido van contra un proyecto de Supabase de desarrollo, creado con `supabase/dev-setup.sql`. La migración en producción la aplica el dueño después de probar.
-2. **El parcial muestra el dinero en juego** (cifra principal **anual**, la misma que encabeza el resultado completo; antes era la mensual), además de arquetipo e índice. Quedan bloqueados: el desglose (clientes al año, escenario prudente, "How we calculate it", anuncios), los pilares, el primer paso, "What to fix" y el regalo. *(Actualizado el 2026-10-27 con el rediseño de resultados.)*
+2. **El parcial muestra el dinero en juego** (cifra principal **anual**, la misma que encabeza el resultado completo; antes era la mensual), además de arquetipo e índice. Quedan bloqueados: el desglose (clientes al año, escenario prudente, "How we calculate it", anuncios), los pilares, el primer paso, "What to fix" y el regalo. *(Actualizado el 2026-10-27 con el rediseño de resultados.)* Fuera de la situación `leak` (`docs/SPEC.md` §3), el parcial suma el titular de la situación bajo la cifra (que pasa al panel neutro) y el bloque para desbloquear se titula "See your first step"; el primer paso sigue bloqueado. *(2026-11-02.)*
 3. **Días hábiles**: lunes a viernes, zona `America/New_York`, **sin feriados** por ahora.
 4. **Invitados sin correo ven el resultado completo.** La pantalla del correo les aparece como opcional, con el regalo como incentivo. El parcial aplica solo a empresas `source = 'open'` sin correo.
 5. **Borrado a 30 días desde la creación** de la empresa (no desde la última actividad).
@@ -204,6 +204,7 @@ Error al guardar: We couldn't save that just now. Try again in a minute.   (mism
 ### Resultado parcial (bloque para desbloquear)
 ```
 Title:       See what to fix first
+             (fuera de leak: See your first step)
 Text:        Add your email to unlock your findings, your first step and your
              {giftShort}. We'll also send you a private link to your results.
              [same field, button and consent as the email screen]
