@@ -15,13 +15,27 @@ interface PreviewConfig {
   /** Vista externa de ejemplo en español. */
   outsideEs: NonNullable<Company["outside"]>;
   plainCompany: Company;
-  samples: Record<ArchetypeId, { answers: Answers; calc: CalcOverrides }>;
+  samples: Record<SampleId, { answers: Answers; calc: CalcOverrides }>;
+  /** Nombre de las muestras de situación (las de arquetipo usan el nombre del arquetipo). */
+  situationLabels: Record<SituationSampleId, string>;
 }
 
 export const preview = raw as unknown as PreviewConfig;
 
 /** Orden en que se muestran los arquetipos. */
-export const SAMPLE_IDS: ArchetypeId[] = ["ready", "leaky", "secret", "bottleneck", "silent"];
+export const ARCHETYPE_SAMPLE_IDS: ArchetypeId[] = ["ready", "leaky", "secret", "bottleneck", "silent"];
+/** Muestras que existen para ver una situación (docs/SPEC.md §3); ready ya da scale. */
+export const SITUATION_SAMPLE_IDS = ["demand", "offer", "noLoss"] as const;
+export type SituationSampleId = (typeof SITUATION_SAMPLE_IDS)[number];
+export type SampleId = ArchetypeId | SituationSampleId;
+export const SAMPLE_IDS: SampleId[] = [...ARCHETYPE_SAMPLE_IDS, ...SITUATION_SAMPLE_IDS];
+
+const isArchetypeSample = (id: SampleId): id is ArchetypeId => (ARCHETYPE_SAMPLE_IDS as string[]).includes(id);
+
+/** Nombre de una muestra: el del arquetipo, o el de la situación (solo inglés: es para el equipo). */
+export function sampleLabel(cfg: Phase1Config, id: SampleId): string {
+  return isArchetypeSample(id) ? cfg.archetypes[id].name : preview.situationLabels[id];
+}
 
 /** "PREVIEW" → con vista externa; "PREVIEW-PLAIN" → negocio sin vista externa ni rubro. Otro código → null. */
 export function previewVariant(code: string): PreviewVariant | null {
@@ -36,11 +50,11 @@ export function previewCompany(v: PreviewVariant, lang: Lang = "en"): Company {
   return lang === "es" ? { ...preview.company, outside: preview.outsideEs } : preview.company;
 }
 
-export function isSampleId(s: unknown): s is ArchetypeId {
+export function isSampleId(s: unknown): s is SampleId {
   return typeof s === "string" && (SAMPLE_IDS as string[]).includes(s);
 }
 
-export function sampleState(id: ArchetypeId): { answers: Answers; calc: CalcOverrides } {
+export function sampleState(id: SampleId): { answers: Answers; calc: CalcOverrides } {
   const s = preview.samples[id];
   return { answers: { ...s.answers }, calc: { ...s.calc } };
 }

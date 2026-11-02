@@ -1,5 +1,5 @@
 {
-  "_note": "Vista previa de /admin/preview y del modo recorrido. Los códigos de vista previa solo funcionan con sesión de admin y nunca escriben en la base. Negocios y respuestas son de ejemplo. outsideEs: la vista externa de ejemplo en español (en una empresa real la escribe el equipo en el idioma del link).",
+  "_note": "Vista previa de /admin/preview y del modo recorrido. Los códigos de vista previa solo funcionan con sesión de admin y nunca escriben en la base. Negocios y respuestas son de ejemplo. outsideEs: la vista externa de ejemplo en español (en una empresa real la escribe el equipo en el idioma del link). samples: las 5 primeras dan su arquetipo; demand, offer y noLoss muestran las situaciones (docs/SPEC.md §3). situationLabels: nombre de esas muestras en la barra del recorrido y en /admin/preview.",
   "code": "PREVIEW",
   "plainCode": "PREVIEW-PLAIN",
   "company": {
@@ -138,9 +138,83 @@
         "ads": "0"
       },
       "calc": {
+        "weekly": 10,
+        "value": 800
+      }
+    },
+    "demand": {
+      "answers": {
+        "industry": "home",
+        "team": "1",
+        "channels": [
+          "phone",
+          "text"
+        ],
+        "busy": "b",
+        "speed": "1h",
+        "afterhours": "auto",
+        "tracking": "none",
+        "followup": "set",
+        "reviews": "process",
+        "away": "slow",
+        "ads": "0"
+      },
+      "calc": {
         "weekly": 3,
         "value": 800
       }
+    },
+    "offer": {
+      "answers": {
+        "industry": "home",
+        "team": "2_5",
+        "channels": [
+          "phone",
+          "form",
+          "google"
+        ],
+        "busy": "b",
+        "speed": "1h",
+        "afterhours": "none",
+        "tracking": "sheet",
+        "followup": "once",
+        "reviews": "some",
+        "away": "slow",
+        "ads": "0"
+      },
+      "calc": {
+        "weekly": 15,
+        "value": 150
+      }
+    },
+    "noLoss": {
+      "answers": {
+        "industry": "prof",
+        "team": "2_5",
+        "channels": [
+          "phone",
+          "email"
+        ],
+        "busy": "b",
+        "speed": "day",
+        "afterhours": "none",
+        "tracking": "sheet",
+        "followup": "once",
+        "reviews": "some",
+        "away": "slow",
+        "ads": "0"
+      },
+      "calc": {
+        "weekly": 15,
+        "unanswered": 0,
+        "noFollowup": 0,
+        "value": 1500
+      }
     }
+  },
+  "situationLabels": {
+    "demand": "Demand · few inquiries",
+    "offer": "Offer · low value per customer",
+    "noLoss": "Scale · nothing slips, by the owner's count"
   }
 }

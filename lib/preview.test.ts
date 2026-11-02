@@ -1,16 +1,47 @@
 import { describe, expect, it } from "vitest";
 import { getConfig, getQuestion, phase1 as cfg } from "./config";
-import { insightCases, maxCalc, preview, previewVariant, SAMPLE_IDS, sampleState } from "./preview";
+import { ARCHETYPE_SAMPLE_IDS, insightCases, isSampleId, maxCalc, preview, previewVariant, SAMPLE_IDS, sampleLabel, sampleState } from "./preview";
 import { calcValues, phase1Result } from "./scoring";
 import { validateAnswer } from "./answers";
 
 const q = (id: string) => getQuestion(id)!;
 const LAST = preview.company.outside!.lastReview;
 
-describe("muestras de arquetipos", () => {
-  it.each(SAMPLE_IDS)("la muestra %s da su arquetipo", (id) => {
+describe("muestras de arquetipos y situaciones", () => {
+  it.each(ARCHETYPE_SAMPLE_IDS)("la muestra %s da su arquetipo", (id) => {
     const s = sampleState(id);
     expect(phase1Result(cfg, s.answers, s.calc).archetype).toBe(id);
+  });
+
+  // Situación esperada de cada muestra (docs/SPEC.md §3); scale: confirmada o solo declarada por el dueño.
+  it.each([
+    ["ready", "ready", "scale", true, 52_000],
+    ["leaky", "leaky", "leak", false, 202_800],
+    ["secret", "secret", "leak", false, 62_400],
+    ["bottleneck", "bottleneck", "leak", false, 52_000],
+    ["silent", "silent", "leak", false, 16_640], // leak con menos de $30,000: cifra neutra
+    ["demand", "silent", "demand", false, 0],
+    ["offer", "silent", "offer", false, 7_800],
+    ["noLoss", "silent", "scale", false, 0],
+  ] as const)("la muestra %s: arquetipo %s, situación %s", (id, arch, sit, confirmed, annual) => {
+    const s = sampleState(id);
+    const r = phase1Result(cfg, s.answers, s.calc);
+    expect([r.archetype, r.situation, r.scaleConfirmed, r.calc.annual]).toEqual([arch, sit, confirmed, annual]);
+  });
+
+  it("hay muestra de cada situación y cada muestra tiene nombre", () => {
+    const sits = new Set(SAMPLE_IDS.map((id) => phase1Result(cfg, sampleState(id).answers, sampleState(id).calc).situation));
+    expect([...sits].sort()).toEqual(["demand", "leak", "offer", "scale"]);
+    for (const id of SAMPLE_IDS) expect(sampleLabel(cfg, id)).toBeTruthy();
+    expect(isSampleId("noLoss")).toBe(true);
+    expect(isSampleId("nope")).toBe(false);
+  });
+
+  it("la muestra demand muestra el paso de demanda; la silent, la cifra neutra", () => {
+    const d = sampleState("demand");
+    expect(phase1Result(cfg, d.answers, d.calc).steps.first).toEqual({ kind: "situation", situation: "demand" });
+    const s = sampleState("silent");
+    expect(phase1Result(cfg, s.answers, s.calc).moneyTone).toBe("neutral");
   });
 
   it("todas las respuestas de muestra son válidas para el config", () => {

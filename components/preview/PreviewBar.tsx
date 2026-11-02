@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { phase1 } from "@/lib/config";
-import { SAMPLE_IDS, sampleState } from "@/lib/preview";
+import { SAMPLE_IDS, sampleLabel, sampleState } from "@/lib/preview";
 import { visibleQuestions } from "@/lib/scoring";
 import { replaceDiagnostic } from "@/lib/store";
 
@@ -50,7 +50,7 @@ export function PreviewBar({ code, knownIndustry, t }: { code: string; knownIndu
             </option>
             {SAMPLE_IDS.map((id) => (
               <option key={id} value={id}>
-                {phase1.archetypes[id].name}
+                {sampleLabel(phase1, id)}
               </option>
             ))}
           </select>

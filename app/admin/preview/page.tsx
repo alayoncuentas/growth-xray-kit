@@ -10,12 +10,12 @@ import { ThemeSwitch } from "@/components/ui/ThemeToggle";
 import { DEFAULT_LANG, fill, getConfig, isChoice, type Lang } from "@/lib/config";
 import { LangScope } from "@/lib/i18n";
 import { progress } from "@/lib/flow";
-import { insightCases, preview, previewCompany, SAMPLE_IDS, sampleState } from "@/lib/preview";
-import { visibleQuestions } from "@/lib/scoring";
+import { insightCases, preview, previewCompany, SAMPLE_IDS, sampleLabel, sampleState, type SampleId } from "@/lib/preview";
+import { phase1Result, visibleQuestions } from "@/lib/scoring";
 import { cookieLang } from "@/lib/server/access";
 import { requireAdmin } from "@/lib/server/auth";
 import { adminCopy } from "@/lib/server/team";
-import type { ArchetypeId, Question } from "@/lib/types";
+import type { Question } from "@/lib/types";
 
 // Vista previa del diagnóstico. Solo lectura: los marcos cargan las rutas reales con códigos de vista previa,
 // que solo existen con sesión de admin y nunca escriben en la base (ver lib/server/access.ts y /api/answer).
@@ -72,8 +72,13 @@ function screens(lang: Lang): Screen[] {
     { id: "email-open", label: p.screens.emailOpen, part: p.openPart, src: X(preview.code, "/email", "&sample=leaky&open=1") },
     { id: "email-invited", label: p.screens.emailInvited, part: null, src: X(preview.code, "/email", "&sample=ready") },
     { id: "partial", label: p.screens.partial, part: p.openPart, src: X(preview.code, "/results", "&sample=leaky&partial=1") },
+    { id: "partial-demand", label: p.screens.partialDemand, part: p.openPart, src: X(preview.code, "/results", "&sample=demand&partial=1") },
     { id: "results", label: p.screens.results, part: null, src: X(preview.code, "/results", "&sample=leaky") },
     { id: "results-gift-b", label: p.screens.resultsGiftB, part: null, src: X(preview.code, "/results", "&sample=ready") },
+    { id: "results-demand", label: p.screens.resultsDemand, part: null, src: X(preview.code, "/results", "&sample=demand") },
+    { id: "results-offer", label: p.screens.resultsOffer, part: null, src: X(preview.code, "/results", "&sample=offer") },
+    { id: "results-noloss", label: p.screens.resultsNoLoss, part: null, src: X(preview.code, "/results", "&sample=noLoss") },
+    { id: "results-small-leak", label: p.screens.resultsSmallLeak, part: null, src: X(preview.code, "/results", "&sample=silent") },
     { id: "results-max", label: p.screens.resultsMax, part: null, src: X(preview.code, "/results", "&sample=leaky&calc=max") },
     { id: "report", label: p.screens.report, part: null, src: `/r/${preview.code}?frame=1&sample=leaky` },
   ];
@@ -132,7 +137,7 @@ async function Preview() {
                 {SAMPLE_IDS.map((id) => (
                   <li key={id}>
                     <a href={`#a-${id}`} className="block border-2 border-line px-2 py-1 text-xs font-bold hover:border-rule hover:bg-highlight/12">
-                      {phase1.archetypes[id].name}
+                      {sampleLabel(phase1, id)}
                     </a>
                   </li>
                 ))}
@@ -175,7 +180,7 @@ async function Preview() {
           <p className="max-w-[640px] text-sm text-muted">{p.archetypesSub}</p>
         </div>
         {SAMPLE_IDS.map((id) => (
-          <Archetype key={id} id={id} lang={lang} />
+          <Sample key={id} id={id} lang={lang} />
         ))}
       </section>
     </div>
@@ -229,21 +234,27 @@ function InsightVariants({ q, lang }: { q: Question; lang: Lang }) {
 }
 
 /** Resultados con una muestra de respuestas, al lado de la vista del equipo. */
-function Archetype({ id, lang }: { id: ArchetypeId; lang: Lang }) {
+function Sample({ id, lang }: { id: SampleId; lang: Lang }) {
   const phase1 = getConfig(lang);
   const s = sampleState(id);
+  const res = phase1Result(phase1, s.answers, s.calc);
+  const label = sampleLabel(phase1, id);
   const src = X(preview.code, "/results", `&sample=${id}`);
   return (
     <article id={`a-${id}`} className="grid scroll-mt-4 gap-3 border-t-2 border-rule pt-6">
       <div className="flex flex-wrap items-baseline gap-3">
-        <h3 className="text-xl">{phase1.archetypes[id].name}</h3>
+        <h3 className="text-xl">{label}</h3>
         <code className="font-mono text-xs text-muted">sample={id}</code>
+        <code className="font-mono text-xs text-muted">
+          archetype={res.archetype} · situation={res.situation}
+          {res.situation === "scale" && (res.scaleConfirmed ? " (confirmed)" : " (declared)")}
+        </code>
         <a href={unframed(src)} target="_blank" rel="noreferrer" className="ml-auto text-sm text-muted underline underline-offset-2">
           {adminCopy.preview.open}
         </a>
       </div>
       <div className="grid items-start gap-5 min-[920px]:grid-cols-[402px_minmax(0,1fr)]">
-        <PhoneFrame key={lang} src={src} title={`${phase1.copy.results.eyebrow} · ${phase1.archetypes[id].name}`} />
+        <PhoneFrame key={lang} src={src} title={`${phase1.copy.results.eyebrow} · ${label}`} />
         <div className="grid gap-4 min-[920px]:sticky min-[920px]:top-4">
           <TeamView code={preview.code} answers={s.answers} calc={s.calc} />
           <details className="border-2 border-line bg-card px-[18px] py-1.5 text-sm">

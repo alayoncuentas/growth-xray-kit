@@ -24,6 +24,11 @@ describe("regalo según calificación", () => {
     const ready = sampleState("ready");
     expect(giftForAnswers(getConfig("en"), leaky.answers, leaky.calc)).toBe("A");
     expect(giftForAnswers(getConfig("en"), ready.answers, ready.calc)).toBe("B");
+    // Muestras de situación: siempre B (noLoss tiene Need 52 y Potential 68, pero no es leak).
+    for (const id of ["demand", "offer", "noLoss"] as const) {
+      const s = sampleState(id);
+      expect(giftForAnswers(getConfig("en"), s.answers, s.calc), id).toBe("B");
+    }
     // Sin respuestas: Potential bajo → B.
     expect(giftForAnswers(getConfig("en"), {}, {})).toBe("B");
   });

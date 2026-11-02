@@ -216,7 +216,7 @@
       "sections": {
         "walk": "Walkthrough",
         "map": "Screen map",
-        "archetypes": "The 5 archetypes"
+        "archetypes": "Sample results: 5 archetypes, 3 situations"
       },
       "try": "Try it as a prospect",
       "tryPlain": "…without the outside view",
@@ -233,7 +233,12 @@
         "emailOpen": "Email screen · open entry (gift A)",
         "emailInvited": "Email screen · invited without an email (gift B)",
         "partial": "Summary · open entry without an email",
-        "resultsGiftB": "Results · with an email (gift B)",
+        "partialDemand": "Summary · open entry without an email · situation demand",
+        "resultsGiftB": "Results · with an email (gift B) · situation scale, confirmed",
+        "resultsDemand": "Results · situation demand (few inquiries, little at stake)",
+        "resultsOffer": "Results · situation offer (low value per customer)",
+        "resultsNoLoss": "Results · situation scale, declared (0 lost, index below 70)",
+        "resultsSmallLeak": "Results · situation leak with less than $30,000 a year (neutral figure)",
         "resultsMax": "Results · widest figure ($650,000,000 a year, calculator at its maximums)"
       },
       "partLabel": "Part {n} · {label}",
@@ -250,7 +255,7 @@
         "weak": "Weak first response or follow-up",
         "strong": "Strong first response and follow-up"
       },
-      "archetypesSub": "Results rendered from a sample set of answers, next to the team view the prospect never sees.",
+      "archetypesSub": "Results rendered from a sample set of answers, next to the team view the prospect never sees. Each sample shows its archetype (from the answers) and its situation (from the numbers).",
       "bar": {
         "label": "Preview · nothing is saved",
         "jump": "Jump to…",
