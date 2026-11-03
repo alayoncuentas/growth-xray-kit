@@ -100,6 +100,7 @@ customers/year  = lostWeek × 52 × closeOf10/10    (< 1 → "less than one"; re
 cautious/year   = cautious × 12
 per $1,000 ads  = 1,000 × lostWeek / weekly       (se omite si adSpend = 0; es otra vista del mismo dinero, no se suma)
 ```
+Con lostWeek = 0 se omiten clientes al año y el escenario prudente (dirían "less than one" y "$0").
 Cifra más larga posible: weekly 500, todas sin respuesta, 10 de 10, $25,000 → $650,000,000 al año (12 caracteres;
 `?calc=max` en /admin/preview).
 

@@ -20,6 +20,7 @@ import {
   pillarsWeakestFirst,
   rankFixes,
   scaleConfirmed,
+  showsLossDetail,
   situation,
   SMALL_STAKES_ANNUAL,
   stepPlan,
@@ -481,6 +482,12 @@ describe("cifras derivadas de la pantalla de resultados", () => {
     const ads = calcValues(cfg, { ads: "1_3" }, { weekly: 20, unanswered: 4, noFollowup: 1 });
     expect(adLeakPerThousand(ads.leak)).toBe(250);
     expect(ads.adLeak).toBe(500); // $2,000 × 5/20
+  });
+
+  it("sin consultas perdidas no se muestran clientes al año ni escenario prudente", () => {
+    expect(showsLossDetail(c)).toBe(true);
+    expect(showsLossDetail(calcValues(cfg, {}, { weekly: 15, unanswered: 0, noFollowup: 1 }))).toBe(true);
+    expect(showsLossDetail(calcValues(cfg, {}, { weekly: 15, unanswered: 0, noFollowup: 0 }))).toBe(false);
   });
 
   it("escenario prudente al año = cautious × 12", () => {

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { fill, usd } from "@/lib/config";
 import { approx, figureFontSize } from "@/lib/format";
 import { useConfig } from "@/lib/i18n";
-import { cautiousAnnual, customersBucket, lostCustomersPerYear, type CalcResult } from "@/lib/scoring";
+import { cautiousAnnual, customersBucket, lostCustomersPerYear, showsLossDetail, type CalcResult } from "@/lib/scoring";
 import type { CalculatorQuestion } from "@/lib/types";
 
 /**
@@ -64,8 +64,13 @@ function HeroDetail({ calc, editHref, rule }: { calc: CalcResult; editHref: stri
   const missed = approx(calc.missed);
   return (
     <>
-      <p className="mt-4 max-w-[52ch] text-[17px]">{fill(line, { customers: Math.round(customers).toLocaleString("en-US") })}</p>
-      <p className="mt-1 max-w-[60ch] text-[15px]">{fill(m.heroCautious, { cautiousAnnual: usd(cautiousAnnual(calc)) })}</p>
+      {/* Sin consultas perdidas, "less than one customer" y "adds $0" no dicen nada: se omiten. */}
+      {showsLossDetail(calc) && (
+        <>
+          <p className="mt-4 max-w-[52ch] text-[17px]">{fill(line, { customers: Math.round(customers).toLocaleString("en-US") })}</p>
+          <p className="mt-1 max-w-[60ch] text-[15px]">{fill(m.heroCautious, { cautiousAnnual: usd(cautiousAnnual(calc)) })}</p>
+        </>
+      )}
       <details className={`mt-4 border-t-2 pt-1 ${rule}`}>
         <summary className="flex min-h-11 items-center text-[15px] font-bold underline-offset-4 hover:underline">{m.howTitle}</summary>
         <ol className="mt-1 grid list-decimal gap-1.5 pl-5 text-[15px] tabular-nums">

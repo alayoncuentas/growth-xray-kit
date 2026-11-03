@@ -204,6 +204,11 @@ export function adLeakPerThousand(leak: number): number {
   return Math.round(leak * 10);
 }
 
+/** Clientes al año y escenario prudente solo tienen sentido si se pierde al menos una consulta (si no, dirían "$0"). */
+export function showsLossDetail(c: CalcResult): boolean {
+  return c.lostWeek > 0;
+}
+
 /** Escenario prudente al año: cautious × 12. */
 export function cautiousAnnual(c: CalcResult): number {
   return c.cautious * 12;
