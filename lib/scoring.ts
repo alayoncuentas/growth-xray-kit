@@ -346,7 +346,7 @@ export function stepPlan(sit: Situation, confirmed: boolean, ps: PillarScores, f
 // ---------- vista del equipo (solo /admin) ----------
 
 export type Verdict = "high" | "nurture" | "prepare" | "selective" | "low" | "demand" | "offer";
-export type TeamFlag = "unmeasured" | "lowVolume" | "demandLimited" | "lowTicket" | "scaleReady" | "payingLeak" | "ownerBottleneck" | "solo";
+export type TeamFlag = "unmeasured" | "lowVolume" | "demandLimited" | "lowTicket" | "scaleReady" | "declaredNoLoss" | "payingLeak" | "ownerBottleneck" | "solo";
 
 export interface TeamScores {
   need: number;
@@ -384,6 +384,9 @@ export function teamScores(cfg: Phase1Config, answers: Answers, ps: PillarScores
   else if (need >= 50) verdict = "prepare";
   else if (potential >= 60) verdict = "selective";
   else verdict = "low";
+  // scale solo por lo declarado (0 perdidas, sin confirmar): como mucho selective, hasta verificarlo en la llamada.
+  const declaredOnly = sit === "scale" && !scaleConfirmed(c, avg);
+  if (declaredOnly && (verdict === "high" || verdict === "nurture")) verdict = "selective";
 
   const flags: TeamFlag[] = [];
   if (single(answers, "speed") === "dk") flags.push("unmeasured");
@@ -391,7 +394,8 @@ export function teamScores(cfg: Phase1Config, answers: Answers, ps: PillarScores
   if (sit === "demand") flags.push("demandLimited");
   else if (c.inquiries < 20) flags.push("lowVolume");
   if (sit === "offer") flags.push("lowTicket");
-  if (sit === "scale" && scaleConfirmed(c, avg)) flags.push("scaleReady");
+  if (sit === "scale" && !declaredOnly) flags.push("scaleReady");
+  if (declaredOnly) flags.push("declaredNoLoss");
   if (isLeaking(ps, spend)) flags.push("payingLeak");
   if ((ps.owner ?? 100) <= 25) flags.push("ownerBottleneck");
   if (team === "1") flags.push("solo");

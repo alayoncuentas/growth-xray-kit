@@ -161,13 +161,15 @@ Readiness = 40 + (ads > 0 ? 20) + (tracking crm|sheet ? 15) + (team > 1 ? 10)   
 Veredicto:
 - situación `demand` → **Primero demanda** (con ticket alto, Potential podría dar "Alta prioridad")
 - situación `offer` → **Primero la oferta**
+- situación `scale` solo declarada (0 perdidas, sin confirmar): la fórmula de abajo, pero "Alta prioridad" y "Nutrir"
+  bajan a **Optimización selectiva** hasta verificarlo en la llamada
 - Need ≥ 50 y Potential ≥ 60 → Readiness ≥ 55 ? **Alta prioridad** : **Nutrir**
 - Need ≥ 50 → **Preparar primero**
 - Potential ≥ 60 → **Optimización selectiva**
 - otro → **Bajo encaje por ahora**
 
 Alertas: no mide tiempo de respuesta · demanda limitada (situación `demand`; reemplaza a volumen bajo) · volumen bajo
-(<20/mes, si no es `demand`) · valor bajo por cliente (`offer`) · listo para más volumen (`scale` confirmado) · paga
+(<20/mes, si no es `demand`) · valor bajo por cliente (`offer`) · listo para más volumen (`scale` confirmado) · declaró 0 perdidas, verificar en la llamada (`scale` sin confirmar) · paga
 por leads que se pierden · dueño cuello de botella (owner ≤ 25) · trabaja solo.
 
 > Los pesos y umbrales son una hipótesis inicial. Después de 30 diagnósticos reales, comparar los puntajes con quién avanzó a llamada y quién cerró, y ajustar.

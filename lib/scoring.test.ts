@@ -28,6 +28,7 @@ import {
   unansweredShare,
   visibleQuestions,
 } from "./scoring";
+import { sampleState } from "./preview";
 import type { Answers } from "./types";
 
 // Un negocio "promedio con fugas", usado en varios tests.
@@ -409,6 +410,23 @@ describe("teamScores", () => {
     const a: Answers = { team: "6_15" };
     expect(teamScores(cfg, a, {}, 80, nums(30, 1, 1, 2500)).flags).toContain("scaleReady");
     expect(teamScores(cfg, a, {}, 40, nums(15, 0, 0)).flags).not.toContain("scaleReady");
+  });
+
+  it("scale solo declarado: veredicto máximo selective y alerta declaredNoLoss (muestra noLoss)", () => {
+    const s = sampleState("noLoss");
+    const r = phase1Result(cfg, s.answers, s.calc);
+    expect([r.situation, r.scaleConfirmed]).toEqual(["scale", false]);
+    const t = teamScores(cfg, s.answers, r.pillars, r.avg, r.calc);
+    // Need 52 y Potential 68: sin el tope sería "high" (Readiness 65)
+    expect([t.need, t.potential, t.readiness]).toEqual([52, 68, 65]);
+    expect(t.verdict).toBe("selective");
+    expect(t.flags).toContain("declaredNoLoss");
+    expect(t.flags).not.toContain("scaleReady");
+    // nurture también baja a selective; prepare y low no cambian
+    expect(teamScores(cfg, { team: "1" }, {}, 30, calcValues(cfg, { team: "1" }, { weekly: 35, unanswered: 0, noFollowup: 0, value: 8000 })).verdict).toBe("selective");
+    expect(teamScores(cfg, {}, {}, 30, nums(15, 0, 0, 300)).verdict).toBe("prepare");
+    // confirmado: sin la alerta
+    expect(teamScores(cfg, { team: "6_15" }, {}, 80, nums(30, 0, 0)).flags).not.toContain("declaredNoLoss");
   });
 
   it("lowVolume sigue cuando hay pocas consultas pero mucho en juego (no es demand)", () => {

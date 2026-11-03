@@ -30,6 +30,7 @@
     "demandLimited": "Demand-limited: few inquiries, little at stake",
     "lowTicket": "Low value per customer",
     "scaleReady": "System works; ready for more volume",
+    "declaredNoLoss": "Declared no losses; verify on the call",
     "payingLeak": "Paying for leaking leads",
     "ownerBottleneck": "Owner bottleneck",
     "solo": "Solo operator"
