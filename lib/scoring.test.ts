@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { phase1 as cfg } from "./config";
+import { phase1 as cfg, phase2 as cfg2 } from "./config";
 import {
   adLeakPerThousand,
   adSpend,
@@ -27,6 +27,20 @@ import {
   teamScores,
   unansweredShare,
   visibleQuestions,
+  blockFinding,
+  combinedPillars,
+  finalReadiness,
+  LOW_BUDGET_READINESS_CAP,
+  managedFit,
+  MANAGED_FIT_MIN,
+  phase2Flags,
+  phase2Result,
+  pillarChanges,
+  readinessRaw,
+  READINESS_WEIGHTS,
+  teamComponents,
+  visibleQuestions2,
+  type FindingContext,
 } from "./scoring";
 import { sampleState } from "./preview";
 import type { Answers } from "./types";
@@ -534,5 +548,222 @@ describe("cifras derivadas de la pantalla de resultados", () => {
   it("pilares sin puntaje no aparecen; los de la fase 2 van aparte", () => {
     expect(pillarsWeakestFirst(cfg, { access: 40 }).map((p) => p.id)).toEqual(["access"]);
     expect(lockedPillars(cfg).map((p) => p.id)).toEqual(["retention", "visibility", "readiness"]);
+  });
+});
+
+// ---------- fase 2 (docs/SPEC.md §4) ----------
+
+/** Respuestas de la fase 2 para un caso: solo lo que importa al test; el resto queda sin responder. */
+const team2 = (runner: string, absorb: string, decide: string, budget: string, when: string, extra: Answers = {}): Answers => ({
+  t_runner: runner,
+  t_absorb: absorb,
+  k_decide: decide,
+  k_budget: budget,
+  k_when: when,
+  ...extra,
+});
+
+describe("fase 2: preguntas visibles", () => {
+  const ids = (a: Answers, sit: Parameters<typeof visibleQuestions2>[2]) => visibleQuestions2(cfg2, a, sit).map((q) => q.id);
+
+  it("leak y scale: sin las condicionales de situación; k_why solo si probó alguna herramienta", () => {
+    for (const sit of ["leak", "scale"] as const) {
+      const v = ids({}, sit);
+      expect(v).not.toContain("r_extras");
+      expect(v).not.toContain("a_tried");
+      expect(v).not.toContain("k_why");
+      expect(v.length).toBe(30);
+    }
+    expect(ids({ k_tools: ["crm"] }, "leak")).toContain("k_why");
+    expect(ids({ k_tools: ["none"] }, "leak")).not.toContain("k_why");
+    expect(ids({ k_tools: [] }, "leak")).not.toContain("k_why");
+  });
+
+  it("offer agrega r_extras; demand agrega a_tried", () => {
+    expect(ids({}, "offer")).toContain("r_extras");
+    expect(ids({}, "offer")).not.toContain("a_tried");
+    expect(ids({}, "demand")).toContain("a_tried");
+    expect(ids({ k_tools: ["crm"] }, "demand").length).toBe(32);
+  });
+});
+
+describe("fase 2: pilares combinados", () => {
+  const a1: Answers = { tracking: "inbox", followup: "once" };
+
+  it("cada pilar promedia los aportes de las dos fases; las multi no puntúan", () => {
+    // pipeline: fase 1 tracking inbox 15 · fase 2 p_open 75, p_value 20, p_owner 60, j_steps 35.
+    const a2: Answers = { p_open: "lt5", p_value: "no", p_owner: "me", j_steps: "varies", a_channels: ["gads", "meta"] };
+    const ps = combinedPillars(cfg, a1, cfg2, a2, "leak");
+    expect(ps.pipeline).toBe(Math.round((15 + 75 + 20 + 60 + 35) / 5));
+    expect(ps.followup).toBe(35);
+    expect(ps.visibility).toBe(Math.round((20 + 30) / 2));
+    expect(ps.owner).toBe(20);
+  });
+
+  it("una respuesta guardada de una pregunta que ya no se muestra no cuenta", () => {
+    expect(combinedPillars(cfg, a1, cfg2, { r_extras: "no" }, "leak").retention).toBeUndefined();
+    expect(combinedPillars(cfg, a1, cfg2, { r_extras: "no" }, "offer").retention).toBe(30);
+  });
+
+  it("pillarChanges: solo los pilares de la fase 1 que cambiaron, con los dos valores", () => {
+    expect(pillarChanges({ access: 45, pipeline: 15, followup: 35 }, { access: 45, pipeline: 41, followup: 35, retention: 70 })).toEqual([
+      { id: "pipeline", was: 15, now: 41 },
+    ]);
+  });
+});
+
+describe("fase 2: Readiness final", () => {
+  it("pesos: suman 1 (hipótesis a calibrar)", () => {
+    expect(Object.values(READINESS_WEIGHTS).reduce((a, b) => a + b, 0)).toBeCloseTo(1);
+  });
+
+  // Los 5 casos de docs/PHASE2.md §Readiness, frente a la fórmula preliminar de la fase 1.
+  const cases: { name: string; a1: Answers; a2: Answers; prelim: number; raw: number; final: number }[] = [
+    { name: "A. solo, presupuesto < $400", a1: { team: "1", ads: "0", tracking: "paper" }, a2: team2("me", "tight", "me", "lt400", "quarter"), prelim: 40, raw: 62, final: 50 },
+    { name: "B. equipo armado", a1: { team: "6_15", ads: "1_3", tracking: "crm" }, a2: team2("person", "yes", "partner", "1500_3000", "month"), prelim: 85, raw: 87, final: 87 },
+    { name: "C. parece listo, no lo está", a1: { team: "2_5", ads: "lt1", tracking: "sheet" }, a2: team2("hire", "no", "other", "plan", "exploring"), prelim: 85, raw: 34, final: 34 },
+    { name: "D. burned by tech", a1: { team: "2_5", ads: "3_10", tracking: "inbox" }, a2: team2("nobody", "tight", "me", "400_1500", "month", { k_tools: ["crm"], k_why: "unused" }), prelim: 70, raw: 70, final: 70 },
+    { name: "E. solo, organizado", a1: { team: "1", ads: "0", tracking: "crm" }, a2: team2("me", "yes", "me", "3000p", "year"), prelim: 55, raw: 77, final: 77 },
+  ];
+
+  for (const c of cases)
+    it(c.name, () => {
+      const r = phase1Result(cfg, c.a1);
+      expect(teamScores(cfg, c.a1, r.pillars, r.avg, r.calc).readiness).toBe(c.prelim);
+      const comp = teamComponents(cfg2, c.a2, r.situation);
+      const flags = phase2Flags(cfg2, c.a2, r.situation);
+      expect(readinessRaw(comp)).toBe(c.raw);
+      expect(finalReadiness(comp, flags)).toBe(c.final);
+      expect(phase2Result(cfg, c.a1, {}, cfg2, c.a2).team.readiness).toBe(c.final);
+    });
+
+  it("tope exacto en $400: menos de $400 se limita a 50; de $400 en adelante, no", () => {
+    const hi = team2("person", "yes", "me", "lt400", "month");
+    expect(readinessRaw(teamComponents(cfg2, hi, "leak"))).toBeGreaterThan(LOW_BUDGET_READINESS_CAP);
+    expect(finalReadiness(teamComponents(cfg2, hi, "leak"), phase2Flags(cfg2, hi, "leak"))).toBe(LOW_BUDGET_READINESS_CAP);
+    const mid = { ...hi, k_budget: "400_1500" };
+    expect(finalReadiness(teamComponents(cfg2, mid, "leak"), phase2Flags(cfg2, mid, "leak"))).toBe(readinessRaw(teamComponents(cfg2, mid, "leak")));
+    // El tope no sube a nadie: un Readiness bajo con presupuesto bajo queda igual.
+    const low = team2("nobody", "no", "other", "lt400", "exploring");
+    expect(finalReadiness(teamComponents(cfg2, low, "leak"), ["lowBudget"])).toBe(readinessRaw(teamComponents(cfg2, low, "leak")));
+  });
+
+  it("sin todos los componentes no hay Readiness final y se mantiene la preliminar", () => {
+    const a1: Answers = { team: "2_5", ads: "lt1", tracking: "sheet" };
+    const partial = { t_runner: "hire", t_absorb: "no" };
+    expect(readinessRaw(teamComponents(cfg2, partial, "leak"))).toBeNull();
+    const res = phase2Result(cfg, a1, {}, cfg2, partial);
+    expect(res.team.readinessFinal).toBe(false);
+    expect(res.team.readiness).toBe(85);
+  });
+
+  it("el veredicto usa el Readiness final con el mismo umbral (55)", () => {
+    const { answers, calc } = sampleState("leaky");
+    const base = phase1Result(cfg, answers, calc);
+    expect(teamScores(cfg, answers, base.pillars, base.avg, base.calc).verdict).toMatch(/high|nurture/);
+    const ready = phase2Result(cfg, answers, calc, cfg2, team2("person", "yes", "me", "1500_3000", "month"));
+    expect(ready.team.verdict).toBe("high");
+    const lowBudget = phase2Result(cfg, answers, calc, cfg2, team2("person", "yes", "me", "lt400", "month"));
+    expect(lowBudget.team.readiness).toBe(50);
+    expect(lowBudget.team.verdict).toBe("nurture");
+  });
+});
+
+describe("fase 2: burned by tech y servicio gestionado", () => {
+  const { answers, calc } = sampleState("leaky");
+  const base = team2("person", "yes", "me", "1500_3000", "month", { k_tools: ["crm", "auto"] });
+
+  it("burned by tech no baja Readiness ni el veredicto (casos pareados)", () => {
+    const still = phase2Result(cfg, answers, calc, cfg2, { ...base, k_why: "still" });
+    for (const why of ["complex", "unused", "price", "results"]) {
+      const burned = phase2Result(cfg, answers, calc, cfg2, { ...base, k_why: why });
+      expect(burned.flags).toContain("burnedByTech");
+      expect(burned.team.readiness, why).toBe(still.team.readiness);
+      expect(burned.team.verdict, why).toBe(still.team.verdict);
+      expect(burned.team.phase2Flags).toContain("burnedByTech");
+    }
+    expect(still.flags).not.toContain("burnedByTech");
+  });
+
+  it("managedFit: +40 burned, +30 yo / nadie, +20 solo, +10 no la usaban; desde 50, servicio gestionado", () => {
+    expect(managedFit({ team: "2_5" }, {}, ["burnedByTech"])).toBe(40);
+    expect(managedFit({ team: "2_5" }, { t_runner: "nobody" }, ["burnedByTech", "toolUnused"])).toBe(80);
+    expect(managedFit({ team: "1" }, { t_runner: "me" }, [])).toBe(50);
+    expect(managedFit({ team: "1" }, { t_runner: "person" }, [])).toBe(20);
+    const burnedOnly = phase2Result(cfg, answers, calc, cfg2, { ...base, k_why: "price" });
+    expect(burnedOnly.team.managedFit).toBeLessThan(MANAGED_FIT_MIN);
+    expect(burnedOnly.team.phase2Flags).not.toContain("managedService");
+    const managed = phase2Result(cfg, answers, calc, cfg2, { ...base, t_runner: "nobody", k_why: "unused" });
+    expect(managed.team.phase2Flags).toContain("managedService");
+  });
+});
+
+describe("fase 2: mini-hallazgos", () => {
+  const p1 = phase1Result(cfg, sampleState("leaky").answers, sampleState("leaky").calc);
+  const ctx = (a2: Answers, over: Partial<FindingContext> = {}): FindingContext => ({
+    a1: {},
+    ps1: { access: 60, pipeline: 60, followup: 60, reputation: 60, owner: 60 },
+    calc: p1.calc,
+    a2,
+    sit: "leak",
+    flags: [],
+    ...over,
+  });
+  const text = (block: Parameters<typeof blockFinding>[1], c: FindingContext) => blockFinding(cfg2, block, c);
+  const rule = (block: keyof typeof cfg2.findings, i: number) => cfg2.findings[block][i].text;
+
+  it("bloque 1: no sabe dónde se va la gente", () => {
+    expect(text("journey", ctx({ j_stuck: "dk", j_steps: "5p" }))).toBe(rule("journey", 0));
+  });
+
+  it("bloque 1, regla 2: cotización + la fase 1 dijo once o wait (followup ≤ 35); con set no aplica", () => {
+    for (const f of ["once", "wait"]) expect(text("journey", ctx({ j_stuck: "quote" }, { a1: { followup: f } }))).toBe(rule("journey", 1));
+    expect(text("journey", ctx({ j_stuck: "quote" }, { a1: { followup: "set" } }))).toBe(rule("journey", 5));
+  });
+
+  it("bloque 1, regla 3: antes de responder + access es el pilar más bajo (empate incluido); si no, no aplica", () => {
+    const lowest = { access: 30, pipeline: 40, followup: 50, reputation: 60, owner: 70 };
+    expect(text("journey", ctx({ j_stuck: "reply" }, { ps1: lowest }))).toBe(rule("journey", 2));
+    expect(text("journey", ctx({ j_stuck: "reply" }, { ps1: { ...lowest, owner: 30 } }))).toBe(rule("journey", 2));
+    // access ≤ 45 pero no es el más bajo: antes la regla habría afirmado algo falso.
+    expect(text("journey", ctx({ j_stuck: "reply" }, { ps1: { ...lowest, access: 40, owner: 20 } }))).toBe(rule("journey", 5));
+  });
+
+  it("bloque 1: 5 pasos o más, nada después de la venta, y la regla final", () => {
+    expect(text("journey", ctx({ j_steps: "5p", j_after: "nothing" }))).toBe(rule("journey", 3));
+    expect(text("journey", ctx({ j_steps: "1_2", j_after: "nothing" }))).toBe(rule("journey", 4));
+    expect(text("journey", ctx({ j_steps: "1_2", j_after: "plan", j_stuck: "rare" }))).toBe(rule("journey", 5));
+  });
+
+  it("bloque 3: r_extras solo cuenta en la situación offer", () => {
+    expect(text("retention", ctx({ r_list: "yes", r_extras: "no" }, { sit: "offer" }))).toBe(rule("retention", 2));
+    expect(text("retention", ctx({ r_list: "yes", r_extras: "no" }))).toBe(rule("retention", 4));
+  });
+
+  it("bloque 5: anuncios sin atribución solo si paga anuncios; agencia mala + seguimiento débil", () => {
+    expect(text("marketing", ctx({ a_attrib: "no" }, { a1: { ads: "1_3" } }))).toBe(rule("marketing", 0));
+    expect(text("marketing", ctx({ a_attrib: "no" }, { a1: { ads: "0" } }))).toBe(rule("marketing", 3));
+    expect(text("marketing", ctx({ a_agency: "bad" }, { ps1: { access: 70, followup: 35 } }))).toBe(rule("marketing", 1));
+    expect(text("marketing", ctx({ a_agency: "bad" }, { ps1: { access: 70, followup: 75 } }))).toBe(rule("marketing", 3));
+    expect(text("marketing", ctx({ a_tried: ["nothing"] }, { sit: "demand" }))).toBe(rule("marketing", 2));
+  });
+
+  it("bloque 6: usa el {closeOf10} de la calculadora de la fase 1", () => {
+    const t = text("visibility", ctx({ f_close: "estimate" }));
+    expect(t).toContain(`${p1.calc.closeOf10} out of 10`);
+    expect(t).not.toContain("{");
+  });
+
+  it("bloque 8: burned by tech por flag; sin respuestas, la regla final", () => {
+    const a2 = { k_tools: ["crm"], k_why: "complex" };
+    expect(text("tech", ctx(a2, { flags: phase2Flags(cfg2, a2, "leak") }))).toBe(rule("tech", 0));
+    expect(text("tech", ctx({}))).toBe(rule("tech", 2));
+  });
+
+  it("phase2Result devuelve un mini-hallazgo por bloque, sin marcadores sin llenar", () => {
+    const { answers, calc } = sampleState("leaky");
+    const r = phase2Result(cfg, answers, calc, cfg2, { f_close: "no" });
+    expect(Object.keys(r.findings)).toEqual(cfg2.blocks.map((b) => b.id));
+    for (const t of Object.values(r.findings)) expect(t).not.toMatch(/\{\w+\}/);
   });
 });

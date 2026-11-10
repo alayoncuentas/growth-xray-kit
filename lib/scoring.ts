@@ -2,6 +2,7 @@
 // Fuente de verdad de las reglas: docs/SPEC.md §3. Si cambias una regla, actualiza el SPEC en el mismo commit.
 
 import type {
+  AnswerMatch,
   Answers,
   ArchetypeId,
   CalcFieldId,
@@ -11,10 +12,16 @@ import type {
   IndexBand,
   NotYetId,
   Option,
+  FindingWhen,
   Phase1Config,
   Phase1PillarId,
+  Phase2BlockId,
+  Phase2Config,
+  Phase2Option,
+  Phase2Question,
   PillarScores,
   Question,
+  TeamComponent,
 } from "./types";
 
 // ---------- helpers ----------
@@ -356,7 +363,11 @@ export interface TeamScores {
   flags: TeamFlag[];
 }
 
-export function teamScores(cfg: Phase1Config, answers: Answers, ps: PillarScores, avg: number, c: CalcResult): TeamScores {
+/**
+ * `opts.readiness`: Readiness final de la fase 2 (finalReadiness), que reemplaza a la fórmula preliminar y entra en el
+ * veredicto con el mismo umbral.
+ */
+export function teamScores(cfg: Phase1Config, answers: Answers, ps: PillarScores, avg: number, c: CalcResult, opts: { readiness?: number } = {}): TeamScores {
   const spend = adSpend(cfg, answers);
   const team = single(answers, "team");
   const hasTeam = !!team && team !== "1";
@@ -370,10 +381,9 @@ export function teamScores(cfg: Phase1Config, answers: Answers, ps: PillarScores
       (hasTeam ? 10 : 0),
   );
   const tracking = single(answers, "tracking");
-  const readiness = Math.min(
-    85,
-    40 + (spend > 0 ? 20 : 0) + (tracking === "crm" || tracking === "sheet" ? 15 : 0) + (hasTeam ? 10 : 0),
-  );
+  const readiness =
+    opts.readiness ??
+    Math.min(85, 40 + (spend > 0 ? 20 : 0) + (tracking === "crm" || tracking === "sheet" ? 15 : 0) + (hasTeam ? 10 : 0));
 
   // demand y offer tienen veredicto propio: con ticket alto, demand podría llegar a "high" por Potential.
   const sit = situation(c, avg);
@@ -429,5 +439,207 @@ export function phase1Result(cfg: Phase1Config, answers: Answers, overrides: Cal
     moneyTone: moneyTone(sit, calc),
     capacityNote: capacityNote(sit, answers, pillars),
     calc,
+  };
+}
+
+// ---------- fase 2 (docs/SPEC.md §4; textos en config/phase2.config.json) ----------
+
+/** Opciones elegidas en una pregunta de la fase 2 (single: una; multi: las marcadas). */
+function picked2(q: Phase2Question, answers: Answers): Phase2Option[] {
+  const a = answers[q.id];
+  const ids = typeof a === "string" ? [a] : Array.isArray(a) ? a : [];
+  return q.options.filter((o) => ids.includes(o.id));
+}
+
+/** La respuesta (single o multi) incluye alguna de las opciones de la lista. Sin respuesta: false. */
+function answerIn(answers: Answers, qid: string, ids: string[]): boolean {
+  const a = answers[qid];
+  if (typeof a === "string") return ids.includes(a);
+  return Array.isArray(a) && a.some((x) => ids.includes(x));
+}
+
+const isAnswered = (answers: Answers, qid: string) => {
+  const a = answers[qid];
+  return typeof a === "string" || (Array.isArray(a) && a.length > 0);
+};
+
+const allIn = (m: AnswerMatch | undefined, answers: Answers) => Object.entries(m ?? {}).every(([qid, ids]) => answerIn(answers, qid, ids));
+const noneIn = (m: AnswerMatch | undefined, answers: Answers) => Object.entries(m ?? {}).every(([qid, ids]) => !answerIn(answers, qid, ids));
+
+/** Preguntas de la fase 2 que se muestran: `showIf` según la situación de la fase 1 y las respuestas anteriores. */
+export function visibleQuestions2(cfg: Phase2Config, answers: Answers, sit: Situation): Phase2Question[] {
+  return cfg.questions.filter((q) => {
+    const s = q.showIf;
+    if (!s) return true;
+    if (s.situation && !s.situation.includes(sit)) return false;
+    if (s.answered && !isAnswered(answers, s.answered)) return false;
+    return noneIn(s.notAnswer, answers);
+  });
+}
+
+/** Solo las respuestas de preguntas visibles: una respuesta vieja de una pregunta que ya no se muestra no cuenta. */
+export function visibleAnswers2(cfg: Phase2Config, answers: Answers, sit: Situation): Answers {
+  const out: Answers = {};
+  for (const q of visibleQuestions2(cfg, answers, sit)) if (answers[q.id] !== undefined) out[q.id] = answers[q.id];
+  return out;
+}
+
+/** Flags de las opciones elegidas en la fase 2 (sin repetir, en el orden del config). */
+export function phase2Flags(cfg: Phase2Config, answers: Answers, sit: Situation): string[] {
+  const a = visibleAnswers2(cfg, answers, sit);
+  return [...new Set(cfg.questions.flatMap((q) => picked2(q, a).flatMap((o) => o.flags ?? [])))];
+}
+
+/**
+ * Los 8 pilares con las dos fases: cada pilar es el promedio de todos sus aportes (fase 1 + fase 2, solo preguntas
+ * single). Los pilares que la fase 2 no toca quedan igual que en la fase 1.
+ */
+export function combinedPillars(cfg1: Phase1Config, a1: Answers, cfg2: Phase2Config, a2: Answers, sit: Situation): PillarScores {
+  const acc: Record<string, number[]> = {};
+  for (const q of cfg1.questions) {
+    if (q.type !== "single") continue;
+    for (const [p, v] of Object.entries(selectedOption(cfg1, a1, q.id)?.scores ?? {})) (acc[p] ||= []).push(v as number);
+  }
+  const vis = visibleAnswers2(cfg2, a2, sit);
+  for (const q of cfg2.questions) {
+    if (q.type !== "single") continue;
+    for (const o of picked2(q, vis)) for (const [p, v] of Object.entries(o.scores ?? {})) (acc[p] ||= []).push(v as number);
+  }
+  const out: PillarScores = {};
+  for (const [p, arr] of Object.entries(acc)) out[p as Phase1PillarId] = Math.round(arr.reduce((x, y) => x + y, 0) / arr.length);
+  return out;
+}
+
+/** Pilares de la fase 1 cuyo valor cambió con la fase 2: el informe muestra los dos valores. */
+export function pillarChanges(p1: PillarScores, full: PillarScores): { id: Phase1PillarId; was: number; now: number }[] {
+  return (Object.keys(p1) as Phase1PillarId[])
+    .filter((id) => typeof p1[id] === "number" && typeof full[id] === "number" && p1[id] !== full[id])
+    .map((id) => ({ id, was: p1[id] as number, now: full[id] as number }));
+}
+
+/** Componentes de Readiness (solo vista del equipo). capacity = promedio de sus aportes; los demás, el valor elegido. */
+export function teamComponents(cfg: Phase2Config, answers: Answers, sit: Situation): Partial<Record<TeamComponent, number>> {
+  const vis = visibleAnswers2(cfg, answers, sit);
+  const acc: Partial<Record<TeamComponent, number[]>> = {};
+  for (const q of cfg.questions)
+    for (const o of picked2(q, vis)) for (const [k, v] of Object.entries(o.team ?? {})) (acc[k as TeamComponent] ||= []).push(v as number);
+  const out: Partial<Record<TeamComponent, number>> = {};
+  for (const [k, arr] of Object.entries(acc)) out[k as TeamComponent] = arr.reduce((x, y) => x + y, 0) / arr.length;
+  return out;
+}
+
+/**
+ * Pesos de Readiness al terminar la fase 2. **Hipótesis a calibrar** con los primeros 30 diagnósticos completos, igual
+ * que SMALL_STAKES_ANNUAL; el umbral del veredicto sigue en 55.
+ */
+export const READINESS_WEIGHTS: Record<TeamComponent, number> = { capacity: 0.3, decision: 0.25, budget: 0.25, timeline: 0.2 };
+/** Con presupuesto menor a $400 al mes (flag lowBudget), Readiness no pasa de este valor ("Nutrir", no "Alta prioridad"). */
+export const LOW_BUDGET_READINESS_CAP = 50;
+
+/** Readiness sin el tope de presupuesto; null si falta algún componente (fase 2 sin terminar). */
+export function readinessRaw(comp: Partial<Record<TeamComponent, number>>): number | null {
+  const keys = Object.keys(READINESS_WEIGHTS) as TeamComponent[];
+  if (keys.some((k) => typeof comp[k] !== "number")) return null;
+  return Math.round(keys.reduce((sum, k) => sum + READINESS_WEIGHTS[k] * (comp[k] as number), 0));
+}
+
+/** Readiness final de la fase 2, con el tope por presupuesto bajo. "Burned by tech" no entra: no resta. */
+export function finalReadiness(comp: Partial<Record<TeamComponent, number>>, flags: string[]): number | null {
+  const raw = readinessRaw(comp);
+  if (raw === null) return null;
+  return flags.includes("lowBudget") ? Math.min(raw, LOW_BUDGET_READINESS_CAP) : raw;
+}
+
+/** Desde este puntaje, la vista del equipo recomienda servicio gestionado y acompañamiento. */
+export const MANAGED_FIT_MIN = 50;
+
+/**
+ * Qué tanto conviene el servicio gestionado: burned by tech +40, "yo / nadie" manejaría el sistema +30, trabaja solo
+ * +20, "el equipo no la usaba" +10.
+ */
+export function managedFit(a1: Answers, a2: Answers, flags: string[]): number {
+  return (
+    (flags.includes("burnedByTech") ? 40 : 0) +
+    (answerIn(a2, "t_runner", ["me", "nobody"]) ? 30 : 0) +
+    (single(a1, "team") === "1" ? 20 : 0) +
+    (flags.includes("toolUnused") ? 10 : 0)
+  );
+}
+
+export type Phase2TeamFlag =
+  | "burnedByTech"
+  | "managedService"
+  | "lowBudget"
+  | "notDecider"
+  | "notOwner"
+  | "noRunner"
+  | "atCapacity"
+  | "reviewGating"
+  | "burnedByAgency";
+
+const PHASE2_TEAM_FLAGS: Phase2TeamFlag[] = ["burnedByTech", "lowBudget", "notDecider", "notOwner", "noRunner", "atCapacity", "reviewGating", "burnedByAgency"];
+
+export interface FindingContext {
+  a1: Answers;
+  /** Pilares de la fase 1. */
+  ps1: PillarScores;
+  calc: CalcResult;
+  a2: Answers;
+  sit: Situation;
+  flags: string[];
+}
+
+/** La condición de un mini-hallazgo se cumple (ver FindingWhen en lib/types.ts). */
+export function findingMatches(when: FindingWhen, ctx: FindingContext): boolean {
+  if (when === "*") return true;
+  const { a1, ps1, a2, sit, flags } = ctx;
+  if (!allIn(when.answer, a2) || !noneIn(when.notAnswer, a2)) return false;
+  if (!allIn(when.p1, a1)) return false;
+  if (when.p1Not && !Object.entries(when.p1Not).every(([qid, ids]) => isAnswered(a1, qid) && !answerIn(a1, qid, ids))) return false;
+  if (when.p1Lowest) {
+    const v = ps1[when.p1Lowest];
+    const others = (Object.entries(ps1) as [string, number | undefined][]).filter(([k, x]) => k !== when.p1Lowest && typeof x === "number");
+    if (typeof v !== "number" || others.some(([, x]) => (x as number) < v)) return false;
+  }
+  if (when.p1Below && !Object.entries(when.p1Below).some(([p, n]) => typeof ps1[p as Phase1PillarId] === "number" && (ps1[p as Phase1PillarId] as number) < (n as number)))
+    return false;
+  if (when.situation && !when.situation.includes(sit)) return false;
+  if (when.flag && !flags.includes(when.flag)) return false;
+  return true;
+}
+
+/** Mini-hallazgo de un bloque: el texto de la primera regla que se cumple, con {closeOf10} de la calculadora. */
+export function blockFinding(cfg: Phase2Config, block: Phase2BlockId, ctx: FindingContext): string {
+  const vis = { ...ctx, a2: visibleAnswers2(cfg, ctx.a2, ctx.sit) };
+  const rule = cfg.findings[block].find((r) => findingMatches(r.when, vis));
+  // Mismo formato que fill() de lib/config.ts (no se importa: scoring no depende de los configs).
+  return (rule?.text ?? "").replace(/\{closeOf10\}/g, String(ctx.calc.closeOf10));
+}
+
+/** Resultado con las dos fases: pilares, cambios frente a la fase 1, índice completo, vista del equipo y mini-hallazgos. */
+export function phase2Result(cfg1: Phase1Config, a1: Answers, overrides: CalcOverrides, cfg2: Phase2Config, a2: Answers) {
+  const p1 = phase1Result(cfg1, a1, overrides);
+  const sit = p1.situation;
+  const flags = phase2Flags(cfg2, a2, sit);
+  const pillars = combinedPillars(cfg1, a1, cfg2, a2, sit);
+  const components = teamComponents(cfg2, a2, sit);
+  const readiness = finalReadiness(components, flags);
+  // Need y Potential siguen saliendo de la fase 1; Readiness final reemplaza a la preliminar cuando está completo.
+  const team = teamScores(cfg1, a1, p1.pillars, p1.avg, p1.calc, readiness === null ? {} : { readiness });
+  const fit = managedFit(a1, a2, flags);
+  const teamFlags: Phase2TeamFlag[] = PHASE2_TEAM_FLAGS.filter((f) => flags.includes(f));
+  if (fit >= MANAGED_FIT_MIN) teamFlags.push("managedService");
+  const ctx: FindingContext = { a1, ps1: p1.pillars, calc: p1.calc, a2, sit, flags };
+  const findings = Object.fromEntries(cfg2.blocks.map((b) => [b.id, blockFinding(cfg2, b.id, ctx)])) as Record<Phase2BlockId, string>;
+  return {
+    phase1: p1,
+    situation: sit,
+    pillars,
+    changes: pillarChanges(p1.pillars, pillars),
+    /** Índice completo: promedio simple de los 8 pilares. */
+    index: averageIndex(pillars),
+    flags,
+    team: { ...team, readinessFinal: readiness !== null, components, managedFit: fit, phase2Flags: teamFlags },
+    findings,
   };
 }

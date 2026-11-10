@@ -207,10 +207,13 @@ de aprobación, está en `docs/PHASE2.md`.
   informe completo (una vez por código, `kind: "report2"`).
 - **Retomar**: la bienvenida `/x/[code]` lleva a la primera pregunta visible sin responder de la fase 2 si ya empezó, o al
   informe si terminó. El link de "Save and finish later" lleva directo a la fase 2 cuando ya empezó.
-- **Mini-hallazgo**: la primera regla del bloque que se cumple (`findings.<bloque>`, con una regla `"*"` obligatoria). Las
-  reglas pueden leer respuestas de la fase 2 y respuestas o pilares de la fase 1; el texto nunca afirma más de lo que dice el
-  dato (p. ej. "lo más débil" solo si el pilar es el mínimo). Sin cifras sin fuente.
-- **Pilares**: cada pilar es el promedio de sus aportes (misma regla que la fase 1). Los bloques 1, 2, 4 y 7 también aportan a
+- **Mini-hallazgo**: la primera regla del bloque que se cumple (`findings.<bloque>`, con una regla `"*"` obligatoria;
+  `blockFinding`). Condiciones (`FindingWhen` en `lib/types.ts`): `answer` / `notAnswer` (fase 2), `p1` / `p1Not`
+  (respuestas de la fase 1), `p1Lowest` (ese pilar de la fase 1 es ≤ a todos los demás, empates incluidos), `p1Below`
+  (alguno de esos pilares por debajo del número), `situation` y `flag`. Solo cuentan las respuestas de preguntas visibles.
+  El texto nunca afirma más de lo que dice el dato (p. ej. "al fondo de tus puntajes" solo si el pilar es el mínimo). Sin
+  cifras sin fuente.
+- **Pilares** (`combinedPillars`, `pillarChanges`): cada pilar es el promedio de sus aportes de las dos fases (misma regla que la fase 1; solo preguntas single visibles). Los bloques 1, 2, 4 y 7 también aportan a
   pilares de la fase 1. El informe completo muestra los 8 pilares y el **índice completo** (promedio simple de los 8); en cada
   pilar que cambió se ve el valor de la fase 1 junto al actualizado. `/r/[code]` con la fase 1 sola no cambia.
 - **Pilar `readiness` visible**: quién atendería el sistema, capacidad para 30 % más de clientes y plazo. El presupuesto y
@@ -219,14 +222,21 @@ de aprobación, está en `docs/PHASE2.md`.
   ```
   capacidad = promedio(team.capacity de "quién atendería" y "30 % más")
   Readiness = round(0.30·capacidad + 0.25·decisión + 0.25·presupuesto + 0.20·plazo)      0–100
+  presupuesto menor a $400 al mes (flag lowBudget) → Readiness máximo 50
   ```
-  > Pesos, valores de las opciones y umbral (55 para "Alta prioridad") son una **hipótesis a calibrar** con los primeros 30
-  > diagnósticos completos, igual que el tope de $30,000. El umbral no se fija hasta revisar los casos de ejemplo de
-  > `docs/PHASE2.md` §Readiness.
+  Funciones puras en `lib/scoring.ts` (`teamComponents`, `readinessRaw`, `finalReadiness`; constantes
+  `READINESS_WEIGHTS` y `LOW_BUDGET_READINESS_CAP`). Si falta algún componente (fase 2 sin terminar), sigue la
+  preliminar. Readiness final entra en el veredicto de §3 con el mismo umbral (≥ 55 → "Alta prioridad"); Need y Potential
+  siguen saliendo de la fase 1. Casos de ejemplo frente a la fórmula preliminar en `docs/PHASE2.md` §Readiness (y en los
+  tests).
+  > Pesos, valores de las opciones, el tope de $400 y el umbral de 55 son una **hipótesis a calibrar** con los primeros 30
+  > diagnósticos completos, igual que el tope de $30,000.
 - **"Burned by tech"** (flag `burnedByTech`: probó y dejó al menos una herramienta, bloque 8) **no descalifica**: no baja
   Readiness ni el veredicto (test con casos pareados). Suma a `managedFit` (función pura): burnedByTech +40, "nadie / yo"
   atendería el sistema +30, trabaja solo +20, "el equipo no la usaba" +10. Con `managedFit` ≥ 50: alerta en `/admin`
   ("Burned by tech: lead with managed service and onboarding") y la ruta del informe usa la variante "lo operamos contigo".
+  (`managedFit`, `MANAGED_FIT_MIN`.) Alertas de la fase 2 para el equipo (`phase2Flags` del resultado): burnedByTech,
+  managedService, lowBudget, notDecider, notOwner, noRunner, atCapacity, reviewGating, burnedByAgency.
 - Las preguntas de presupuesto y decisión van **solo** en el bloque 8 (`kind: budget | decision`; un test lo exige).
 - **Resultado final** (`/x/[code]/report`, y `/r/[code]` cuando la fase 2 terminó): informe completo + ruta en 3 fases
   (Captura y organización → Atención y seguimiento → Medición y crecimiento, adaptada a lo que ya tiene y a la situación)

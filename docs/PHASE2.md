@@ -602,23 +602,19 @@ Se omiten (sin fuente verificable o sin origen claro):
 ## Readiness: casos de ejemplo frente a la fórmula preliminar
 
 Preliminar (§3): `40 + ads>0 (20) + tracking crm|sheet (15) + team>1 (10)`, tope 85.
-Propuesta (SPEC §4): `0.30·capacidad + 0.25·decisión + 0.25·presupuesto + 0.20·plazo`.
+Final (SPEC §4): `0.30·capacidad + 0.25·decisión + 0.25·presupuesto + 0.20·plazo`; con presupuesto menor a $400 al mes,
+máximo 50. **Hipótesis a calibrar.** Los cinco casos están en `lib/scoring.test.ts`.
 
-| Caso | Fase 1 | Fase 2 | Preliminar | Propuesta |
-|---|---|---|---|---|
-| A. Solo, sin anuncios, papel | team 1, ads 0, paper | yo (45) · justo (60) · decide yo (100) · < $500 (25) · 3 meses (75) | 40 | **62** |
-| B. Equipo armado | 6 a 15, $1k–3k, CRM | persona (90) · sí (90) · con socio (80) · $1.5k–3k (80) · este mes (100) | 85 | **87** |
-| C. Parece listo, no lo está | 2 a 5, < $1k, hoja de cálculo | contratar (35) · al tope (20) · otro decide (40) · ver plan (50) · explorando (15) | 85 | **34** |
-| D. Burned by tech | 2 a 5, $3k–10k, bandeja | nadie (15) · justo (60) · yo (100) · $500–1.5k (55) · este mes (100) | 70 | **70** |
-| E. Solo, organizado, sin anuncios | team 1, ads 0, CRM | yo (45) · sí (90) · yo (100) · > $3k (95) · este año (40) | 55 | **77** |
+| Caso | Fase 1 | Fase 2 | Preliminar | Sin tope | Final |
+|---|---|---|---|---|---|
+| A. Solo, sin anuncios, papel | team 1, ads 0, paper | yo (45) · justo (60) · decide yo (100) · < $400 (25) · 3 meses (75) | 40 | 62 | **50** |
+| B. Equipo armado | 6 a 15, $1k–3k, CRM | persona (90) · sí (90) · con socio (80) · $1.5k–3k (80) · este mes (100) | 85 | 87 | **87** |
+| C. Parece listo, no lo está | 2 a 5, < $1k, hoja de cálculo | contratar (35) · al tope (20) · otro decide (40) · ver plan (50) · explorando (15) | 85 | 34 | **34** |
+| D. Burned by tech | 2 a 5, $3k–10k, bandeja | nadie (15) · justo (60) · yo (100) · $400–1.5k (55) · este mes (100) | 70 | 70 | **70** |
+| E. Solo, organizado, sin anuncios | team 1, ads 0, CRM | yo (45) · sí (90) · yo (100) · > $3k (95) · este año (40) | 55 | 77 | **77** |
 
 Lectura:
-- C es el caso que la fase 2 debe corregir: con la fórmula preliminar salía 85, "Alta prioridad", y con lo que se sabe en
-  la fase 2 baja a 34.
-- D (burned by tech) queda igual: el flag no resta, como se aprobó.
-- **A pasa el umbral de 55 (62) con presupuesto menor a $500.** Con Need y Potential altos, sería "Alta prioridad" para
-  un negocio que no puede pagar casi nada. Opciones:
-  1. Tope: con presupuesto `lt500`, Readiness máximo 50 (queda en "Nutrir"). *Recomendada.*
-  2. Subir el peso del presupuesto a 0.35 (y capacidad 0.25, decisión 0.20, plazo 0.20): A da 57, sigue pasando.
-  3. Subir el umbral a 65: A no pasa, pero D (70) pasa justo y cualquier ajuste pequeño lo cambia.
-- El umbral de 55 queda **sin fijar** hasta que elijas una opción.
+- A deja de pasar el umbral de 55: con Need y Potential altos queda en "Nutrir", no en "Alta prioridad".
+- C baja de 85 a 34: es el caso que la fase 2 corrige.
+- D (burned by tech) queda igual: el flag no resta.
+- El tope solo baja: un Readiness que ya es menor a 50 con presupuesto bajo no cambia.
