@@ -1,7 +1,14 @@
 # Growth X-Ray — Fase 2: borrador de preguntas y mini-hallazgos
 
-> **Estado: BORRADOR, pendiente de aprobación.** Las decisiones aprobadas están en `docs/SPEC.md` §4. Cuando se aprueben
-> estos textos, pasan tal cual a `config/phase2.config.json` (EN) y `config/phase2.config.es.json` (ES).
+> **Estado: aprobado el 2026-11-10** (bloques 1 a 8, evidencia `schmitt2011` y `ftc2024`; se omite el "5 a 25 veces" de
+> HBR). Las decisiones están en `docs/SPEC.md` §4. Los textos están en `config/phase2.config.json` (EN) y
+> `config/phase2.config.es.json` (ES); si cambian allí, actualizar este documento.
+>
+> **Pendiente de aprobar:** los nombres de los bloques en la interfaz (EN / ES): Customer journey / El recorrido del
+> cliente · Pipeline & follow-up / Cotizaciones y seguimiento · Retention & customer value / Retención y valor del
+> cliente · Reviews & proof / Reseñas y pruebas · Marketing history / Historia con el marketing · Visibility &
+> forecasting / Visibilidad y proyección · Team & capacity / Equipo y capacidad · Tools & next steps / Herramientas y
+> próximos pasos.
 
 Convenciones:
 - `scores` → pilares que ve el prospecto (0-100, promedio de aportes). `team.*` → solo vista del equipo.
@@ -522,16 +529,16 @@ probaste y lo que tendría sentido ahora."
 | `group` | A group or board | Un grupo o una junta | 50 |
 | `other` | Someone else decides | Lo decide otra persona | 40 · `notDecider` |
 
-**`k_budget`** (single, `kind: budget`)
-- EN: "If the plan made sense, what monthly range would be reasonable to fix this?" Sub: "Including tools and help. This only helps us suggest a realistic plan."
-- ES: "Si el plan tuviera sentido, ¿qué rango mensual sería razonable para resolver esto?" Sub: "Incluye herramientas y ayuda. Solo nos sirve para proponerte un plan realista."
+**`k_budget`** (single, `kind: budget`) *(ajustado 2026-11-10: corte exacto en $400 al mes y monto mensual explícito)*
+- EN: "If the plan made sense, how much per month would be reasonable to fix this?" Sub: "A monthly amount, including tools and help. This only helps us suggest a realistic plan."
+- ES: "Si el plan tuviera sentido, ¿cuánto al mes sería razonable para resolver esto?" Sub: "Un monto mensual, con herramientas y ayuda incluidas. Solo nos sirve para proponerte un plan realista."
 
 | id | EN | ES | team.budget |
 |---|---|---|---|
-| `lt500` | Under $500 | Menos de $500 | 25 |
-| `500_1500` | $500 to $1,500 | De $500 a $1,500 | 55 |
-| `1500_3000` | $1,500 to $3,000 | De $1,500 a $3,000 | 80 |
-| `3000p` | More than $3,000 | Más de $3,000 | 95 |
+| `lt400` | Under $400 a month | Menos de $400 al mes | 25 · `lowBudget` (Readiness máximo 50) |
+| `400_1500` | $400 to $1,500 a month | De $400 a $1,500 al mes | 55 |
+| `1500_3000` | $1,500 to $3,000 a month | De $1,500 a $3,000 al mes | 80 |
+| `3000p` | More than $3,000 a month | Más de $3,000 al mes | 95 |
 | `plan` | I'd need to see a plan first | Primero necesitaría ver un plan | 50 |
 
 **`k_when`** (single)

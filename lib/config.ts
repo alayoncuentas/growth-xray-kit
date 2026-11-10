@@ -1,6 +1,8 @@
 import en from "@/config/phase1.config.json";
 import es from "@/config/phase1.config.es.json";
-import type { CalculatorField, CalculatorQuestion, ChoiceQuestion, Phase1Config, Question } from "./types";
+import en2 from "@/config/phase2.config.json";
+import es2 from "@/config/phase2.config.es.json";
+import type { CalculatorField, CalculatorQuestion, ChoiceQuestion, Phase1Config, Phase2Config, Question } from "./types";
 
 // Idiomas de la interfaz pública. Los dos configs tienen la misma estructura (ids, opciones, puntajes):
 // solo cambian los textos (lo verifica lib/config.test.ts). El panel /admin sigue en inglés.
@@ -22,6 +24,19 @@ export function getConfig(lang: Lang = DEFAULT_LANG): Phase1Config {
 
 /** Config de referencia para la lógica que no muestra textos, y textos del panel (en inglés). */
 export const phase1 = configs.en;
+
+const configs2: Record<Lang, Phase2Config> = {
+  en: en2 as unknown as Phase2Config,
+  es: es2 as unknown as Phase2Config,
+};
+
+/** Config de la fase 2 con los textos del idioma (misma estructura en los dos; lo verifica lib/config.test.ts). */
+export function getPhase2Config(lang: Lang = DEFAULT_LANG): Phase2Config {
+  return configs2[lang] ?? configs2.en;
+}
+
+/** Config de referencia de la fase 2 para la lógica. */
+export const phase2 = configs2.en;
 
 export function getQuestion(id: string, cfg: Phase1Config = phase1): Question | undefined {
   return cfg.questions.find((q) => q.id === id);

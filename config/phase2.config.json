@@ -1,0 +1,1700 @@
+{
+  "version": "0.1.0",
+  "phase": 2,
+  "estimatedMinutes": 20,
+  "blocks": [
+    {
+      "id": "journey",
+      "label": "Customer journey",
+      "intro": "First, the path a customer takes, from first message to paid."
+    },
+    {
+      "id": "pipeline",
+      "label": "Pipeline & follow-up",
+      "intro": "Now, the quotes and deals that are still open."
+    },
+    {
+      "id": "retention",
+      "label": "Retention & customer value",
+      "intro": "Next, the customers you already have."
+    },
+    {
+      "id": "reviews",
+      "label": "Reviews & proof",
+      "intro": "Now, what people see before they choose you."
+    },
+    {
+      "id": "marketing",
+      "label": "Marketing history",
+      "intro": "Now, what you've tried to bring in customers."
+    },
+    {
+      "id": "visibility",
+      "label": "Visibility & forecasting",
+      "intro": "Now, the numbers you use to make decisions."
+    },
+    {
+      "id": "team",
+      "label": "Team & capacity",
+      "intro": "Now, who would make this work day to day."
+    },
+    {
+      "id": "tech",
+      "label": "Tools & next steps",
+      "intro": "Last block: what you've tried and what would make sense now."
+    }
+  ],
+  "evidence": {
+    "schmitt2011": {
+      "text": "In a study of about 10,000 customers of a German bank, customers who joined through a referral program were worth at least 16% more than similar customers who didn't. The gap varied by customer segment.",
+      "source": "Schmitt, Skiera & Van den Bulte, \"Referral Programs and Customer Value\", Journal of Marketing, 2011",
+      "kind": "academic",
+      "url": "https://faculty.wharton.upenn.edu/wp-content/uploads/2012/04/Schmitt-Skiera-vandenBulte-2011-Referral-Programs-Customer-Value.pdf"
+    },
+    "ftc2024": {
+      "text": "Since October 21, 2024, an FTC rule bans fake reviews and testimonials, paying for reviews that must say something positive or negative, certain undisclosed reviews from insiders, and threats to get negative reviews removed.",
+      "source": "Federal Trade Commission, Rule on the Use of Consumer Reviews and Testimonials (16 CFR Part 465), 2024",
+      "kind": "government",
+      "url": "https://www.ftc.gov/business-guidance/resources/consumer-reviews-testimonials-rule-questions-answers"
+    }
+  },
+  "questions": [
+    {
+      "id": "j_steps",
+      "block": "journey",
+      "type": "single",
+      "prompt": "Think about your most recent new customer. From their first message to paying you, how many steps did it take?",
+      "sub": "A step is anything they had to wait for: a call back, a visit, a quote, an approval, a date, an invoice.",
+      "options": [
+        {
+          "id": "1_2",
+          "label": "1 or 2",
+          "scores": {
+            "visibility": 75
+          }
+        },
+        {
+          "id": "3_4",
+          "label": "3 or 4",
+          "scores": {
+            "visibility": 75
+          }
+        },
+        {
+          "id": "5p",
+          "label": "5 or more",
+          "scores": {
+            "visibility": 70
+          },
+          "flags": [
+            "longJourney"
+          ]
+        },
+        {
+          "id": "varies",
+          "label": "It changes every time",
+          "scores": {
+            "visibility": 30,
+            "pipeline": 35
+          }
+        }
+      ]
+    },
+    {
+      "id": "j_stuck",
+      "block": "journey",
+      "type": "single",
+      "prompt": "Where do you lose the most people along the way?",
+      "options": [
+        {
+          "id": "reply",
+          "label": "Before we get back to them",
+          "scores": {
+            "visibility": 70
+          },
+          "flags": [
+            "stuckReply"
+          ]
+        },
+        {
+          "id": "quote",
+          "label": "After they get a quote",
+          "scores": {
+            "visibility": 70
+          },
+          "flags": [
+            "stuckQuote"
+          ]
+        },
+        {
+          "id": "schedule",
+          "label": "When it's time to pick a date",
+          "scores": {
+            "visibility": 70
+          },
+          "flags": [
+            "stuckSchedule"
+          ]
+        },
+        {
+          "id": "price",
+          "label": "When they hear the price",
+          "scores": {
+            "visibility": 70
+          },
+          "flags": [
+            "stuckPrice"
+          ]
+        },
+        {
+          "id": "rare",
+          "label": "We rarely lose anyone once they reach out",
+          "scores": {
+            "visibility": 60
+          }
+        },
+        {
+          "id": "dk",
+          "label": "I don't really know",
+          "scores": {
+            "visibility": 15
+          },
+          "flags": [
+            "stuckUnknown"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "j_after",
+      "block": "journey",
+      "type": "single",
+      "prompt": "The job is done and paid. What happens next with that customer?",
+      "options": [
+        {
+          "id": "plan",
+          "label": "They're on a plan: the next visit or reminder is already scheduled",
+          "scores": {
+            "retention": 95
+          }
+        },
+        {
+          "id": "checkin",
+          "label": "We check in after a while",
+          "scores": {
+            "retention": 70
+          }
+        },
+        {
+          "id": "review",
+          "label": "We ask for a review, and that's usually the last contact",
+          "scores": {
+            "retention": 35,
+            "reputation": 70
+          }
+        },
+        {
+          "id": "nothing",
+          "label": "Nothing, unless they call us",
+          "scores": {
+            "retention": 15
+          }
+        },
+        {
+          "id": "once",
+          "label": "Our work is usually a one-time job",
+          "scores": {
+            "retention": 50
+          },
+          "flags": [
+            "oneTime"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p_open",
+      "block": "pipeline",
+      "type": "single",
+      "prompt": "Right now, how many quotes or proposals are waiting on an answer from the customer?",
+      "options": [
+        {
+          "id": "lt5",
+          "label": "Fewer than 5",
+          "scores": {
+            "pipeline": 75
+          }
+        },
+        {
+          "id": "5_20",
+          "label": "5 to 20",
+          "scores": {
+            "pipeline": 75
+          }
+        },
+        {
+          "id": "20p",
+          "label": "More than 20",
+          "scores": {
+            "pipeline": 75
+          }
+        },
+        {
+          "id": "dk",
+          "label": "I'd have to go look",
+          "scores": {
+            "pipeline": 25
+          },
+          "flags": [
+            "openUnknown"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p_value",
+      "block": "pipeline",
+      "type": "single",
+      "prompt": "Do you know the total dollar value of those open quotes?",
+      "options": [
+        {
+          "id": "exact",
+          "label": "Yes, I could tell you the number now",
+          "scores": {
+            "visibility": 90,
+            "pipeline": 90
+          }
+        },
+        {
+          "id": "rough",
+          "label": "Roughly",
+          "scores": {
+            "visibility": 55,
+            "pipeline": 60
+          }
+        },
+        {
+          "id": "no",
+          "label": "No",
+          "scores": {
+            "visibility": 20,
+            "pipeline": 20
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_lost",
+      "block": "pipeline",
+      "type": "single",
+      "prompt": "When you lose a sale, do you write down why?",
+      "options": [
+        {
+          "id": "always",
+          "label": "Every time, in one place",
+          "scores": {
+            "visibility": 90
+          }
+        },
+        {
+          "id": "some",
+          "label": "Sometimes",
+          "scores": {
+            "visibility": 50
+          }
+        },
+        {
+          "id": "know",
+          "label": "No, but I usually know why",
+          "scores": {
+            "visibility": 30
+          }
+        },
+        {
+          "id": "no",
+          "label": "No",
+          "scores": {
+            "visibility": 15
+          }
+        }
+      ]
+    },
+    {
+      "id": "p_owner",
+      "block": "pipeline",
+      "type": "single",
+      "prompt": "Who is responsible for moving each open quote forward?",
+      "options": [
+        {
+          "id": "named",
+          "label": "A specific person for each one",
+          "scores": {
+            "pipeline": 90,
+            "owner": 80
+          }
+        },
+        {
+          "id": "me",
+          "label": "Me",
+          "scores": {
+            "pipeline": 60,
+            "owner": 20
+          }
+        },
+        {
+          "id": "whoever",
+          "label": "Whoever has time",
+          "scores": {
+            "pipeline": 30,
+            "owner": 50
+          }
+        },
+        {
+          "id": "nobody",
+          "label": "Nobody in particular",
+          "scores": {
+            "pipeline": 10,
+            "owner": 40
+          }
+        }
+      ]
+    },
+    {
+      "id": "r_repeat",
+      "block": "retention",
+      "type": "single",
+      "prompt": "How often does a typical customer buy from you again?",
+      "insight": {
+        "kind": "evidence",
+        "evidence": "reichheld"
+      },
+      "options": [
+        {
+          "id": "often",
+          "label": "Several times a year",
+          "scores": {
+            "retention": 90
+          }
+        },
+        {
+          "id": "yearly",
+          "label": "About once a year",
+          "scores": {
+            "retention": 70
+          }
+        },
+        {
+          "id": "years",
+          "label": "Every few years",
+          "scores": {
+            "retention": 45
+          }
+        },
+        {
+          "id": "once",
+          "label": "Usually just once",
+          "scores": {
+            "retention": 30
+          }
+        },
+        {
+          "id": "dk",
+          "label": "I don't know",
+          "scores": {
+            "retention": 15
+          },
+          "flags": [
+            "repeatUnknown"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "r_remind",
+      "block": "retention",
+      "type": "single",
+      "prompt": "Do you remind customers when it's time for a renewal, maintenance or their next visit?",
+      "options": [
+        {
+          "id": "auto",
+          "label": "Yes, automatically",
+          "scores": {
+            "retention": 95
+          }
+        },
+        {
+          "id": "manual",
+          "label": "Yes, when we remember",
+          "scores": {
+            "retention": 50
+          }
+        },
+        {
+          "id": "no",
+          "label": "No",
+          "scores": {
+            "retention": 15
+          }
+        },
+        {
+          "id": "na",
+          "label": "That doesn't apply to my business"
+        }
+      ]
+    },
+    {
+      "id": "r_list",
+      "block": "retention",
+      "type": "single",
+      "prompt": "Could you send a message today to everyone who bought from you in the last two years?",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Yes, I have a list with their contact info",
+          "scores": {
+            "retention": 90
+          }
+        },
+        {
+          "id": "partly",
+          "label": "Some of them; it's spread across my phone, email and invoices",
+          "scores": {
+            "retention": 45
+          }
+        },
+        {
+          "id": "no",
+          "label": "No",
+          "scores": {
+            "retention": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "r_referrals",
+      "block": "retention",
+      "type": "single",
+      "prompt": "How do new referrals happen?",
+      "insight": {
+        "kind": "evidence",
+        "evidence": "schmitt2011"
+      },
+      "options": [
+        {
+          "id": "process",
+          "label": "We ask every customer, the same way each time",
+          "scores": {
+            "retention": 95
+          }
+        },
+        {
+          "id": "some",
+          "label": "We ask now and then",
+          "scores": {
+            "retention": 55
+          }
+        },
+        {
+          "id": "own",
+          "label": "They happen on their own",
+          "scores": {
+            "retention": 25
+          }
+        },
+        {
+          "id": "rare",
+          "label": "We rarely get referrals",
+          "scores": {
+            "retention": 15
+          }
+        }
+      ]
+    },
+    {
+      "id": "r_extras",
+      "block": "retention",
+      "type": "single",
+      "prompt": "Do you offer anything beyond your main service, like plans, packages or add-ons?",
+      "showIf": {
+        "situation": [
+          "offer"
+        ]
+      },
+      "options": [
+        {
+          "id": "taken",
+          "label": "Yes, and many customers take them",
+          "scores": {
+            "retention": 85
+          }
+        },
+        {
+          "id": "few",
+          "label": "Yes, but few customers take them",
+          "scores": {
+            "retention": 55
+          }
+        },
+        {
+          "id": "no",
+          "label": "No",
+          "scores": {
+            "retention": 30
+          },
+          "flags": [
+            "noExtras"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "v_respond",
+      "block": "reviews",
+      "type": "single",
+      "prompt": "When a new review comes in, what do you do?",
+      "insight": {
+        "kind": "evidence",
+        "evidence": "brightlocal2026b"
+      },
+      "options": [
+        {
+          "id": "all",
+          "label": "We reply to all of them",
+          "scores": {
+            "reputation": 95
+          }
+        },
+        {
+          "id": "bad",
+          "label": "We reply only to the bad ones",
+          "scores": {
+            "reputation": 55
+          }
+        },
+        {
+          "id": "none",
+          "label": "We don't reply",
+          "scores": {
+            "reputation": 20
+          }
+        },
+        {
+          "id": "unseen",
+          "label": "I don't always see them",
+          "scores": {
+            "reputation": 15
+          }
+        }
+      ]
+    },
+    {
+      "id": "v_ask",
+      "block": "reviews",
+      "type": "single",
+      "prompt": "When you ask for reviews, who gets asked?",
+      "insight": {
+        "kind": "evidence",
+        "evidence": "ftc2024"
+      },
+      "options": [
+        {
+          "id": "all",
+          "label": "Every customer",
+          "scores": {
+            "reputation": 90
+          }
+        },
+        {
+          "id": "happy",
+          "label": "Only the customers we think are happy",
+          "scores": {
+            "reputation": 40
+          },
+          "flags": [
+            "reviewGating"
+          ]
+        },
+        {
+          "id": "none",
+          "label": "We don't ask",
+          "scores": {
+            "reputation": 15
+          }
+        }
+      ]
+    },
+    {
+      "id": "v_proof",
+      "block": "reviews",
+      "type": "single",
+      "prompt": "Beyond star ratings, do you have proof like video testimonials or case studies with real results?",
+      "options": [
+        {
+          "id": "several",
+          "label": "Yes, several",
+          "scores": {
+            "reputation": 90
+          }
+        },
+        {
+          "id": "few",
+          "label": "One or two",
+          "scores": {
+            "reputation": 60
+          }
+        },
+        {
+          "id": "no",
+          "label": "No",
+          "scores": {
+            "reputation": 20
+          }
+        }
+      ]
+    },
+    {
+      "id": "v_use",
+      "block": "reviews",
+      "type": "single",
+      "prompt": "Where do customers see your reviews or testimonials before they buy?",
+      "options": [
+        {
+          "id": "ours",
+          "label": "On our website, quotes or ads",
+          "scores": {
+            "reputation": 90
+          }
+        },
+        {
+          "id": "sites",
+          "label": "Only on Google or review sites",
+          "scores": {
+            "reputation": 45
+          }
+        },
+        {
+          "id": "nowhere",
+          "label": "Nowhere that we control",
+          "scores": {
+            "reputation": 20
+          }
+        }
+      ]
+    },
+    {
+      "id": "a_channels",
+      "block": "marketing",
+      "type": "multi",
+      "prompt": "Besides referrals, where have new customers come from in the last year?",
+      "sub": "Pick all that apply.",
+      "options": [
+        {
+          "id": "gads",
+          "label": "Google search ads"
+        },
+        {
+          "id": "lsa",
+          "label": "Google Local Services Ads"
+        },
+        {
+          "id": "gbp",
+          "label": "Our Google Business Profile"
+        },
+        {
+          "id": "meta",
+          "label": "Facebook or Instagram ads"
+        },
+        {
+          "id": "leadsites",
+          "label": "Angi, Thumbtack, Yelp or similar"
+        },
+        {
+          "id": "seo",
+          "label": "Our website showing up on Google"
+        },
+        {
+          "id": "offline",
+          "label": "Mail, print, radio or events"
+        },
+        {
+          "id": "none",
+          "label": "None of these"
+        }
+      ]
+    },
+    {
+      "id": "a_agency",
+      "block": "marketing",
+      "type": "single",
+      "prompt": "Have you worked with a marketing agency or freelancer?",
+      "insight": {
+        "kind": "myth",
+        "myth": "marketing",
+        "options": [
+          "bad"
+        ]
+      },
+      "options": [
+        {
+          "id": "now",
+          "label": "Yes, we work with one now"
+        },
+        {
+          "id": "good",
+          "label": "Yes, and it went well"
+        },
+        {
+          "id": "bad",
+          "label": "Yes, and it didn't go well",
+          "flags": [
+            "burnedByAgency"
+          ]
+        },
+        {
+          "id": "never",
+          "label": "No"
+        }
+      ]
+    },
+    {
+      "id": "a_attrib",
+      "block": "marketing",
+      "type": "single",
+      "prompt": "When a new customer comes in, do you know which ad or channel brought them?",
+      "options": [
+        {
+          "id": "track",
+          "label": "Yes, we track it for every customer",
+          "scores": {
+            "visibility": 95
+          }
+        },
+        {
+          "id": "ask",
+          "label": "We ask, but don't write it down",
+          "scores": {
+            "visibility": 45
+          }
+        },
+        {
+          "id": "idea",
+          "label": "We have a rough idea",
+          "scores": {
+            "visibility": 30
+          }
+        },
+        {
+          "id": "no",
+          "label": "No",
+          "scores": {
+            "visibility": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "a_tried",
+      "block": "marketing",
+      "type": "multi",
+      "prompt": "What have you tried to get more inquiries?",
+      "sub": "Pick all that apply.",
+      "showIf": {
+        "situation": [
+          "demand"
+        ]
+      },
+      "options": [
+        {
+          "id": "ads",
+          "label": "Paid ads"
+        },
+        {
+          "id": "profile",
+          "label": "Improving our Google profile"
+        },
+        {
+          "id": "referrals",
+          "label": "Asking for referrals"
+        },
+        {
+          "id": "social",
+          "label": "Posting on social media"
+        },
+        {
+          "id": "partners",
+          "label": "Partnerships with other businesses"
+        },
+        {
+          "id": "nothing",
+          "label": "Nothing yet"
+        }
+      ]
+    },
+    {
+      "id": "f_close",
+      "block": "visibility",
+      "type": "single",
+      "prompt": "Do you know your close rate, meaning how many out of every 10 quotes become customers?",
+      "options": [
+        {
+          "id": "measured",
+          "label": "Yes, we measure it",
+          "scores": {
+            "visibility": 95
+          }
+        },
+        {
+          "id": "estimate",
+          "label": "I have an estimate",
+          "scores": {
+            "visibility": 50
+          }
+        },
+        {
+          "id": "no",
+          "label": "No",
+          "scores": {
+            "visibility": 15
+          }
+        }
+      ]
+    },
+    {
+      "id": "f_cac",
+      "block": "visibility",
+      "type": "single",
+      "prompt": "Do you know how much it costs you to get one new customer?",
+      "options": [
+        {
+          "id": "channel",
+          "label": "Yes, for each channel",
+          "scores": {
+            "visibility": 95
+          }
+        },
+        {
+          "id": "overall",
+          "label": "Yes, as an overall average",
+          "scores": {
+            "visibility": 70
+          }
+        },
+        {
+          "id": "rough",
+          "label": "Roughly",
+          "scores": {
+            "visibility": 40
+          }
+        },
+        {
+          "id": "no",
+          "label": "No",
+          "scores": {
+            "visibility": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "f_forecast",
+      "block": "visibility",
+      "type": "single",
+      "prompt": "Could you predict next quarter's revenue within about 20%?",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Yes, from the quotes and bookings we have",
+          "scores": {
+            "visibility": 95
+          }
+        },
+        {
+          "id": "gut",
+          "label": "Only as a gut feeling",
+          "scores": {
+            "visibility": 35
+          }
+        },
+        {
+          "id": "no",
+          "label": "No",
+          "scores": {
+            "visibility": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "f_review",
+      "block": "visibility",
+      "type": "single",
+      "prompt": "How often do you look at these numbers?",
+      "options": [
+        {
+          "id": "weekly",
+          "label": "Every week",
+          "scores": {
+            "visibility": 95
+          }
+        },
+        {
+          "id": "monthly",
+          "label": "Every month",
+          "scores": {
+            "visibility": 75
+          }
+        },
+        {
+          "id": "problem",
+          "label": "When something goes wrong",
+          "scores": {
+            "visibility": 30
+          }
+        },
+        {
+          "id": "never",
+          "label": "Hardly ever",
+          "scores": {
+            "visibility": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "t_runner",
+      "block": "team",
+      "type": "single",
+      "prompt": "If a new system started tomorrow, who would handle it day to day?",
+      "options": [
+        {
+          "id": "person",
+          "label": "A specific person on the team",
+          "scores": {
+            "readiness": 85,
+            "owner": 80
+          },
+          "team": {
+            "capacity": 90
+          }
+        },
+        {
+          "id": "me",
+          "label": "Me",
+          "scores": {
+            "readiness": 45,
+            "owner": 20
+          },
+          "team": {
+            "capacity": 45
+          }
+        },
+        {
+          "id": "hire",
+          "label": "We'd need to hire someone",
+          "scores": {
+            "readiness": 35
+          },
+          "team": {
+            "capacity": 35
+          }
+        },
+        {
+          "id": "nobody",
+          "label": "Nobody has time for that right now",
+          "scores": {
+            "readiness": 15
+          },
+          "team": {
+            "capacity": 15
+          },
+          "flags": [
+            "noRunner"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "t_absorb",
+      "block": "team",
+      "type": "single",
+      "prompt": "If you got 30% more customers next month, could you serve them well?",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Yes, we have room",
+          "scores": {
+            "readiness": 90
+          },
+          "team": {
+            "capacity": 90
+          }
+        },
+        {
+          "id": "tight",
+          "label": "Yes, but it'd be tight",
+          "scores": {
+            "readiness": 60
+          },
+          "team": {
+            "capacity": 60
+          }
+        },
+        {
+          "id": "no",
+          "label": "No, we're at capacity",
+          "scores": {
+            "readiness": 20
+          },
+          "team": {
+            "capacity": 20
+          },
+          "flags": [
+            "atCapacity"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "t_hours",
+      "block": "team",
+      "type": "single",
+      "prompt": "How many hours a week do you personally spend on sales and replying to inquiries?",
+      "options": [
+        {
+          "id": "lt5",
+          "label": "Under 5",
+          "scores": {
+            "owner": 85
+          }
+        },
+        {
+          "id": "5_15",
+          "label": "5 to 15",
+          "scores": {
+            "owner": 55
+          }
+        },
+        {
+          "id": "15p",
+          "label": "More than 15",
+          "scores": {
+            "owner": 25
+          }
+        }
+      ]
+    },
+    {
+      "id": "t_who",
+      "block": "team",
+      "type": "single",
+      "prompt": "Who is answering this diagnostic?",
+      "options": [
+        {
+          "id": "owner",
+          "label": "The owner"
+        },
+        {
+          "id": "partner",
+          "label": "A partner or co-owner"
+        },
+        {
+          "id": "manager",
+          "label": "A manager",
+          "flags": [
+            "notOwner"
+          ]
+        },
+        {
+          "id": "staff",
+          "label": "Someone else on the team",
+          "flags": [
+            "notOwner"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "k_tools",
+      "block": "tech",
+      "type": "multi",
+      "prompt": "Which of these have you tried in the past?",
+      "sub": "Pick all that apply.",
+      "options": [
+        {
+          "id": "crm",
+          "label": "A CRM"
+        },
+        {
+          "id": "booking",
+          "label": "Online booking"
+        },
+        {
+          "id": "auto",
+          "label": "Automatic texts or emails"
+        },
+        {
+          "id": "answering",
+          "label": "An answering service or virtual receptionist"
+        },
+        {
+          "id": "agencytool",
+          "label": "Software an agency set up for us"
+        },
+        {
+          "id": "none",
+          "label": "None of these"
+        }
+      ]
+    },
+    {
+      "id": "k_why",
+      "block": "tech",
+      "type": "single",
+      "prompt": "If you stopped using any of them, what was the main reason?",
+      "showIf": {
+        "answered": "k_tools",
+        "notAnswer": {
+          "k_tools": [
+            "none"
+          ]
+        }
+      },
+      "options": [
+        {
+          "id": "complex",
+          "label": "It was too complicated",
+          "flags": [
+            "burnedByTech"
+          ]
+        },
+        {
+          "id": "unused",
+          "label": "The team didn't use it",
+          "flags": [
+            "burnedByTech",
+            "toolUnused"
+          ]
+        },
+        {
+          "id": "price",
+          "label": "It cost too much",
+          "flags": [
+            "burnedByTech"
+          ]
+        },
+        {
+          "id": "results",
+          "label": "It didn't bring results",
+          "flags": [
+            "burnedByTech"
+          ]
+        },
+        {
+          "id": "still",
+          "label": "We still use them"
+        }
+      ]
+    },
+    {
+      "id": "k_decide",
+      "block": "tech",
+      "type": "single",
+      "prompt": "Who makes the final call on an investment like this?",
+      "kind": "decision",
+      "options": [
+        {
+          "id": "me",
+          "label": "I do",
+          "team": {
+            "decision": 100
+          }
+        },
+        {
+          "id": "partner",
+          "label": "I do, together with a partner",
+          "team": {
+            "decision": 80
+          }
+        },
+        {
+          "id": "group",
+          "label": "A group or board",
+          "team": {
+            "decision": 50
+          }
+        },
+        {
+          "id": "other",
+          "label": "Someone else decides",
+          "team": {
+            "decision": 40
+          },
+          "flags": [
+            "notDecider"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "k_budget",
+      "block": "tech",
+      "type": "single",
+      "prompt": "If the plan made sense, how much per month would be reasonable to fix this?",
+      "sub": "A monthly amount, including tools and help. This only helps us suggest a realistic plan.",
+      "kind": "budget",
+      "options": [
+        {
+          "id": "lt400",
+          "label": "Under $400 a month",
+          "team": {
+            "budget": 25
+          },
+          "flags": [
+            "lowBudget"
+          ]
+        },
+        {
+          "id": "400_1500",
+          "label": "$400 to $1,500 a month",
+          "team": {
+            "budget": 55
+          }
+        },
+        {
+          "id": "1500_3000",
+          "label": "$1,500 to $3,000 a month",
+          "team": {
+            "budget": 80
+          }
+        },
+        {
+          "id": "3000p",
+          "label": "More than $3,000 a month",
+          "team": {
+            "budget": 95
+          }
+        },
+        {
+          "id": "plan",
+          "label": "I'd need to see a plan first",
+          "team": {
+            "budget": 50
+          }
+        }
+      ]
+    },
+    {
+      "id": "k_when",
+      "block": "tech",
+      "type": "single",
+      "prompt": "When would you like to have this solved?",
+      "options": [
+        {
+          "id": "month",
+          "label": "This month",
+          "scores": {
+            "readiness": 95
+          },
+          "team": {
+            "timeline": 100
+          }
+        },
+        {
+          "id": "quarter",
+          "label": "In the next 3 months",
+          "scores": {
+            "readiness": 75
+          },
+          "team": {
+            "timeline": 75
+          }
+        },
+        {
+          "id": "year",
+          "label": "Later this year",
+          "scores": {
+            "readiness": 40
+          },
+          "team": {
+            "timeline": 40
+          }
+        },
+        {
+          "id": "exploring",
+          "label": "I'm just exploring for now",
+          "scores": {
+            "readiness": 15
+          },
+          "team": {
+            "timeline": 15
+          }
+        }
+      ]
+    }
+  ],
+  "findings": {
+    "journey": [
+      {
+        "when": {
+          "answer": {
+            "j_stuck": [
+              "dk"
+            ]
+          }
+        },
+        "text": "You don't know yet where people drop off. That's common, and it's the first thing to make visible: you can't fix a step you can't see."
+      },
+      {
+        "when": {
+          "answer": {
+            "j_stuck": [
+              "quote"
+            ]
+          },
+          "p1": {
+            "followup": [
+              "once",
+              "wait"
+            ]
+          }
+        },
+        "text": "This lines up with your Phase 1 answer: when a quote goes quiet, it gets one follow-up at most. And you told us that's where you lose the most people."
+      },
+      {
+        "when": {
+          "answer": {
+            "j_stuck": [
+              "reply"
+            ]
+          },
+          "p1Lowest": "access"
+        },
+        "text": "This lines up with Phase 1: people drop off before the first reply, and first response came out at the bottom of your Phase 1 scores."
+      },
+      {
+        "when": {
+          "answer": {
+            "j_steps": [
+              "5p"
+            ]
+          }
+        },
+        "text": "Your customers go through 5 or more steps before paying. Each wait is a chance to drop off; your plan will show which ones can be shortened."
+      },
+      {
+        "when": {
+          "answer": {
+            "j_after": [
+              "nothing"
+            ]
+          }
+        },
+        "text": "After the sale, the relationship ends unless the customer calls. Block 3 looks at what that's worth."
+      },
+      {
+        "when": "*",
+        "text": "You have a clear picture of the journey. The next blocks look at what happens at each stage."
+      }
+    ],
+    "pipeline": [
+      {
+        "when": {
+          "answer": {
+            "p_value": [
+              "no"
+            ],
+            "p_open": [
+              "5_20",
+              "20p"
+            ]
+          }
+        },
+        "text": "You have quotes waiting and no total for them. That's money already in play that nobody is watching as a whole."
+      },
+      {
+        "when": {
+          "answer": {
+            "p_owner": [
+              "me"
+            ]
+          },
+          "p1": {
+            "away": [
+              "stop",
+              "cant"
+            ]
+          }
+        },
+        "text": "This lines up with Phase 1: open quotes depend on you, and so do new sales when you're away."
+      },
+      {
+        "when": {
+          "answer": {
+            "p_lost": [
+              "know",
+              "no"
+            ]
+          }
+        },
+        "text": "Lost sales aren't written down, so the reasons stay as hunches. A short list of reasons is often enough to spot a pattern."
+      },
+      {
+        "when": "*",
+        "text": "You keep track of what's open. Next: what happens after a customer buys."
+      }
+    ],
+    "retention": [
+      {
+        "when": {
+          "answer": {
+            "r_list": [
+              "no"
+            ]
+          }
+        },
+        "text": "There's no list of past customers you could reach today. They already trust you, and right now there's no way to contact them all at once."
+      },
+      {
+        "when": {
+          "answer": {
+            "r_remind": [
+              "manual",
+              "no"
+            ],
+            "r_repeat": [
+              "often",
+              "yearly"
+            ]
+          }
+        },
+        "text": "Customers come back, but the reminder depends on memory or doesn't happen. Repeat business is happening without a system behind it."
+      },
+      {
+        "when": {
+          "answer": {
+            "r_extras": [
+              "no"
+            ]
+          }
+        },
+        "text": "Your numbers point to value per customer, and there's nothing beyond the main service yet. Your plan looks at what could be added before bringing in more people."
+      },
+      {
+        "when": {
+          "answer": {
+            "r_referrals": [
+              "own",
+              "rare"
+            ]
+          }
+        },
+        "text": "Referrals depend on luck. Asking every customer, the same way each time, turns them into something you can count on."
+      },
+      {
+        "when": "*",
+        "text": "Your past customers are an active part of the business. Next: reviews and proof."
+      }
+    ],
+    "reviews": [
+      {
+        "when": {
+          "answer": {
+            "v_ask": [
+              "happy"
+            ]
+          }
+        },
+        "text": "Asking only the customers you think are happy can tilt your reviews. The FTC says this practice could violate the FTC Act. Asking everyone is safer and more credible."
+      },
+      {
+        "when": {
+          "answer": {
+            "v_respond": [
+              "none",
+              "unseen"
+            ]
+          }
+        },
+        "text": "New reviews go unanswered. People reading them also read your replies, so each reply shows that someone is listening."
+      },
+      {
+        "when": {
+          "answer": {
+            "v_use": [
+              "sites",
+              "nowhere"
+            ]
+          },
+          "notAnswer": {
+            "v_proof": [
+              "no"
+            ]
+          }
+        },
+        "text": "You have proof, but it stays on review sites. Showing it where people decide, like your quote or your site, costs nothing extra."
+      },
+      {
+        "when": "*",
+        "text": "Your proof is working for you. Next: your marketing history."
+      }
+    ],
+    "marketing": [
+      {
+        "when": {
+          "p1Not": {
+            "ads": [
+              "0"
+            ]
+          },
+          "answer": {
+            "a_attrib": [
+              "idea",
+              "no"
+            ]
+          }
+        },
+        "text": "You pay for ads but can't tell which one brings customers. Until that's measured, any change to the budget is a guess."
+      },
+      {
+        "when": {
+          "answer": {
+            "a_agency": [
+              "bad"
+            ]
+          },
+          "p1Below": {
+            "access": 55,
+            "followup": 55
+          }
+        },
+        "text": "Part of what didn't work may have happened after the click: in Phase 1, first response or follow-up came out weak. That part usually gets blamed on the ads."
+      },
+      {
+        "when": {
+          "situation": [
+            "demand"
+          ],
+          "answer": {
+            "a_tried": [
+              "nothing"
+            ]
+          }
+        },
+        "text": "You haven't tried anything yet to get more inquiries. That's where your plan starts, before any new system."
+      },
+      {
+        "when": "*",
+        "text": "That's your marketing history. Next: how well you can see your own numbers."
+      }
+    ],
+    "visibility": [
+      {
+        "when": {
+          "answer": {
+            "f_close": [
+              "estimate",
+              "no"
+            ]
+          }
+        },
+        "text": "In Phase 1 you estimated that {closeOf10} out of 10 buy. Without measuring it, that number can't tell you whether a change helped."
+      },
+      {
+        "when": {
+          "answer": {
+            "f_forecast": [
+              "gut",
+              "no"
+            ],
+            "f_cac": [
+              "rough",
+              "no"
+            ]
+          }
+        },
+        "text": "Revenue and cost per customer are both estimates today. That's what makes it hard to decide how much to invest in growth."
+      },
+      {
+        "when": {
+          "answer": {
+            "f_review": [
+              "problem",
+              "never"
+            ]
+          }
+        },
+        "text": "The numbers get checked when something goes wrong. By then, the problem has usually been there for a while."
+      },
+      {
+        "when": "*",
+        "text": "You can see your numbers. Next: who would run the changes."
+      }
+    ],
+    "team": [
+      {
+        "when": {
+          "answer": {
+            "t_absorb": [
+              "no"
+            ]
+          }
+        },
+        "text": "You're at capacity. More inquiries won't help yet; your plan has to start with what frees up time."
+      },
+      {
+        "when": {
+          "answer": {
+            "t_runner": [
+              "me",
+              "nobody"
+            ]
+          }
+        },
+        "text": "A new system would land on you. That's why your plan has to cover who runs it, not just which tool."
+      },
+      {
+        "when": {
+          "answer": {
+            "t_hours": [
+              "15p"
+            ]
+          }
+        },
+        "text": "You spend more than 15 hours a week on sales and replies. That's the time a system gives back first."
+      },
+      {
+        "when": "*",
+        "text": "You have people and room to take on more. Last block: what you've tried before and what's next."
+      }
+    ],
+    "tech": [
+      {
+        "when": {
+          "flag": "burnedByTech"
+        },
+        "text": "You've tried tools before and they didn't stick. That's common, and it usually means the tool arrived without someone to set it up and run it. Your plan takes that into account."
+      },
+      {
+        "when": {
+          "answer": {
+            "k_when": [
+              "exploring"
+            ]
+          }
+        },
+        "text": "You're exploring for now. Your report separates the few things worth doing first from what can wait."
+      },
+      {
+        "when": "*",
+        "text": "That's everything. Your full report is ready."
+      }
+    ]
+  },
+  "copy": {
+    "report": {
+      "pillarWas": "Phase 1: {was}",
+      "pillarWasAria": "{label}: {now} out of 100, {was} in Phase 1"
+    }
+  }
+}

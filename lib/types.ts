@@ -161,3 +161,98 @@ export interface Company {
   website?: string;
   outside?: OutsideView;
 }
+
+// ---------- fase 2 (config/phase2.config.json; docs/SPEC.md §4, textos en docs/PHASE2.md) ----------
+
+export type Phase2BlockId = "journey" | "pipeline" | "retention" | "reviews" | "marketing" | "visibility" | "team" | "tech";
+
+export interface Phase2Block {
+  id: Phase2BlockId;
+  label: string;
+  intro: string;
+}
+
+/** Componentes de Readiness que solo ve el equipo (0-100). */
+export type TeamComponent = "capacity" | "decision" | "budget" | "timeline";
+
+export interface Phase2Option {
+  id: string;
+  label: string;
+  hint?: string;
+  /** Aportes a pilares que ve el prospecto (los ocho de phase1.config.json → pillars). */
+  scores?: Partial<Record<PillarId, number>>;
+  /** Aportes a la vista del equipo. */
+  team?: Partial<Record<TeamComponent, number>>;
+  flags?: string[];
+}
+
+/** Respuestas de la fase 2 que una regla compara: id de pregunta → ids de opción (multi: basta con que incluya una). */
+export type AnswerMatch = Record<string, string[]>;
+
+/** Cuándo se muestra una pregunta. Todas las condiciones presentes deben cumplirse. */
+export interface ShowIf {
+  situation?: ("leak" | "demand" | "offer" | "scale")[];
+  /** La pregunta indicada ya tiene respuesta. */
+  answered?: string;
+  /** La respuesta no incluye ninguna de estas opciones. */
+  notAnswer?: AnswerMatch;
+}
+
+export interface Phase2Insight {
+  kind: "evidence" | "myth";
+  /** Id en phase2.evidence o, si no está, en phase1.evidence. */
+  evidence?: string;
+  /** Id en phase1.myths. */
+  myth?: string;
+  /** Solo si la opción elegida es una de estas. */
+  options?: string[];
+}
+
+export interface Phase2Question {
+  id: string;
+  block: Phase2BlockId;
+  type: "single" | "multi";
+  prompt: string;
+  sub?: string;
+  /** Presupuesto y decisión: solo en el bloque `tech`. */
+  kind?: "budget" | "decision";
+  showIf?: ShowIf;
+  insight?: Phase2Insight;
+  options: Phase2Option[];
+}
+
+/**
+ * Condición de un mini-hallazgo (todas las presentes deben cumplirse), o "*" para la regla final.
+ * answer / notAnswer: respuestas de la fase 2 · p1 / p1Not: respuestas de la fase 1 · p1Lowest: ese pilar de la fase 1
+ * es ≤ a todos los demás con puntaje · p1Below: alguno de esos pilares de la fase 1 está por debajo del número ·
+ * situation: situación de la fase 1 · flag: alguna opción elegida en la fase 2 lleva ese flag.
+ */
+export type FindingWhen =
+  | "*"
+  | {
+      answer?: AnswerMatch;
+      notAnswer?: AnswerMatch;
+      p1?: AnswerMatch;
+      p1Not?: AnswerMatch;
+      p1Lowest?: Phase1PillarId;
+      p1Below?: Partial<Record<Phase1PillarId, number>>;
+      situation?: ("leak" | "demand" | "offer" | "scale")[];
+      flag?: string;
+    };
+
+export interface BlockFinding {
+  when: FindingWhen;
+  /** Puede usar {closeOf10} (calculadora de la fase 1). */
+  text: string;
+}
+
+export interface Phase2Config {
+  version: string;
+  phase: 2;
+  estimatedMinutes: number;
+  blocks: Phase2Block[];
+  evidence: Record<string, Evidence>;
+  questions: Phase2Question[];
+  findings: Record<Phase2BlockId, BlockFinding[]>;
+  copy: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+}

@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import en from "@/config/phase1.config.json";
 import es from "@/config/phase1.config.es.json";
-import { fill, getConfig, langFromAcceptLanguage, LANGS } from "./config";
+import en2 from "@/config/phase2.config.json";
+import es2 from "@/config/phase2.config.es.json";
+import { fill, getConfig, getPhase2Config, langFromAcceptLanguage, LANGS } from "./config";
 
 // Los dos idiomas deben tener exactamente la misma estructura: mismas claves, mismos ids, opciones, puntajes,
 // valores, evidencia (fuente y url) y reglas. Solo cambian los textos. Si este test falla, el config en español
@@ -102,6 +104,49 @@ describe("config en / es", () => {
 
   it("getConfig devuelve cada idioma", () => {
     for (const l of LANGS) expect(getConfig(l).questions.length).toBe(getConfig("en").questions.length);
+  });
+});
+
+// Fase 2: además de la misma estructura, todo lo que no es texto (ids, puntajes, flags, condiciones de showIf y de los
+// mini-hallazgos, fuentes y urls) debe ser idéntico. Los textos son prompt, sub, label, hint, intro, text y copy.
+const TEXT_KEYS = new Set(["prompt", "sub", "label", "hint", "intro", "text"]);
+
+/** Copia sin los textos traducibles: lo que queda es la lógica de la fase 2. */
+function logicOf(x: Json, path = ""): Json {
+  if (Array.isArray(x)) return x.map((v) => logicOf(v, path));
+  if (x !== null && typeof x === "object") {
+    const out: Record<string, Json> = {};
+    for (const [k, v] of Object.entries(x)) {
+      if (TEXT_KEYS.has(k) || (path === "" && k === "copy")) continue;
+      out[k] = logicOf(v, path ? `${path}.${k}` : k);
+    }
+    return out;
+  }
+  return x;
+}
+
+describe("config de la fase 2 en / es", () => {
+  it("misma estructura y mismos marcadores en los textos", () => {
+    expect(diff(en2 as unknown as Json, es2 as unknown as Json)).toEqual([]);
+  });
+
+  it("misma lógica: ids, puntajes, flags, condiciones, fuentes y urls", () => {
+    expect(logicOf(es2 as unknown as Json)).toEqual(logicOf(en2 as unknown as Json));
+  });
+
+  it("el test de lógica detecta un id de regla o un puntaje cambiados en español", () => {
+    const otraRegla = JSON.parse(JSON.stringify(es2));
+    otraRegla.findings.journey[0].when.answer.j_stuck = ["quote"];
+    expect(logicOf(otraRegla)).not.toEqual(logicOf(en2 as unknown as Json));
+    const otroPuntaje = JSON.parse(JSON.stringify(es2));
+    otroPuntaje.questions[0].options[0].scores.visibility = 1;
+    expect(logicOf(otroPuntaje)).not.toEqual(logicOf(en2 as unknown as Json));
+  });
+
+  it("los textos sí están traducidos", () => {
+    const [e, s] = [getPhase2Config("en"), getPhase2Config("es")];
+    e.questions.forEach((q, i) => expect(s.questions[i].prompt, q.id).not.toBe(q.prompt));
+    e.blocks.forEach((b, i) => expect(s.blocks[i].intro, b.id).not.toBe(b.intro));
   });
 });
 
