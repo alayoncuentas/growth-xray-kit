@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { calculatorId, resultsMode } from "@/lib/flow";
 import { Suspense } from "react";
 import { CodeError } from "@/components/gate/CodeError";
+import { PhaseSteps } from "@/components/results/PhaseSteps";
 import { ResultsBody } from "@/components/results/ResultsBody";
 import { BusinessMarker } from "@/components/ui/BusinessMarker";
 import { ButtonLink } from "@/components/ui/Button";
@@ -71,7 +72,8 @@ async function Report({ code: raw, sample }: { code: string; sample: unknown }) 
         editHref={`${resumeHref}/q/${calculatorId(phase1)}`}
       />
       <section className="mt-5 grid gap-3 border-2 border-rule bg-card px-[18px] py-4 min-[561px]:px-7 min-[561px]:py-6">
-        <h2 className="text-lg uppercase">{t.continueTitle}</h2>
+        <PhaseSteps tone="card" />
+        <h2 className="mt-1 text-lg uppercase">{t.continueTitle}</h2>
         <p className="text-muted">{open ? t.continueSubOpen : t.continueSub}</p>
         <div>
           <ButtonLink href={resumeHref} variant="line">

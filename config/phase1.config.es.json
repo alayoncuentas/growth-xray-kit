@@ -856,6 +856,12 @@
       "pillarsTitle": "Cómo está tu sistema",
       "pillarsSub": "De la más débil a la más fuerte",
       "lockedSummary": "{n} áreas más se abren en la fase 2: {list}.",
+      "lockedTitle": "Se abre en la fase 2",
+      "lockedNotes": {
+        "retention": "Cada cuánto vuelven tus clientes y te recomiendan.",
+        "visibility": "Si conoces tu tasa de cierre, tu costo por cliente y qué esperar el próximo trimestre.",
+        "readiness": "Quién atendería un sistema nuevo, y cuándo."
+      },
       "moneyTitle": "Dinero que se queda sobre la mesa",
       "fixTitle": "Qué corregir, en orden",
       "stepsTitle": "Por dónde empezar",
@@ -866,6 +872,7 @@
       "firstStep": "Tu primer paso",
       "noGaps": "No hay brechas importantes en la fase 1. Lo que sigue está en la medición y la retención, que cubre la fase 2.",
       "notYetTitle": "Lo que probablemente todavía no necesitas",
+      "notYetCount": "{n} puntos",
       "redo": "Cambiar mis respuestas",
       "emptyTitle": "Todavía no hay respuestas con este código.",
       "emptyTitleOpen": "Todavía no tenemos respuestas.",
@@ -938,6 +945,14 @@
     },
     "unlock": {
       "eyebrow": "Fase 2 · Unos 20 minutos · Pausa cuando quieras",
+      "steps": {
+        "label": "Tu avance",
+        "p1": "Fase 1",
+        "p2": "Fase 2",
+        "report": "Informe completo",
+        "done": "Lista",
+        "next": "Siguiente"
+      },
       "title": "Ya sabes dónde está la fuga. La fase 2 te dice exactamente cómo cerrarla.",
       "titles": {
         "demand": "Ya sabes dónde está la oportunidad. La fase 2 revisa tu visibilidad y qué corregir primero.",

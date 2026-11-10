@@ -176,13 +176,14 @@
   summary::-webkit-details-marker {
     display: none;
   }
-  summary::before {
+  /* Los desplegables con flecha propia (clase chevron, ChevronIcon) no llevan el + / −. */
+  summary:not(.chevron)::before {
     content: "+";
     display: inline-block;
     width: 1.1em;
     font-weight: 700;
   }
-  details[open] > summary::before {
+  details[open] > summary:not(.chevron)::before {
     content: "−";
   }
   @media (prefers-reduced-motion: reduce) {

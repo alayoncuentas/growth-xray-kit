@@ -3,6 +3,8 @@
 import { useConfig } from "@/lib/i18n";
 import type { NotYetId, Phase1PillarId } from "@/lib/types";
 import { Badge } from "@/components/ui/Badge";
+import { ChevronIcon } from "@/components/ui/ChevronIcon";
+import { fill } from "@/lib/config";
 import type { FirstStep } from "@/lib/scoring";
 
 type Fix = { pillar: Phase1PillarId; score: number };
@@ -66,15 +68,24 @@ function Severity({ score }: { score: number }) {
   );
 }
 
-/** "What you probably don't need yet", plegado. */
+/**
+ * "What you probably don't need yet", plegado: toda la fila es el área táctil, con fondo, contador y una flecha que
+ * gira al abrir (la animación la anula "reducir movimiento", app/globals.css).
+ */
 export function NotYet({ items }: { items: NotYetId[] }) {
   const cfg = useConfig();
+  const t = cfg.copy.results;
   return (
-    <details className="border-2 border-rule bg-card px-[18px] py-1.5 min-[561px]:px-6">
-      <summary className="flex min-h-11 items-center">
-        <h2 className="inline text-lg uppercase">{cfg.copy.results.notYetTitle}</h2>
+    <details className="group border-2 border-rule bg-card">
+      <summary className="chevron flex min-h-[52px] items-center gap-3 bg-card-2 px-[18px] py-2 hover:bg-line group-open:border-b-2 group-open:border-rule min-[561px]:px-6">
+        <h2 className="min-w-0 flex-1 text-lg uppercase">{t.notYetTitle}</h2>
+        <Badge tone="strong" className="shrink-0 tabular-nums">
+          <span aria-hidden="true">{items.length}</span>
+          <span className="sr-only">{fill(t.notYetCount, { n: items.length })}</span>
+        </Badge>
+        <ChevronIcon className="shrink-0 text-ink transition-transform duration-150 group-open:rotate-180" />
       </summary>
-      <ul className="mt-1 mb-3 grid gap-2.5">
+      <ul className="mt-3 mb-4 grid gap-2.5 px-[18px] min-[561px]:px-6">
         {items.map((id) => (
           <li key={id} className="relative pl-[22px] text-[15px] before:absolute before:top-2.5 before:left-0.5 before:h-0.5 before:w-2.5 before:bg-ink-2">
             {cfg.notYet[id]}

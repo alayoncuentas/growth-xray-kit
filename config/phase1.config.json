@@ -856,6 +856,12 @@
       "pillarsTitle": "Where your system stands",
       "pillarsSub": "Weakest first",
       "lockedSummary": "{n} more areas open in Phase 2: {list}.",
+      "lockedTitle": "Opens in Phase 2",
+      "lockedNotes": {
+        "retention": "How often customers come back and refer others.",
+        "visibility": "Whether you know your close rate, cost per customer and what to expect next quarter.",
+        "readiness": "Who would run a new system, and when."
+      },
       "moneyTitle": "Money on the table",
       "fixTitle": "What to fix, in order",
       "stepsTitle": "Where to start",
@@ -866,6 +872,7 @@
       "firstStep": "Your first step",
       "noGaps": "No major gaps in Phase 1. Your next gains are in measurement and retention, which Phase 2 covers.",
       "notYetTitle": "What you probably don't need yet",
+      "notYetCount": "{n} items",
       "redo": "Change my answers",
       "emptyTitle": "We don't have any answers for this code yet.",
       "emptyTitleOpen": "We don't have any answers yet.",
@@ -938,6 +945,14 @@
     },
     "unlock": {
       "eyebrow": "Phase 2 · About 20 minutes · Pause any time",
+      "steps": {
+        "label": "Your progress",
+        "p1": "Phase 1",
+        "p2": "Phase 2",
+        "report": "Full report",
+        "done": "Done",
+        "next": "Next"
+      },
       "title": "You know where the leak is. Phase 2 tells you exactly how to close it.",
       "titles": {
         "demand": "You know where the opportunity is. Phase 2 looks at your visibility and what to fix first.",

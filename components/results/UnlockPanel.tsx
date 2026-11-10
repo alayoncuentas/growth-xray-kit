@@ -6,6 +6,7 @@ import { SaveForLater } from "@/components/question/SaveForLater";
 import { fill } from "@/lib/config";
 import { useConfig } from "@/lib/i18n";
 import type { Situation } from "@/lib/scoring";
+import { PhaseSteps } from "./PhaseSteps";
 
 /** Bloque oscuro de invitación a la fase 2 (invierte paper/ink). El título depende de la situación (docs/SPEC.md §3). */
 export function UnlockPanel({
@@ -29,6 +30,9 @@ export function UnlockPanel({
   return (
     <section className="mt-5 grid gap-3.5 bg-ink px-[18px] py-5 text-paper min-[561px]:px-8 min-[561px]:py-7">
       <div className="label-mono text-paper/75">{u.eyebrow}</div>
+      <div className="my-1">
+        <PhaseSteps />
+      </div>
       <h2 className="text-[clamp(22px,4vw,28px)] uppercase">{title}</h2>
       <ul className="grid list-[square] gap-1.5 pl-[18px] marker:text-highlight">
         {u.bullets.map((b: string) => (
