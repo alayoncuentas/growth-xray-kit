@@ -373,3 +373,26 @@ Reglas de persistencia (fase 1):
 | 2. Fase 2 | `phase2.config.json`, bloques con pausa, informe completo, agenda | % de quienes terminan la fase 1 y pasan a la fase 2 |
 | 3. Integraciones | CRM, PostHog, Google Places para la vista externa | Leads llegan al CRM con puntaje |
 | 4. Calibración | Ajuste de pesos con datos de 30+ diagnósticos; casos propios en el banco de evidencia | Correlación puntaje ↔ cierre |
+
+## 8. Registro de cambios de pesos, topes y umbrales
+
+Regla: cada cambio de un peso, tope o umbral de la calificación (constantes de `lib/scoring.ts`, fórmulas de §3 y §4, o
+puntajes de las opciones en los configs) agrega una fila aquí **en el mismo commit**, con la fecha, el valor anterior y
+el nuevo, y el motivo (y los datos que lo justifican, cuando los haya). Antes del 2026-11-02 rigen los valores iniciales
+de §3, sin registro.
+
+| Fecha | Qué | Antes → después | Motivo | Commit |
+|---|---|---|---|---|
+| 2026-11-02 | Situación: `SMALL_STAKES_ANNUAL`, `DEMAND_*`, `OFFER_*`, `SCALE_*` (§3) | — → $30,000; 4 / 10 / 1 consultas; 5 consultas y $300; 20 consultas, 10 % y índice 70 | Separar "cerrar fugas" de demanda, oferta y escala; hipótesis inicial a calibrar con 30 diagnósticos | `d784402` |
+| 2026-11-02 | Veredictos `demand` y `offer` | fórmula Need / Potential → veredicto propio | Con poca demanda o ticket bajo, el problema no es de seguimiento | `d784402` |
+| 2026-11-02 | `scale` solo declarado (0 perdidas sin confirmar) | "Alta prioridad" / "Nutrir" → como máximo "Optimización selectiva" | Lo declarado se verifica en la llamada antes de priorizar | `923ae31` |
+| 2026-11-10 | Readiness al terminar la fase 2 (`READINESS_WEIGHTS`) | preliminar `40 + 20 + 15 + 10`, tope 85 → `0.30·capacidad + 0.25·decisión + 0.25·presupuesto + 0.20·plazo` | La fase 2 mide capacidad, decisión, presupuesto y plazo; hipótesis a calibrar | `bdf317c` |
+| 2026-11-10 | Tope por presupuesto (`LOW_BUDGET_READINESS_CAP`) | sin tope → con menos de $400 al mes, Readiness máximo 50 | En los casos de prueba, un negocio con presupuesto mínimo llegaba a 62 y pasaba a "Alta prioridad"; corte en $400 decidido por el dueño del producto | `bdf317c` |
+| 2026-11-10 | Umbral de "Alta prioridad" (Readiness ≥ 55) | 55 → 55 (sin cambio) | Revisado con 5 casos frente a la fórmula preliminar (`docs/PHASE2.md` §Readiness); se mantiene con el tope | `bdf317c` |
+
+> **Cómo se guardan hoy los puntajes.** Need, Potential, Readiness, el veredicto y las alertas se calculan con funciones
+> puras a partir de las respuestas guardadas. La tabla `scores` guarda además una **copia** que se recalcula con la
+> fórmula vigente cada vez que llega una respuesta (`lib/server/diagnostic.ts`). El detalle de un lead en `/admin`
+> recalcula al leer, desde las respuestas; la lista, el embudo y el CSV leen la copia de `scores`. Por eso, si cambia un
+> peso, las filas de los leads que no vuelven a responder conservan el valor anterior hasta que se recalculen. Esto se
+> resuelve en la etapa 3 de la fase 2 (persistencia).
