@@ -174,25 +174,70 @@ por leads que se pierden · dueño cuello de botella (owner ≤ 25) · trabaja s
 
 > Los pesos y umbrales son una hipótesis inicial. Después de 30 diagnósticos reales, comparar los puntajes con quién avanzó a llamada y quién cerró, y ajustar.
 
-## 4. Fase 2 (por construir)
+## 4. Fase 2 (en construcción)
 
-8 bloques, unas 3-4 preguntas cada uno, con un mini-hallazgo al cerrar cada bloque y pausa permitida entre bloques.
+8 bloques, unas 3-4 preguntas cada uno (30 a 32 visibles según el caso), con un mini-hallazgo al cerrar cada bloque y
+pausa permitida entre bloques. Preguntas, opciones, puntajes y mini-hallazgos en `config/phase2.config.json` y
+`config/phase2.config.es.json` (misma estructura, lo verifica `lib/config.test.ts`). El borrador de los textos, pendiente
+de aprobación, está en `docs/PHASE2.md`.
 
-| Bloque | Mide | Preguntas tentativas |
+| Bloque | Mide | Pilares que recibe |
 |---|---|---|
-| 1. Customer journey | recorrido completo | Del primer contacto al pago, ¿cuántos pasos hay? ¿Dónde se traba más gente? ¿Qué pasa después de la venta? |
-| 2. Pipeline & follow-up | pipeline, followup | ¿Cuántas cotizaciones abiertas hay hoy? ¿Sabes su valor total? ¿Registras por qué pierdes ventas? ¿Quién es responsable de cada oportunidad? |
-| 3. Retention & LTV | retention | ¿Cada cuánto vuelve un cliente? ¿Le recuerdas renovaciones o mantenimientos? ¿Tienes una lista de clientes anteriores que puedas contactar? ¿Pides referidos con un proceso? |
-| 4. Reviews & proof | reputation | ¿Respondes las reseñas: todas, solo las malas, ninguna? ¿Tienes testimonios en video o casos con números? ¿Dónde los usas: web, anuncios, cotizaciones? → tarjeta FTC 2024 |
-| 5. Advertising & marketing history | demand, ads | ¿Cuánto inviertes y en qué? ¿Trabajaste con agencias? ¿Qué pasó? ¿Sabes qué anuncio trajo a qué cliente? → mito "marketing doesn't work" |
-| 6. Visibility & forecasting | visibility | ¿Sabes tu tasa de cierre? ¿Tu costo por cliente? ¿Puedes proyectar los ingresos del próximo trimestre? |
-| 7. Team & capacity | readiness, owner | ¿Quién atendería un sistema nuevo? ¿Puedes absorber un 30% más de clientes? ¿Quién responde este diagnóstico? |
-| 8. Technology history & readiness | readiness | ¿Qué herramientas probaste y por qué las dejaste? ¿Quién decide la inversión? Rango de presupuesto mensual. ¿Cuándo quieres resolver esto? |
+| 1. Customer journey | recorrido completo | visibility, pipeline, retention, reputation |
+| 2. Pipeline & follow-up | cotizaciones abiertas, motivos de pérdida, responsable | pipeline, visibility, owner |
+| 3. Retention & LTV | recompra, recordatorios, lista de clientes, referidos | retention |
+| 4. Reviews & proof | respuesta a reseñas, pruebas, a quién se le piden → tarjeta FTC 2024 | reputation |
+| 5. Advertising & marketing history | canales, agencias, atribución → mito "marketing doesn't work" | visibility |
+| 6. Visibility & forecasting | tasa de cierre, costo por cliente, proyección | visibility |
+| 7. Team & capacity | quién atendería un sistema, capacidad, quién responde | readiness, owner (y capacidad del equipo) |
+| 8. Technology history & readiness | herramientas probadas, decisión, presupuesto, plazo | readiness (y decisión, presupuesto y plazo del equipo) |
 
-Reglas de la fase 2:
-- Las preguntas de presupuesto y decisión van **solo** en el bloque 8.
-- "Burned by tech" (probó y abandonó herramientas) **no descalifica**: sube el peso de la oferta de servicio gestionado y del acompañamiento.
-- Resultado final: informe completo + ruta en 3 fases (Captura y organización → Atención y seguimiento → Medición y crecimiento, adaptada a lo que ya tiene) + CTA para agendar.
+### Decisiones aprobadas (2026-11-10)
+- **Quién entra**: solo un código con correo **y** con la fase 1 terminada (`canEnterPhase2`, función pura). Sin correo,
+  "Continue to Phase 2" lleva a la pantalla del correo (`?next=phase-2`; `email_captured` con `from: phase2`); sin la fase 1
+  terminada, a la primera pregunta pendiente. El servidor lo comprueba en cada ruta de la fase 2 y en `/api/answer`.
+- **Recorrido único** para las cuatro situaciones, con una pregunta condicional como máximo por situación
+  (`showIf: { situation: [...] }`; offer: oferta adicional en el bloque 3; demand: qué probó para conseguir consultas en el
+  bloque 5) y una condicional por respuesta (`showIf: { answer: … }`: por qué dejó las herramientas, en el bloque 8). Los
+  mini-hallazgos y la ruta en 3 fases del informe cambian de texto según la situación.
+- **Una pregunta por pantalla**, guardada al momento como en la fase 1 (`/api/answer` con `phase: 2`, sesión `phase = 2`).
+  Un bloque está **terminado** cuando todas sus preguntas visibles tienen respuesta (se calcula; sin columna nueva). Al
+  cerrarlo, pantalla de pausa con el mini-hallazgo, "Continue" y "Save and finish later"; evento `block_done`
+  (`payload.block`), una vez por bloque. Al cerrar el bloque 8: `phase_done` (`phase: 2`), estado `p2_done` y el correo con el
+  informe completo (una vez por código, `kind: "report2"`).
+- **Retomar**: la bienvenida `/x/[code]` lleva a la primera pregunta visible sin responder de la fase 2 si ya empezó, o al
+  informe si terminó. El link de "Save and finish later" lleva directo a la fase 2 cuando ya empezó.
+- **Mini-hallazgo**: la primera regla del bloque que se cumple (`findings.<bloque>`, con una regla `"*"` obligatoria). Las
+  reglas pueden leer respuestas de la fase 2 y respuestas o pilares de la fase 1; el texto nunca afirma más de lo que dice el
+  dato (p. ej. "lo más débil" solo si el pilar es el mínimo). Sin cifras sin fuente.
+- **Pilares**: cada pilar es el promedio de sus aportes (misma regla que la fase 1). Los bloques 1, 2, 4 y 7 también aportan a
+  pilares de la fase 1. El informe completo muestra los 8 pilares y el **índice completo** (promedio simple de los 8); en cada
+  pilar que cambió se ve el valor de la fase 1 junto al actualizado. `/r/[code]` con la fase 1 sola no cambia.
+- **Pilar `readiness` visible**: quién atendería el sistema, capacidad para 30 % más de clientes y plazo. El presupuesto y
+  quién decide **no** entran en el pilar que ve el prospecto, solo en la vista del equipo.
+- **Readiness del equipo** al terminar la fase 2 (reemplaza la fórmula preliminar de §3):
+  ```
+  capacidad = promedio(team.capacity de "quién atendería" y "30 % más")
+  Readiness = round(0.30·capacidad + 0.25·decisión + 0.25·presupuesto + 0.20·plazo)      0–100
+  ```
+  > Pesos, valores de las opciones y umbral (55 para "Alta prioridad") son una **hipótesis a calibrar** con los primeros 30
+  > diagnósticos completos, igual que el tope de $30,000. El umbral no se fija hasta revisar los casos de ejemplo de
+  > `docs/PHASE2.md` §Readiness.
+- **"Burned by tech"** (flag `burnedByTech`: probó y dejó al menos una herramienta, bloque 8) **no descalifica**: no baja
+  Readiness ni el veredicto (test con casos pareados). Suma a `managedFit` (función pura): burnedByTech +40, "nadie / yo"
+  atendería el sistema +30, trabaja solo +20, "el equipo no la usaba" +10. Con `managedFit` ≥ 50: alerta en `/admin`
+  ("Burned by tech: lead with managed service and onboarding") y la ruta del informe usa la variante "lo operamos contigo".
+- Las preguntas de presupuesto y decisión van **solo** en el bloque 8 (`kind: budget | decision`; un test lo exige).
+- **Resultado final** (`/x/[code]/report`, y `/r/[code]` cuando la fase 2 terminó): informe completo + ruta en 3 fases
+  (Captura y organización → Atención y seguimiento → Medición y crecimiento, adaptada a lo que ya tiene y a la situación)
+  + CTA para agendar.
+- **Agenda**: calendario de GoHighLevel incrustado (Embed Code) en el informe. "Agendó" llega por un workflow de GHL
+  (trigger "Customer Booked Appointment", filtro "In Calendar", acción Custom Webhook) a `POST /api/ghl/booked`, con
+  `Authorization: Bearer <GHL_WEBHOOK_SECRET>` comparado en tiempo constante: estado `booked` y evento `booked`. Al terminar
+  la fase 2, upsert del contacto en GHL con los datos de las dos fases (`/api/crm-sync`, docs/OPEN_ENTRY.md §6). Duración
+  propuesta de la cita: 30 min. Precargar nombre y correo en el calendario no está documentado: solo se usa si funciona en
+  una prueba.
+- **Rama**: `feature/phase-2`, creada desde `feature/open-entry`.
 
 ## 5. Arquitectura recomendada
 
@@ -205,7 +250,7 @@ Reglas de la fase 2:
 | Correo transaccional | **Resend** | Envío del informe y del link para retomar |
 | Correo de prospección | Herramienta dedicada (Instantly, Smartlead o similar) con dominio secundario | Protege tu dominio principal; maneja bajas (CAN-SPAM) |
 | CRM | Webhook a **HubSpot** o **GoHighLevel** | Crear contacto + negocio con puntajes, arquetipo y alertas |
-| Agenda | **Cal.com** o **Calendly** (link) | CTA final |
+| Agenda | **GoHighLevel** (calendario incrustado + workflow con webhook) | CTA final; mismo CRM (§4) |
 | Analítica | **PostHog** | Embudo y abandono por pregunta |
 | Datos externos | **Google Places API** | Calificación y número de reseñas para "Lo que vimos desde afuera" |
 
@@ -278,7 +323,10 @@ Reglas de persistencia (fase 1):
 /x/[code]/business     datos del negocio (solo camino abierto, después del rubro)
 /x/[code]/email        pantalla del correo (al terminar la fase 1 sin correo)
 /x/[code]/results      resultado de la fase 1 (parcial en el camino abierto sin correo; ?skip=1, ?unlocked=1)
-/x/[code]/phase-2/...  bloques de la fase 2
+/x/[code]/phase-2       entrada de la fase 2 (correo y fase 1 terminada; lleva a la primera pendiente)
+/x/[code]/phase-2/q/[qid]  pregunta de la fase 2
+/x/[code]/phase-2/b/[block] pausa al cerrar un bloque (mini-hallazgo)
+/x/[code]/report       informe completo + ruta en 3 fases + agendar
 /r/[code]              informe compartible (solo lectura)
 /admin                 panel interno (protegido con Supabase Auth): lista, embudo, puntajes, vista del equipo; ?source=invited|open
 /admin/export          CSV (?status=sent, ?source=invited|open)
@@ -288,6 +336,7 @@ Reglas de persistencia (fase 1):
 /api/answer            POST: guarda respuesta y recalcula puntajes
 /api/cron/cleanup      GET (Vercel Cron, Bearer CRON_SECRET): borrado automático diario
 /api/crm-sync          webhook al CRM cuando termina una fase
+/api/ghl/booked        POST (workflow de GHL, Bearer GHL_WEBHOOK_SECRET): marca la cita agendada
 ```
 
 ## 6. Seguridad, privacidad y cumplimiento (EE. UU.)
