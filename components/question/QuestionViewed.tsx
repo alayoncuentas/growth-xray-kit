@@ -8,12 +8,12 @@ import { markQuestionViewed } from "@/app/actions";
 const sent = new Set<string>();
 
 /** Registra que la pregunta se vio en el navegador (`question_viewed`), para el abandono por pregunta en el panel. */
-export function QuestionViewed({ code, qid }: { code: string; qid: string }) {
+export function QuestionViewed({ code, qid, phase = 1 }: { code: string; qid: string; phase?: 1 | 2 }) {
   useEffect(() => {
-    const key = `${code}:${qid}`;
+    const key = `${code}:${phase}:${qid}`;
     if (sent.has(key)) return;
     sent.add(key);
-    markQuestionViewed(code, qid).catch((e) => console.warn("[question_viewed]", e));
-  }, [code, qid]);
+    markQuestionViewed(code, qid, phase).catch((e) => console.warn("[question_viewed]", e));
+  }, [code, qid, phase]);
   return null;
 }

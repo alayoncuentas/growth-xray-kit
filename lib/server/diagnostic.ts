@@ -132,8 +132,8 @@ export async function openLink(code: string, userAgent: string | null) {
 }
 
 /** La pregunta se vio en el navegador. No crea la sesión: eso lo hacen abrir el link, el inicio abierto o responder. */
-export async function logQuestionViewed(code: string, questionId: string) {
-  await logEvent(code, "question_viewed", { phase: PHASE, question_id: questionId });
+export async function logQuestionViewed(code: string, questionId: string, phase: Phase = PHASE) {
+  await logEvent(code, "question_viewed", { phase, question_id: questionId });
 }
 
 /** Camino abierto: la persona empieza desde el inicio. La sesión nace con el idioma de su navegador. */

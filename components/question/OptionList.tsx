@@ -1,13 +1,16 @@
 "use client";
 
-import type { ChoiceQuestion } from "@/lib/types";
+import type { ChoiceQuestion, Phase2Question } from "@/lib/types";
+
+/** Lo que la lista necesita de una pregunta de opciones, de la fase 1 o de la fase 2. */
+type OptionsQuestion = Pick<ChoiceQuestion | Phase2Question, "type" | "prompt" | "options">;
 
 export function OptionList({
   question,
   value,
   onToggle,
 }: {
-  question: ChoiceQuestion;
+  question: OptionsQuestion;
   value: string | string[] | undefined;
   onToggle: (optionId: string) => void;
 }) {

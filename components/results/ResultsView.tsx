@@ -23,6 +23,7 @@ export function ResultsView({
   gift = "B",
   unlockedTo = null,
   offered = null,
+  phase2Href,
 }: {
   code: string;
   company: Company | null;
@@ -35,6 +36,8 @@ export function ResultsView({
   unlockedTo?: string | null;
   /** Regalo ya ofrecido (código con correo y fase terminada) y el correo enmascarado al que escribiremos. */
   offered?: { kind: GiftKind; to: string } | null;
+  /** Entrada a la fase 2 (en la vista previa, con la muestra). */
+  phase2Href: string;
 }) {
   const { answers, calc } = useDiagnostic(code);
   const cfg = useConfig();
@@ -84,7 +87,7 @@ export function ResultsView({
 
       {offered && <GiftPanel kind={offered.kind} to={offered.to} />}
 
-      <UnlockPanel code={code} open={open} situation={res.situation} confirmed={res.scaleConfirmed} />
+      <UnlockPanel code={code} href={phase2Href} open={open} situation={res.situation} confirmed={res.scaleConfirmed} />
 
       {redo}
     </>

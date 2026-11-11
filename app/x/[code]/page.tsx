@@ -9,11 +9,13 @@ import { Card } from "@/components/ui/Card";
 import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { LoadingCard } from "@/components/ui/Loading";
-import { fill, getConfig } from "@/lib/config";
+import { fill, getConfig, phase1, phase2 } from "@/lib/config";
 import { answeredCount, resumeTarget } from "@/lib/answers";
 import { businessFirst, firstQuestion, needsBusinessStep, stepHref } from "@/lib/flow";
 import { checkAccess } from "@/lib/server/access";
-import { emptyPhase1, loadPhase1 } from "@/lib/server/diagnostic";
+import { emptyPhase1, loadPhase1, loadPhase2 } from "@/lib/server/diagnostic";
+import { doneBlocks } from "@/lib/phase2";
+import { phase1Result } from "@/lib/scoring";
 import { LangProvider } from "@/lib/i18n";
 import { DiagnosticProvider } from "@/lib/store";
 
@@ -43,20 +45,30 @@ async function Welcome({ code: raw, frame }: { code: string; frame: boolean }) {
   const saved = r.access.preview ? emptyPhase1() : await loadPhase1(code); // la vista previa no lee la base
   const { done, total } = answeredCount(cfg, saved, co?.industry);
   const target = resumeTarget(cfg, saved, co?.industry);
-  const mode = saved.completed ? "done" : done > 0 ? "resume" : "new";
-  const title = mode === "done" ? w.doneTitle : mode === "resume" ? w.resumeTitle : co?.business ? w.titleKnown : w.titleGeneric;
-  const sub = mode === "done" ? w.doneSub : mode === "resume" ? fill(w.resumeSub, { done, total }) : w.sub;
+  // Fase 2 empezada: la bienvenida lleva a la fase 2 (que retoma en la primera pregunta pendiente). Terminada, a los
+  // resultados hasta que exista el informe completo (etapa 5).
+  const saved2 = saved.completed && !r.access.preview ? await loadPhase2(code) : null;
+  const blocks2 = saved2?.started ? doneBlocks(phase2, saved2.answers, phase1Result(phase1, saved.answers, saved.calc).situation).length : 0;
+  const mode = saved2?.completed ? "p2done" : saved2?.started ? "p2" : saved.completed ? "done" : done > 0 ? "resume" : "new";
+  const titles = { p2done: w.p2DoneTitle, p2: w.p2ResumeTitle, done: w.doneTitle, resume: w.resumeTitle };
+  const title = mode === "new" ? (co?.business ? w.titleKnown : w.titleGeneric) : titles[mode];
+  const subs = {
+    p2done: w.p2DoneSub,
+    p2: fill(w.p2ResumeSub, { done: blocks2, total: phase2.blocks.length }),
+    done: w.doneSub,
+    resume: fill(w.resumeSub, { done, total }),
+    new: w.sub,
+  };
+  const sub = subs[mode];
   // Camino abierto sin nombre: retomar después del rubro pasa primero por los datos del negocio.
   const needsBusiness = needsBusinessStep({ open: r.access.open, business: co?.business });
   const resumeQid = mode === "done" || target.kind === "results" ? null : target.qid;
-  const ctaHref =
-    mode === "new"
-      ? firstHref
-      : businessFirst(cfg, resumeQid, { knownIndustry: co?.industry, needsBusiness })
-        ? stepHref(code, { kind: "business" })
-        : resumeQid
-          ? `${base}/q/${resumeQid}`
-          : `${base}/results`;
+  const phase1Href = businessFirst(cfg, resumeQid, { knownIndustry: co?.industry, needsBusiness })
+    ? stepHref(code, { kind: "business" })
+    : resumeQid
+      ? `${base}/q/${resumeQid}`
+      : `${base}/results`;
+  const ctaHref = mode === "new" ? firstHref : mode === "p2" ? `${base}/phase-2` : mode === "p2done" ? `${base}/results` : phase1Href;
   const named = !!co?.business; // una empresa abierta todavía sin nombre se saluda como sin empresa
 
   return (
@@ -101,14 +113,14 @@ async function Welcome({ code: raw, frame }: { code: string; frame: boolean }) {
             {r.access.open ? w.backOpen : w.back}
           </ButtonLink>
           <ButtonLink href={ctaHref}>
-            {mode === "done" ? w.doneCta : mode === "resume" ? w.resumeCta : w.cta}
+            {mode === "p2" ? w.p2ResumeCta : mode === "done" || mode === "p2done" ? w.doneCta : mode === "resume" ? w.resumeCta : w.cta}
             <Arrow />
           </ButtonLink>
         </div>
         {mode !== "new" && (
           <p className="mt-4 text-right text-sm">
             <Link href={firstHref} className="inline-flex min-h-11 items-center text-ink-2 underline underline-offset-4 hover:text-ink">
-              {mode === "done" ? w.doneReview : w.resumeFromStart}
+              {mode === "resume" ? w.resumeFromStart : w.doneReview}
             </Link>
           </p>
         )}

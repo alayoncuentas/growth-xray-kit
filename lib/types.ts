@@ -169,6 +169,9 @@ export type Phase2BlockId = "journey" | "pipeline" | "retention" | "reviews" | "
 export interface Phase2Block {
   id: Phase2BlockId;
   label: string;
+  /** Tiempo estimado del bloque, en minutos (aprobado el 2026-11-11). */
+  minutes: number;
+  /** Frase de apertura, encima de la primera pregunta del bloque. */
   intro: string;
 }
 

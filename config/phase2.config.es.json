@@ -6,41 +6,49 @@
     {
       "id": "journey",
       "label": "El recorrido del cliente",
+      "minutes": 2,
       "intro": "Primero, el camino de un cliente, desde el primer mensaje hasta el pago."
     },
     {
       "id": "pipeline",
       "label": "Cotizaciones y seguimiento",
+      "minutes": 2,
       "intro": "Ahora, las cotizaciones y ventas que siguen abiertas."
     },
     {
       "id": "retention",
       "label": "Retención y valor del cliente",
+      "minutes": 3,
       "intro": "Ahora, los clientes que ya tienes."
     },
     {
       "id": "reviews",
       "label": "Reseñas y pruebas",
+      "minutes": 2,
       "intro": "Ahora, lo que la gente ve antes de elegirte."
     },
     {
       "id": "marketing",
       "label": "Historia con el marketing",
+      "minutes": 2,
       "intro": "Ahora, lo que has probado para atraer clientes."
     },
     {
       "id": "visibility",
       "label": "Visibilidad y proyección",
+      "minutes": 2,
       "intro": "Ahora, los números con los que tomas decisiones."
     },
     {
       "id": "team",
       "label": "Equipo y capacidad",
+      "minutes": 2,
       "intro": "Ahora, quién haría que esto funcione en el día a día."
     },
     {
       "id": "tech",
       "label": "Herramientas y próximos pasos",
+      "minutes": 3,
       "intro": "Último bloque: lo que ya probaste y lo que tendría sentido ahora."
     }
   ],
@@ -1692,6 +1700,20 @@
     ]
   },
   "copy": {
+    "flow": {
+      "block": "Bloque {n} de {total} · {label}",
+      "minutesLeft": "Faltan unos {n} min",
+      "backToResults": "Volver a mis resultados",
+      "pause": {
+        "eyebrow": "Bloque {n} de {total} listo · {label}",
+        "title": "Lo que notamos",
+        "next": "Sigue: {label} · unos {n} min",
+        "continue": "Continuar",
+        "saved": "Puedes parar aquí. Tus respuestas quedan guardadas.",
+        "finalEyebrow": "Fase 2 completa",
+        "finalCta": "Volver a mis resultados"
+      }
+    },
     "report": {
       "pillarWas": "Fase 1: {was}",
       "pillarWasAria": "{label}: {now} de 100; {was} en la fase 1"

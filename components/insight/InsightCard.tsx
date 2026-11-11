@@ -2,6 +2,7 @@
 
 import { useConfig } from "@/lib/i18n";
 import type { InsightView } from "@/lib/insights";
+import type { Evidence } from "@/lib/types";
 
 /** Texto con **negritas** simples, como los espejos del config. */
 export function Rich({ text }: { text: string }) {
@@ -18,9 +19,8 @@ function Shell({ tag, myth = false, children }: { tag: string; myth?: boolean; c
   );
 }
 
-function Source({ id, link = true }: { id: string; link?: boolean }) {
-  const { evidence, copy } = useConfig();
-  const e = evidence[id];
+function Source({ e, link = true }: { e: Evidence; link?: boolean }) {
+  const { copy } = useConfig();
   return (
     <p className="border-t border-line pt-2 text-sm break-words text-muted">
       {copy.insight.source} {e.source}
@@ -43,7 +43,18 @@ export function EvidenceCard({ id, lead, extraLead }: { id: string; lead?: strin
       {lead && <p className="text-lg leading-snug">{lead}</p>}
       <p>{evidence[id].text}</p>
       {extraLead && <p className="text-lg leading-snug">{extraLead}</p>}
-      <Source id={id} />
+      <Source e={evidence[id]} />
+    </Shell>
+  );
+}
+
+/** Evidencia ya resuelta (la fase 2 la busca en su config y, si no está, en el de la fase 1). */
+export function EvidenceItemCard({ item }: { item: Evidence }) {
+  const { copy } = useConfig();
+  return (
+    <Shell tag={copy.insight.evidenceTag}>
+      <p>{item.text}</p>
+      <Source e={item} />
     </Shell>
   );
 }
@@ -69,7 +80,7 @@ export function MythCard({ id }: { id: string }) {
       <p>{m.reality}</p>
       {ev && <p>{evidence[ev].text}</p>}
       {m.note && <p className="text-sm text-ink-2">{m.note}</p>}
-      {ev && <Source id={ev} link={false} />}
+      {ev && <Source e={evidence[ev]} link={false} />}
     </Shell>
   );
 }

@@ -7,8 +7,9 @@
 import { setSaveFailed } from "./store";
 
 type Value = string | string[] | Record<string, number>;
+type Phase = 1 | 2;
 
-const pending = new Map<string, { code: string; questionId: string; value: Value }>();
+const pending = new Map<string, { code: string; questionId: string; value: Value; phase?: 2 }>();
 let timer: ReturnType<typeof setTimeout> | undefined;
 let running: Promise<void> | null = null;
 
@@ -55,9 +56,11 @@ async function kick() {
   if (pending.size) await run();
 }
 
-/** Encola el valor de una pregunta. `delay` agrupa cambios seguidos (sliders). */
-export function queueSave(code: string, questionId: string, value: Value, delay = 0) {
-  pending.set(`${code}:${questionId}`, { code, questionId, value });
+const key = (code: string, questionId: string, phase: Phase) => `${code}:${phase}:${questionId}`;
+
+/** Encola el valor de una pregunta. `delay` agrupa cambios seguidos (sliders). La fase 1 no manda `phase`. */
+export function queueSave(code: string, questionId: string, value: Value, delay = 0, phase: Phase = 1) {
+  pending.set(key(code, questionId, phase), { code, questionId, value, ...(phase === 2 ? { phase } : {}) });
   clearTimeout(timer);
   timer = setTimeout(() => {
     timer = undefined;
@@ -73,10 +76,13 @@ export async function flushSaves(): Promise<boolean> {
   return pending.size === 0;
 }
 
-/** Cierra la fase: guarda la última respuesta con `complete` para que el servidor registre phase_done. */
-export async function completePhase(code: string, questionId: string, value: Value): Promise<void> {
-  pending.delete(`${code}:${questionId}`);
+/**
+ * Cierra la fase: guarda la última respuesta con `complete` para que el servidor registre phase_done. En la fase 2
+ * el servidor solo la cierra si no queda ninguna pregunta visible sin responder.
+ */
+export async function completePhase(code: string, questionId: string, value: Value, phase: Phase = 1): Promise<void> {
+  pending.delete(key(code, questionId, phase));
   await flushSaves();
-  const r = await post({ code, questionId, value, complete: true });
+  const r = await post({ code, questionId, value, complete: true, ...(phase === 2 ? { phase } : {}) });
   if (r === "retry") setSaveFailed(true);
 }

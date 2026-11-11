@@ -18,19 +18,32 @@ import { loadPhase1 } from "@/lib/server/diagnostic";
 
 // Pantalla del correo, al terminar la fase 1 sin correo (docs/OPEN_ENTRY.md §1 y §9). En el camino abierto,
 // "Skip" lleva al resultado parcial; para un invitado es opcional y lleva al resultado completo.
+// Con ?next=phase-2 ("Continue to Phase 2" sin correo; docs/SPEC.md §4), el correo lleva a la fase 2.
 export default function EmailPage({ params, searchParams }: PageProps<"/x/[code]/email">) {
   return (
     <Container>
       <Suspense fallback={<LoadingCard />}>
         {Promise.all([params, searchParams]).then(([{ code }, sp]) => (
-          <EmailStep code={code} sample={sp.sample} frame={sp.frame === "1"} previewOpen={sp.open === "1"} />
+          <EmailStep code={code} sample={sp.sample} frame={sp.frame === "1"} previewOpen={sp.open === "1"} toPhase2={sp.next === "phase-2"} />
         ))}
       </Suspense>
     </Container>
   );
 }
 
-async function EmailStep({ code: raw, sample, frame, previewOpen }: { code: string; sample: unknown; frame: boolean; previewOpen: boolean }) {
+async function EmailStep({
+  code: raw,
+  sample,
+  frame,
+  previewOpen,
+  toPhase2,
+}: {
+  code: string;
+  sample: unknown;
+  frame: boolean;
+  previewOpen: boolean;
+  toPhase2: boolean;
+}) {
   const r = await checkAccess(raw);
   if (!r.ok) return <CodeError reason={r.reason} />;
   const { code, lang, email, preview } = r.access;
@@ -42,7 +55,7 @@ async function EmailStep({ code: raw, sample, frame, previewOpen }: { code: stri
   if (preview) {
     state = isSampleId(sample) ? sampleState(sample) : { answers: {}, calc: {} };
   } else {
-    if (email) redirect(results); // ya tiene correo: nada que pedir
+    if (email) redirect(toPhase2 ? `/x/${encodeURIComponent(code)}/phase-2` : results); // ya tiene correo: nada que pedir
     const saved = await loadPhase1(code);
     if (!saved.completed) redirect(`/x/${encodeURIComponent(code)}`); // la bienvenida lleva a la pregunta pendiente
     state = saved;
@@ -55,11 +68,11 @@ async function EmailStep({ code: raw, sample, frame, previewOpen }: { code: stri
       <Card>
         <Eyebrow>{t.capture.eyebrow}</Eyebrow>
         <h1 className="mb-3 display text-[clamp(28px,5.5vw,40px)]">{t.capture.title}</h1>
-        <p className="mb-4 text-muted">{t.capture.sub}</p>
+        <p className="mb-4 text-muted">{toPhase2 ? t.capture.subPhase2 : t.capture.sub}</p>
         <p className="mb-[22px] border-2 border-l-[6px] border-line border-l-highlight bg-highlight-soft px-4 py-3 text-[15px]">
           {fill(t.capture.gift, { giftTitle: t.gifts[gift].title })}
         </p>
-        <EmailForm code={code} from="screen" gift={gift} />
+        <EmailForm code={code} from={toPhase2 ? "phase2" : "screen"} gift={gift} />
         <div className="mt-5 border-t border-line pt-4">
           <ButtonLink href={`${results}?skip=1${preview && open ? "&partial=1" : ""}`} variant="ghost">
             {open ? t.capture.skip : t.capture.skipInvited}

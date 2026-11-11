@@ -1,12 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { phase1 } from "@/lib/config";
+import { phase1, phase2 } from "@/lib/config";
+import { phase2StoreKey } from "@/lib/phase2";
 import { SAMPLE_IDS, sampleLabel, sampleState } from "@/lib/preview";
 import { visibleQuestions } from "@/lib/scoring";
 import { replaceDiagnostic } from "@/lib/store";
 
-type Copy = Record<"label" | "jump" | "welcome" | "results" | "sample" | "reset" | "back", string>;
+type Copy = Record<"label" | "jump" | "welcome" | "results" | "sample" | "reset" | "back" | "phase2", string>;
 
 const selectClass = "min-h-11 w-full min-w-0 cursor-pointer min-[560px]:w-[220px] border-2 border-paper/60 bg-transparent px-3 py-1.5 text-paper [&>option]:text-ink";
 
@@ -33,6 +34,13 @@ export function PreviewBar({ code, knownIndustry, t }: { code: string; knownIndu
               </option>
             ))}
             <option value={`${base}/results`}>{t.results}</option>
+            <optgroup label={t.phase2}>
+              {phase2.questions.map((q, i) => (
+                <option key={q.id} value={`${base}/phase-2/q/${q.id}`}>
+                  {i + 1}. {q.id} · {q.prompt.length > 48 ? `${q.prompt.slice(0, 47)}…` : q.prompt}
+                </option>
+              ))}
+            </optgroup>
           </select>
           <select
             aria-label={t.sample}
@@ -58,6 +66,7 @@ export function PreviewBar({ code, knownIndustry, t }: { code: string; knownIndu
             type="button"
             onClick={() => {
               replaceDiagnostic(code, { answers: {}, calc: {} });
+              replaceDiagnostic(phase2StoreKey(code), { answers: {}, calc: {} });
               router.push(base);
             }}
             className="min-h-11 cursor-pointer border-2 border-paper/60 px-3 py-1.5 font-bold hover:bg-paper hover:text-ink"

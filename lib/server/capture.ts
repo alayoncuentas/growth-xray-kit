@@ -9,8 +9,11 @@ import { appOrigin } from "./origin";
 
 // Pantalla del correo y bloque para desbloquear el parcial (docs/OPEN_ENTRY.md §1 y §9).
 
-/** Dónde dejó el correo: pantalla del correo, bloque del parcial o "Save and finish later" (lib/server/email.ts). */
-export type CaptureFrom = "screen" | "partial" | "later";
+/**
+ * Dónde dejó el correo: pantalla del correo, bloque del parcial, "Save and finish later" (lib/server/email.ts) o la
+ * pantalla del correo camino a la fase 2 (?next=phase-2).
+ */
+export type CaptureFrom = "screen" | "partial" | "later" | "phase2";
 
 /**
  * Guarda el correo con la fecha y la versión del consentimiento ("By continuing…"), solo si el código no tenía

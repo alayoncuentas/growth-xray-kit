@@ -812,7 +812,12 @@
       "doneTitle": "Hola de nuevo. Tus resultados están listos.",
       "doneSub": "Terminaste la fase 1. Tus resultados están guardados y puedes cambiar cualquier respuesta.",
       "doneCta": "Ver mis resultados",
-      "doneReview": "Revisar mis respuestas"
+      "doneReview": "Revisar mis respuestas",
+      "p2ResumeTitle": "Hola de nuevo. Tus respuestas de la fase 2 están guardadas.",
+      "p2ResumeSub": "Terminaste {done} de {total} bloques. Retoma justo donde te quedaste.",
+      "p2ResumeCta": "Seguir con la fase 2",
+      "p2DoneTitle": "Hola de nuevo. Terminaste las dos fases.",
+      "p2DoneSub": "Tus respuestas de las dos fases están guardadas y puedes cambiar cualquiera."
     },
     "question": {
       "part": "Parte {n} de {total} · {label}",
@@ -918,7 +923,8 @@
       "errorEmail": "Ingresa un correo electrónico válido.",
       "errorSave": "No pudimos guardarlo en este momento. Vuelve a intentarlo en un minuto.",
       "consent": "Al continuar, aceptas que te enviemos tus resultados por correo, que te contactemos sobre tu extra gratis ({giftShort}) y que te mandemos de vez en cuando consejos para conseguir más clientes. Puedes darte de baja cuando quieras.",
-      "privacy": "Política de privacidad"
+      "privacy": "Política de privacidad",
+      "subPhase2": "La fase 2 queda guardada con tu correo, para que puedas pausar entre bloques y volver con tu enlace privado."
     },
     "partial": {
       "title": "Mira qué corregir primero",
@@ -967,8 +973,7 @@
       ],
       "cta": "Continuar a la fase 2",
       "savedTo": "Tus respuestas están guardadas con el código {code}.",
-      "savedToOpen": "Tus respuestas están guardadas. El enlace privado de tu correo te trae de vuelta aquí.",
-      "p2Pending": "La fase 2 todavía no está abierta. Tus respuestas de la fase 1 están guardadas y pasarán a la fase 2."
+      "savedToOpen": "Tus respuestas están guardadas. El enlace privado de tu correo te trae de vuelta aquí."
     },
     "lang": {
       "label": "Idioma",

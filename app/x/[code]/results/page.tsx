@@ -96,6 +96,7 @@ async function Results({
           gift={giftKind}
           unlockedTo={unlocked && mode === "full" && email ? maskEmail(email) : null}
           offered={offered}
+          phase2Href={`/x/${encodeURIComponent(code)}/phase-2${preview && isSampleId(sample) ? `?sample=${sample}` : ""}`}
         />
         <PreviewChrome access={r.access} frame={frame} />
       </DiagnosticProvider>

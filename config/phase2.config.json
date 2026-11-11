@@ -6,41 +6,49 @@
     {
       "id": "journey",
       "label": "Customer journey",
+      "minutes": 2,
       "intro": "First, the path a customer takes, from first message to paid."
     },
     {
       "id": "pipeline",
       "label": "Pipeline & follow-up",
+      "minutes": 2,
       "intro": "Now, the quotes and deals that are still open."
     },
     {
       "id": "retention",
       "label": "Retention & customer value",
+      "minutes": 3,
       "intro": "Next, the customers you already have."
     },
     {
       "id": "reviews",
       "label": "Reviews & proof",
+      "minutes": 2,
       "intro": "Now, what people see before they choose you."
     },
     {
       "id": "marketing",
       "label": "Marketing history",
+      "minutes": 2,
       "intro": "Now, what you've tried to bring in customers."
     },
     {
       "id": "visibility",
       "label": "Visibility & forecasting",
+      "minutes": 2,
       "intro": "Now, the numbers you use to make decisions."
     },
     {
       "id": "team",
       "label": "Team & capacity",
+      "minutes": 2,
       "intro": "Now, who would make this work day to day."
     },
     {
       "id": "tech",
       "label": "Tools & next steps",
+      "minutes": 3,
       "intro": "Last block: what you've tried and what would make sense now."
     }
   ],
@@ -1692,6 +1700,20 @@
     ]
   },
   "copy": {
+    "flow": {
+      "block": "Block {n} of {total} · {label}",
+      "minutesLeft": "About {n} min left",
+      "backToResults": "Back to my results",
+      "pause": {
+        "eyebrow": "Block {n} of {total} done · {label}",
+        "title": "What we noticed",
+        "next": "Next: {label} · about {n} min",
+        "continue": "Continue",
+        "saved": "You can stop here. Your answers are saved.",
+        "finalEyebrow": "Phase 2 complete",
+        "finalCta": "Back to my results"
+      }
+    },
     "report": {
       "pillarWas": "Phase 1: {was}",
       "pillarWasAria": "{label}: {now} out of 100, {was} in Phase 1"

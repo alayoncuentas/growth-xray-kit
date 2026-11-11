@@ -13,7 +13,7 @@ import { ErrorText, inputClass, labelClass } from "@/components/ui/field";
  * Correo antes del resultado completo: un campo, el botón y el consentimiento "By continuing…" (docs/OPEN_ENTRY.md §9).
  * Lo comparten la pantalla del correo y el bloque para desbloquear el parcial. Valida en el servidor.
  */
-export function EmailForm({ code, from, gift }: { code: string; from: "screen" | "partial"; gift: GiftKind }) {
+export function EmailForm({ code, from, gift }: { code: string; from: "screen" | "partial" | "phase2"; gift: GiftKind }) {
   const cfg = useConfig();
   const t = cfg.copy.capture;
   const [state, action, pending] = useActionState<CaptureState, FormData>(captureEmail.bind(null, code, from), {});

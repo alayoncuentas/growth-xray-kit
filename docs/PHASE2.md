@@ -4,11 +4,15 @@
 > HBR). Las decisiones están en `docs/SPEC.md` §4. Los textos están en `config/phase2.config.json` (EN) y
 > `config/phase2.config.es.json` (ES); si cambian allí, actualizar este documento.
 >
-> **Pendiente de aprobar:** los nombres de los bloques en la interfaz (EN / ES): Customer journey / El recorrido del
-> cliente · Pipeline & follow-up / Cotizaciones y seguimiento · Retention & customer value / Retención y valor del
-> cliente · Reviews & proof / Reseñas y pruebas · Marketing history / Historia con el marketing · Visibility &
-> forecasting / Visibilidad y proyección · Team & capacity / Equipo y capacidad · Tools & next steps / Herramientas y
-> próximos pasos.
+> **Aprobado el 2026-11-11:** los nombres de los bloques en la interfaz (EN / ES) y su tiempo estimado
+> (`blocks[].minutes`): Customer journey / El recorrido del cliente (2) · Pipeline & follow-up / Cotizaciones y
+> seguimiento (2) · Retention & customer value / Retención y valor del cliente (3) · Reviews & proof / Reseñas y pruebas
+> (2) · Marketing history / Historia con el marketing (2) · Visibility & forecasting / Visibilidad y proyección (2) · Team &
+> capacity / Equipo y capacidad (2) · Tools & next steps / Herramientas y próximos pasos (3). Suman 18 min; con las pausas,
+> los ~20 que promete la bienvenida.
+>
+> **Pendiente de aprobar:** las frases de apertura de cada bloque (`blocks[].intro`, abajo en cada bloque) y los textos
+> de las pantallas de la etapa 4 (`copy.flow` de la fase 2; `welcome.p2*` y `capture.subPhase2` de la fase 1).
 
 Convenciones:
 - `scores` → pilares que ve el prospecto (0-100, promedio de aportes). `team.*` → solo vista del equipo.

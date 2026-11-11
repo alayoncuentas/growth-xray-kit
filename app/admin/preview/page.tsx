@@ -7,7 +7,7 @@ import { buttonClass } from "@/components/ui/Button";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { LoadingCard } from "@/components/ui/Loading";
 import { ThemeSwitch } from "@/components/ui/ThemeToggle";
-import { DEFAULT_LANG, fill, getConfig, isChoice, type Lang } from "@/lib/config";
+import { DEFAULT_LANG, fill, getConfig, getPhase2Config, isChoice, type Lang } from "@/lib/config";
 import { LangScope } from "@/lib/i18n";
 import { progress } from "@/lib/flow";
 import { insightCases, preview, previewCompany, SAMPLE_IDS, sampleLabel, sampleState, type SampleId } from "@/lib/preview";
@@ -15,7 +15,7 @@ import { phase1Result, visibleQuestions } from "@/lib/scoring";
 import { cookieLang } from "@/lib/server/access";
 import { requireAdmin } from "@/lib/server/auth";
 import { adminCopy } from "@/lib/server/team";
-import type { Question } from "@/lib/types";
+import type { Phase2Question, Question } from "@/lib/types";
 
 // Vista previa del diagnóstico. Solo lectura: los marcos cargan las rutas reales con códigos de vista previa,
 // que solo existen con sesión de admin y nunca escriben en la base (ver lib/server/access.ts y /api/answer).
@@ -40,6 +40,25 @@ interface Screen {
   part: string | null;
   src: string;
   question?: Question;
+  /** Cuándo aparece una pregunta condicional de la fase 2. */
+  note?: string;
+}
+
+/** Muestra de la fase 1 con la que se ve una pregunta de la fase 2: la de su situación si es condicional. */
+function sampleFor2(q: Phase2Question): string {
+  const sit = q.showIf?.situation;
+  return sit?.includes("offer") ? "offer" : sit?.includes("demand") ? "demand" : "leaky";
+}
+
+function conditionNote(q: Phase2Question): string | undefined {
+  const s = q.showIf;
+  if (!s) return undefined;
+  const when = [
+    s.situation && `situation ${s.situation.join(" / ")}`,
+    s.answered && `after ${s.answered}`,
+    s.notAnswer && `unless ${Object.entries(s.notAnswer).map(([k, v]) => `${k} = ${v.join(" / ")}`).join(", ")}`,
+  ].filter(Boolean);
+  return fill(adminCopy.preview.screens.phase2Conditional, { when: when.join(", ") });
 }
 
 function screens(lang: Lang): Screen[] {
@@ -61,6 +80,17 @@ function screens(lang: Lang): Screen[] {
   // Camino abierto (docs/OPEN_ENTRY.md): los datos del negocio van justo después de la pregunta de rubro.
   const afterIndustry = questions.findIndex((s) => s.id === "industry") + 1;
   const business: Screen = { id: "business", label: p.screens.business, part: p.openPart, src: X(preview.plainCode, "/business") };
+  // Fase 2: cada pregunta (las condicionales con la muestra de su situación) y la pausa de cada bloque.
+  const cfg2 = getPhase2Config(lang);
+  const phase2 = cfg2.blocks.flatMap((b, n): Screen[] => {
+    const part = fill(p.phase2Part, { n: n + 1, label: b.label });
+    return [
+      ...cfg2.questions
+        .filter((q) => q.block === b.id)
+        .map((q) => ({ id: `p2-${q.id}`, label: q.prompt, part, src: X(preview.code, `/phase-2/q/${q.id}`, `&sample=${sampleFor2(q)}`), note: conditionNote(q) })),
+      { id: `p2-pause-${b.id}`, label: p.screens.pause, part, src: X(preview.code, `/phase-2/b/${b.id}`, "&sample=leaky") },
+    ];
+  });
   return [
     { id: "gate", label: p.screens.gate, part: null, src: "/?frame=1" },
     { id: "start", label: p.screens.start, part: p.openPart, src: "/?frame=1&preview=open" },
@@ -81,6 +111,7 @@ function screens(lang: Lang): Screen[] {
     { id: "results-small-leak", label: p.screens.resultsSmallLeak, part: null, src: X(preview.code, "/results", "&sample=silent") },
     { id: "results-max", label: p.screens.resultsMax, part: null, src: X(preview.code, "/results", "&sample=leaky&calc=max") },
     { id: "report", label: p.screens.report, part: null, src: `/r/${preview.code}?frame=1&sample=leaky` },
+    ...phase2,
   ];
 }
 
@@ -168,6 +199,7 @@ async function Preview() {
         {list.map((s, i) => (
           <article key={s.id} id={`s-${s.id}`} className="grid scroll-mt-4 gap-3 border-t-2 border-rule pt-6">
             <ScreenHeader n={i + 1} id={s.id} part={s.part} label={s.label} src={s.src} />
+            {s.note && <p className="text-sm text-muted">{s.note}</p>}
             <PhoneFrame key={lang} src={s.src} title={`${s.id} · ${s.label}`} />
             {s.question && <InsightVariants q={s.question} lang={lang} />}
           </article>

@@ -249,7 +249,9 @@
         "resultsOffer": "Results · situation offer (low value per customer)",
         "resultsNoLoss": "Results · situation scale, declared (0 lost, index below 70)",
         "resultsSmallLeak": "Results · situation leak with less than $30,000 a year (neutral figure)",
-        "resultsMax": "Results · widest figure ($650,000,000 a year, calculator at its maximums)"
+        "resultsMax": "Results · widest figure ($650,000,000 a year, calculator at its maximums)",
+        "pause": "Pause after the block · mini-finding (with no Phase 2 answers here, the fallback \"*\" rule)",
+        "phase2Conditional": "Conditional · shows only {when}"
       },
       "partLabel": "Part {n} · {label}",
       "mapSub": "In order. Question screens use a business without a known industry, so the industry question appears too; with a code that includes the industry it's skipped.",
@@ -273,10 +275,12 @@
         "results": "Results",
         "sample": "Load sample results…",
         "reset": "Start over",
-        "back": "Preview map"
+        "back": "Preview map",
+        "phase2": "Phase 2"
       },
       "sampleAnswers": "Sample answers",
-      "openPart": "Open entry"
+      "openPart": "Open entry",
+      "phase2Part": "Phase 2 · Block {n} · {label}"
     },
     "langs": {
       "en": "English",

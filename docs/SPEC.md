@@ -215,6 +215,12 @@ de aprobación, está en `docs/PHASE2.md`.
   ids sin repetir. La vista previa valida contra el config y no guarda nada.
 - **Retomar** (`resumeTarget2`): la bienvenida `/x/[code]` lleva a la primera pregunta visible sin responder de la fase 2
   si ya empezó, o al informe si terminó. El link de "Save and finish later" lleva directo a la fase 2 cuando ya empezó.
+- **Pantallas** (etapa 4): `/x/[code]/phase-2` (entrada: aplica `canEnterPhase2` y redirige a donde retomar),
+  `/x/[code]/phase-2/q/[qid]` (una pregunta; la frase de apertura del bloque va en su primera pregunta) y
+  `/x/[code]/phase-2/b/[block]` (pausa, solo con el bloque cerrado). Barra de 8 bloques con los minutos que faltan
+  (`blocks[].minutes`, aprobados el 2026-11-11). Mientras no exista el informe completo (etapa 5), la pausa final y la
+  bienvenida con la fase 2 terminada llevan a los resultados de la fase 1. La vista previa usa la fase 1 de una muestra
+  (`?sample=`, `leaky` por defecto) y no guarda nada.
 - **Mini-hallazgo**: la primera regla del bloque que se cumple (`findings.<bloque>`, con una regla `"*"` obligatoria;
   `blockFinding`). Condiciones (`FindingWhen` en `lib/types.ts`): `answer` / `notAnswer` (fase 2), `p1` / `p1Not`
   (respuestas de la fase 1), `p1Lowest` (ese pilar de la fase 1 es ≤ a todos los demás, empates incluidos), `p1Below`

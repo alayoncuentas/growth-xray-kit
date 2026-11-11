@@ -3,9 +3,10 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { isLang, LANG_COOKIE } from "@/lib/config";
-import { getConfig, phase1 } from "@/lib/config";
+import { getConfig, phase1, phase2 } from "@/lib/config";
 import { giftForAnswers, type GiftKind } from "@/lib/gifts";
 import { afterBusiness, isVisibleQuestion, stepHref } from "@/lib/flow";
+import { getQuestion2 } from "@/lib/phase2";
 import { normalizeEmail } from "@/lib/email";
 import { arrivalFrom, parseBusinessForm } from "@/lib/open-entry";
 import { browserLang, checkAccess, clientKey, type AccessError } from "@/lib/server/access";
@@ -96,7 +97,8 @@ export type CaptureState = { error?: "email" | "save"; email?: string };
 
 /**
  * Pantalla del correo (`from = "screen"`) o bloque para desbloquear el parcial (`"partial"`): guarda el correo con
- * el consentimiento y lleva al resultado completo. Desde el parcial, con el aviso "Unlocked…" (?unlocked=1).
+ * el consentimiento y lleva al resultado completo. Desde el parcial, con el aviso "Unlocked…" (?unlocked=1). Camino a
+ * la fase 2 (`"phase2"`, pantalla del correo con ?next=phase-2), a la fase 2.
  * La vista previa valida igual pero no guarda nada.
  */
 export async function captureEmail(code: string, from: CaptureFrom, _prev: CaptureState, formData: FormData): Promise<CaptureState> {
@@ -114,6 +116,7 @@ export async function captureEmail(code: string, from: CaptureFrom, _prev: Captu
     }
   }
   const results = stepHref(r.access.code, { kind: "results" });
+  if (from === "phase2") redirect(`/x/${encodeURIComponent(r.access.code)}/phase-2`);
   redirect(from === "partial" && !r.access.preview ? `${results}?unlocked=1` : results);
 }
 
@@ -121,11 +124,12 @@ export async function captureEmail(code: string, from: CaptureFrom, _prev: Captu
  * Una pregunta se vio en el navegador: registra `question_viewed`. Se llama desde el cliente (no al renderizar)
  * para no contar prefetches. La vista previa no registra nada; una pregunta que no existe o no se muestra, tampoco.
  */
-export async function markQuestionViewed(code: string, qid: string): Promise<void> {
+export async function markQuestionViewed(code: string, qid: string, phase: 1 | 2 = 1): Promise<void> {
   const r = await checkAccess(code);
   if (!r.ok || r.access.preview) return;
-  if (!isVisibleQuestion(phase1, qid, r.access.company?.industry)) return;
-  await logQuestionViewed(r.access.code, qid);
+  // Fase 2: basta con que la pregunta exista (la visibilidad depende de respuestas que pueden no haber llegado aún).
+  if (phase === 2 ? !getQuestion2(phase2, qid) : !isVisibleQuestion(phase1, qid, r.access.company?.industry)) return;
+  await logQuestionViewed(r.access.code, qid, phase);
 }
 
 export type SaveLaterState =
