@@ -25,19 +25,19 @@
       "id": "reviews",
       "label": "Reseñas y pruebas",
       "minutes": 2,
-      "intro": "Ahora, lo que la gente ve antes de elegirte."
+      "intro": "Sigamos con lo que la gente ve antes de elegirte."
     },
     {
       "id": "marketing",
       "label": "Historia con el marketing",
       "minutes": 2,
-      "intro": "Ahora, lo que has probado para atraer clientes."
+      "intro": "Veamos lo que has probado para atraer clientes."
     },
     {
       "id": "visibility",
       "label": "Visibilidad y proyección",
       "minutes": 2,
-      "intro": "Ahora, los números con los que tomas decisiones."
+      "intro": "Pasemos a los números con los que tomas decisiones."
     },
     {
       "id": "team",
@@ -1707,7 +1707,7 @@
       "pause": {
         "eyebrow": "Bloque {n} de {total} listo · {label}",
         "title": "Lo que notamos",
-        "next": "Sigue: {label} · unos {n} min",
+        "next": "Siguiente: {label} · unos {n} min",
         "continue": "Continuar",
         "saved": "Puedes parar aquí. Tus respuestas quedan guardadas.",
         "finalEyebrow": "Fase 2 completa",

@@ -817,7 +817,7 @@
       "p2ResumeSub": "Terminaste {done} de {total} bloques. Retoma justo donde te quedaste.",
       "p2ResumeCta": "Seguir con la fase 2",
       "p2DoneTitle": "Hola de nuevo. Terminaste las dos fases.",
-      "p2DoneSub": "Tus respuestas de las dos fases están guardadas y puedes cambiar cualquiera."
+      "p2DoneSub": "Tus respuestas de las dos fases están guardadas."
     },
     "question": {
       "part": "Parte {n} de {total} · {label}",

@@ -817,7 +817,7 @@
       "p2ResumeSub": "You've finished {done} of {total} blocks. Pick up right where you stopped.",
       "p2ResumeCta": "Continue Phase 2",
       "p2DoneTitle": "Welcome back. You finished both phases.",
-      "p2DoneSub": "Your answers to both phases are saved, and you can change any of them."
+      "p2DoneSub": "Your answers to both phases are saved."
     },
     "question": {
       "part": "Part {n} of {total} · {label}",
@@ -924,7 +924,7 @@
       "errorSave": "We couldn't save that just now. Try again in a minute.",
       "consent": "By continuing, you agree that we can email you your results, follow up about your {giftShort}, and send occasional tips on winning more customers. Unsubscribe anytime.",
       "privacy": "Privacy policy",
-      "subPhase2": "Phase 2 is saved to your email, so you can pause between blocks and come back with your private link."
+      "subPhase2": "Phase 2 is saved with your email, so you can pause between blocks and come back with your private link."
     },
     "partial": {
       "title": "See what to fix first",

@@ -11,8 +11,8 @@
 > capacity / Equipo y capacidad (2) · Tools & next steps / Herramientas y próximos pasos (3). Suman 18 min; con las pausas,
 > los ~20 que promete la bienvenida.
 >
-> **Pendiente de aprobar:** las frases de apertura de cada bloque (`blocks[].intro`, abajo en cada bloque) y los textos
-> de las pantallas de la etapa 4 (`copy.flow` de la fase 2; `welcome.p2*` y `capture.subPhase2` de la fase 1).
+> **Aprobado el 2026-11-11 (2):** las frases de apertura de cada bloque (`blocks[].intro`, abajo en cada bloque) y los
+> textos de las pantallas de la etapa 4 (`copy.flow` de la fase 2; `welcome.p2*` y `capture.subPhase2` de la fase 1).
 
 Convenciones:
 - `scores` → pilares que ve el prospecto (0-100, promedio de aportes). `team.*` → solo vista del equipo.
@@ -236,7 +236,7 @@ desde el primer mensaje hasta el pago."
 
 ## Bloque 4 · Reviews & proof (`reviews`)
 
-**Intro** — EN: "Now, what people see before they choose you." · ES: "Ahora, lo que la gente ve antes de elegirte."
+**Intro** — EN: "Now, what people see before they choose you." · ES: "Sigamos con lo que la gente ve antes de elegirte."
 
 **`v_respond`** (single) — insight: evidencia `brightlocal2026b` (ya está en la fase 1)
 - EN: "When a new review comes in, what do you do?"
@@ -297,7 +297,7 @@ desde el primer mensaje hasta el pago."
 
 ## Bloque 5 · Advertising & marketing history (`marketing`)
 
-**Intro** — EN: "Now, what you've tried to bring in customers." · ES: "Ahora, lo que has probado para atraer clientes."
+**Intro** — EN: "Now, what you've tried to bring in customers." · ES: "Veamos lo que has probado para atraer clientes."
 
 **`a_channels`** (multi, sin puntaje)
 - EN: "Besides referrals, where have new customers come from in the last year?" Sub: "Pick all that apply."
@@ -368,7 +368,7 @@ a `a_attrib`, porque saber de dónde viene cada cliente también sirve sin anunc
 
 ## Bloque 6 · Visibility & forecasting (`visibility`)
 
-**Intro** — EN: "Now, the numbers you use to make decisions." · ES: "Ahora, los números con los que tomas decisiones."
+**Intro** — EN: "Now, the numbers you use to make decisions." · ES: "Pasemos a los números con los que tomas decisiones."
 
 **`f_close`** (single)
 - EN: "Do you know your close rate, meaning how many out of every 10 quotes become customers?"
