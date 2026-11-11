@@ -4,8 +4,7 @@ import { giftState, industryLabel, utmSummary } from "@/lib/admin";
 import { fill, phase1, usd } from "@/lib/config";
 import type { LeadRow } from "@/lib/server/admin-data";
 import { adminCopy, team } from "@/lib/server/team";
-import type { ArchetypeId } from "@/lib/types";
-import type { TeamFlag } from "@/lib/scoring";
+import type { Phase2TeamFlag, TeamFlag } from "@/lib/scoring";
 import { Flags } from "./TeamView";
 import { StatusBadge, when } from "./Status";
 import { Badge, type BadgeTone } from "@/components/ui/Badge";
@@ -27,8 +26,9 @@ export function LeadList({ leads }: { leads: LeadRow[] }) {
       </div>
       <ul>
         {leads.map((lead) => {
-          const s = lead.phase1?.scores;
-          const arch = s?.archetype ? phase1.archetypes[s.archetype as ArchetypeId]?.name : null;
+          // Calculados al leer desde las respuestas (lib/lead-scores.ts), igual que el detalle.
+          const s = lead.scores;
+          const arch = s ? phase1.archetypes[s.archetype]?.name : null;
           return (
             <li key={lead.code} className="border-b border-line last:border-b-0">
               <Link
@@ -76,9 +76,9 @@ export function LeadList({ leads }: { leads: LeadRow[] }) {
                     </span>
                     <span className="font-mono text-sm tabular-nums">
                       <span className="text-muted min-[860px]:hidden">{l.colMonthly} </span>
-                      {s.monthly_at_stake !== null ? usd(s.monthly_at_stake) : "—"}
+                      {usd(s.monthlyAtStake)}
                     </span>
-                    <span>{s.flags.length ? <Flags flags={s.flags.map((f) => team.flags[f as TeamFlag] ?? f)} /> : <span className="text-muted">—</span>}</span>
+                    <span>{s.flags.length ? <Flags flags={s.flags.map((f) => team.flags[f as TeamFlag | Phase2TeamFlag] ?? f)} /> : <span className="text-muted">—</span>}</span>
                   </>
                 ) : (
                   <span className="text-sm text-muted min-[860px]:col-span-4">{l.noScores}</span>

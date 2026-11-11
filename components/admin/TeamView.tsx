@@ -1,15 +1,19 @@
 import "server-only";
 import { Bar } from "@/components/ui/Bar";
-import { fill, phase1, usd } from "@/lib/config";
-import { phase1Result, teamScores } from "@/lib/scoring";
+import { fill, phase1, phase2, usd } from "@/lib/config";
+import { scoresFrom } from "@/lib/lead-scores";
+import { phase1Result } from "@/lib/scoring";
 import { team } from "@/lib/server/team";
 import type { Answers, CalcOverrides } from "@/lib/types";
 import { Badge } from "@/components/ui/Badge";
 
-/** "Vista del equipo" del prototipo: Need / Potential / Readiness, veredicto, alertas y datos para la llamada. */
-export function TeamView({ code, answers, calc }: { code: string; answers: Answers; calc: CalcOverrides }) {
+/**
+ * "Vista del equipo" del prototipo: Need / Potential / Readiness, veredicto, alertas y datos para la llamada. Se calcula
+ * al leer con la misma función que la lista (lib/lead-scores.ts); con respuestas de la fase 2, Readiness es el final.
+ */
+export function TeamView({ code, answers, calc, answers2 = {} }: { code: string; answers: Answers; calc: CalcOverrides; answers2?: Answers }) {
   const res = phase1Result(phase1, answers, calc);
-  const t = teamScores(phase1, answers, res.pillars, res.avg, res.calc);
+  const t = scoresFrom(phase1, phase2, answers, calc, answers2);
   const archName = phase1.archetypes[res.archetype].name;
   const opening = fill(team.openingLine, { archetype: archName.replace(/^The /, "the ").toLowerCase() });
   const axes = [
@@ -34,7 +38,7 @@ export function TeamView({ code, answers, calc }: { code: string; answers: Answe
         ))}
       </div>
       <p className="bg-highlight px-[18px] py-3.5 text-lg leading-snug text-highlight-ink">{team.verdicts[t.verdict]}</p>
-      {t.flags.length > 0 && <Flags flags={t.flags.map((f) => team.flags[f])} />}
+      {t.flags.length > 0 && <Flags flags={t.flags.map((f) => team.flags[f as keyof typeof team.flags] ?? f)} />}
       <dl className="grid grid-cols-[minmax(0,auto)_minmax(0,1fr)] gap-x-4 gap-y-2 text-sm">
         <dt className="text-muted">{team.kv.code}</dt>
         <dd className="font-mono">{code}</dd>

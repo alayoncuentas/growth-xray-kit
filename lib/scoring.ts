@@ -24,6 +24,12 @@ import type {
   TeamComponent,
 } from "./types";
 
+/**
+ * Versión de las reglas de puntaje: la fecha de la última fila de docs/SPEC.md §8 (un test lo exige). Se guarda en cada
+ * foto de `scores`, que es historial: lo que se muestra siempre se calcula al leer, desde las respuestas.
+ */
+export const SCORING_VERSION = "2026-11-10";
+
 // ---------- helpers ----------
 
 function single(answers: Answers, qid: string): string | undefined {

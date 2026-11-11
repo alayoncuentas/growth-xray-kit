@@ -13,6 +13,7 @@ import { LoadingCard } from "@/components/ui/Loading";
 import { markGiftDeliveredAction } from "@/app/admin/actions";
 import { deleteConfirmation, EXPIRY_CHOICES, giftState, utmEntries } from "@/lib/admin";
 import { splitAnswers } from "@/lib/answers";
+import { answersFromRows2 } from "@/lib/phase2";
 import { calcFieldText, fill, getQuestion, isChoice, phase1 } from "@/lib/config";
 import { calcValues, visibleQuestions } from "@/lib/scoring";
 import { getLead, type LeadDetail } from "@/lib/server/admin-data";
@@ -105,7 +106,7 @@ async function Lead({ code, created }: { code: string; created: boolean }) {
       <div className="grid gap-5 min-[861px]:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
         <div className="grid content-start gap-5">
           {started ? (
-            <TeamView code={lead.code} answers={saved.answers} calc={saved.calc} />
+            <TeamView code={lead.code} answers={saved.answers} calc={saved.calc} answers2={answersFromRows2(lead.answers2)} />
           ) : (
             <p className="border-2 border-dashed border-rule px-[18px] py-4 text-ink-2">{d.teamPending}</p>
           )}

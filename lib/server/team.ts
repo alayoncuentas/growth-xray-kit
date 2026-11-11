@@ -1,6 +1,6 @@
 import "server-only";
 import raw from "@/config/team.config.json";
-import type { Situation, TeamFlag, Verdict } from "@/lib/scoring";
+import type { Phase2TeamFlag, Situation, TeamFlag, Verdict } from "@/lib/scoring";
 
 // Textos de la vista del equipo y del panel. Solo servidor: nunca deben llegar a una ruta pública.
 
@@ -8,7 +8,7 @@ export interface TeamConfig {
   title: string;
   axes: Record<"need" | "potential" | "readiness", { label: string; note: string }>;
   verdicts: Record<Verdict, string>;
-  flags: Record<TeamFlag, string>;
+  flags: Record<TeamFlag | Phase2TeamFlag, string>;
   situations: Record<Situation, string>;
   kv: Record<"code" | "monthly" | "situation" | "cautious" | "ads" | "noAds" | "opening", string>;
   openingLine: string;

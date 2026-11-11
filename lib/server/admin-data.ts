@@ -1,6 +1,7 @@
 import "server-only";
 import { confirmMatches, deleteConfirmation, generateCode, sourceOf, type CodeStatus, type CompanyInput, type GiftRow, type Source } from "@/lib/admin";
-import { isLang, type Lang } from "@/lib/config";
+import { isLang, phase1, phase2, type Lang } from "@/lib/config";
+import { currentScores, LEAD_SELECT, type AnswerRow, type CurrentScores } from "@/lib/lead-scores";
 import type { OutsideView } from "@/lib/types";
 import { requireAdmin } from "./auth";
 import { CrmUnavailableError, deleteContacts } from "./crm";
@@ -8,16 +9,6 @@ import { db, must } from "./db";
 
 // Lecturas y escrituras del panel interno. Cada función exportada exige sesión de admin (capa de acceso a datos):
 // así ninguna página o acción puede olvidarse de verificarla.
-
-export interface ScoreRow {
-  need: number | null;
-  potential: number | null;
-  readiness: number | null;
-  archetype: string | null;
-  monthly_at_stake: number | null;
-  flags: string[];
-  verdict: string | null;
-}
 
 export interface CompanyRow {
   id: string;
@@ -60,15 +51,15 @@ export interface LeadRow {
     last_question_id: string | null;
     /** Idioma en que respondió (o que eligió con el botón EN / ES); null si todavía no. */
     lang: Lang | null;
-    scores: ScoreRow | null;
   } | null;
+  phase2: { started_at: string; completed_at: string | null } | null;
+  /** Puntajes actuales, calculados al leer desde las respuestas (nunca desde la tabla `scores`, que es historial). */
+  scores: CurrentScores | null;
 }
 
 // PostgREST devuelve objeto o lista según cómo infiera la relación; se normaliza a uno.
 const one = <T,>(v: T | T[] | null | undefined): T | null => (Array.isArray(v) ? (v[0] ?? null) : (v ?? null));
 
-const LEAD_SELECT =
-  "code, status, email, expires_at, lang, created_at, email_consent_at, email_consent_version, gifts(kind, offered_at, due_at, delivered_at, delivered_by), companies(*), sessions(id, phase, started_at, completed_at, last_question_id, lang, scores(need, potential, readiness, archetype, monthly_at_stake, flags, verdict))";
 
 interface RawLead {
   code: string;
@@ -88,12 +79,13 @@ interface RawLead {
     completed_at: string | null;
     last_question_id: string | null;
     lang: string | null;
-    scores: ScoreRow | ScoreRow[] | null;
+    answers: AnswerRow[] | null;
   }[];
 }
 
 function toLead(r: RawLead): LeadRow {
   const s = r.sessions?.find((x) => x.phase === 1);
+  const s2 = r.sessions?.find((x) => x.phase === 2);
   const company = one(r.companies);
   return {
     code: r.code,
@@ -113,9 +105,10 @@ function toLead(r: RawLead): LeadRow {
           completed_at: s.completed_at,
           last_question_id: s.last_question_id,
           lang: isLang(s.lang) ? s.lang : null,
-          scores: one(s.scores),
         }
       : null,
+    phase2: s2 ? { started_at: s2.started_at, completed_at: s2.completed_at } : null,
+    scores: currentScores(phase1, phase2, s?.answers ?? [], s2?.answers ?? []),
   };
 }
 
@@ -126,7 +119,9 @@ export async function listLeads(): Promise<LeadRow[]> {
 }
 
 export interface LeadDetail extends LeadRow {
-  answers: { question_id: string; value: unknown }[];
+  /** Respuestas de la fase 1 y de la fase 2. */
+  answers: AnswerRow[];
+  answers2: AnswerRow[];
   events: { type: string; payload: Record<string, unknown>; at: string }[];
   otherCodes: { code: string; status: CodeStatus }[];
 }
@@ -138,18 +133,16 @@ export async function getLead(code: string): Promise<LeadDetail | null> {
     | null;
   if (!raw) return null;
   const lead = toLead(raw);
-  const sessionId = raw.sessions?.find((s) => s.phase === 1)?.id;
+  const answers = raw.sessions?.find((s) => s.phase === 1)?.answers ?? [];
+  const answers2 = raw.sessions?.find((s) => s.phase === 2)?.answers ?? [];
 
-  const [answers, events, otherCodes] = await Promise.all([
-    sessionId
-      ? db().from("answers").select("question_id, value").eq("session_id", sessionId).then((r) => must(r, "answers"))
-      : Promise.resolve([]),
+  const [events, otherCodes] = await Promise.all([
     db().from("events").select("type, payload, at").eq("code", code).order("at", { ascending: false }).limit(100).then((r) => must(r, "events")),
     lead.company
       ? db().from("access_codes").select("code, status").eq("company_id", lead.company.id).neq("code", code).then((r) => must(r, "codes"))
       : Promise.resolve([]),
   ]);
-  return { ...lead, answers: answers ?? [], events: events ?? [], otherCodes: (otherCodes ?? []) as LeadDetail["otherCodes"] };
+  return { ...lead, answers, answers2, events: events ?? [], otherCodes: (otherCodes ?? []) as LeadDetail["otherCodes"] };
 }
 
 function expiry(days: number | null): string | null {

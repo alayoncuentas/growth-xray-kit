@@ -33,7 +33,16 @@
     "declaredNoLoss": "Declared no losses; verify on the call",
     "payingLeak": "Paying for leaking leads",
     "ownerBottleneck": "Owner bottleneck",
-    "solo": "Solo operator"
+    "solo": "Solo operator",
+    "burnedByTech": "Burned by tech: tried tools and dropped them",
+    "managedService": "Burned by tech: lead with managed service and onboarding",
+    "lowBudget": "Budget under $400/month (Readiness capped at 50)",
+    "notDecider": "Not the decision-maker",
+    "notOwner": "Answered by someone other than the owner",
+    "noRunner": "Nobody to run a new system",
+    "atCapacity": "At capacity: can't take 30% more customers",
+    "reviewGating": "Asks only happy customers for reviews",
+    "burnedByAgency": "Bad experience with a marketing agency"
   },
   "situations": {
     "leak": "Leak · closing gaps is the main opportunity",

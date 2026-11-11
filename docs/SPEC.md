@@ -198,15 +198,23 @@ de aprobación, está en `docs/PHASE2.md`.
   terminada, a la primera pregunta pendiente. El servidor lo comprueba en cada ruta de la fase 2 y en `/api/answer`.
 - **Recorrido único** para las cuatro situaciones, con una pregunta condicional como máximo por situación
   (`showIf: { situation: [...] }`; offer: oferta adicional en el bloque 3; demand: qué probó para conseguir consultas en el
-  bloque 5) y una condicional por respuesta (`showIf: { answer: … }`: por qué dejó las herramientas, en el bloque 8). Los
+  bloque 5) y una condicional por respuesta (`showIf: { answered, notAnswer }`: por qué dejó las herramientas, en el
+  bloque 8). Los
   mini-hallazgos y la ruta en 3 fases del informe cambian de texto según la situación.
 - **Una pregunta por pantalla**, guardada al momento como en la fase 1 (`/api/answer` con `phase: 2`, sesión `phase = 2`).
-  Un bloque está **terminado** cuando todas sus preguntas visibles tienen respuesta (se calcula; sin columna nueva). Al
-  cerrarlo, pantalla de pausa con el mini-hallazgo, "Continue" y "Save and finish later"; evento `block_done`
-  (`payload.block`), una vez por bloque. Al cerrar el bloque 8: `phase_done` (`phase: 2`), estado `p2_done` y el correo con el
-  informe completo (una vez por código, `kind: "report2"`).
-- **Retomar**: la bienvenida `/x/[code]` lleva a la primera pregunta visible sin responder de la fase 2 si ya empezó, o al
-  informe si terminó. El link de "Save and finish later" lleva directo a la fase 2 cuando ya empezó.
+  Un bloque está **terminado** cuando todas sus preguntas visibles tienen respuesta (se calcula; sin columna nueva;
+  `lib/phase2.ts`: `blockDone`). Al cerrarlo, pantalla de pausa con el mini-hallazgo, "Continue" y "Save and finish later"
+  (`nextAfter2` devuelve la pausa). El evento `block_done` (`payload.block`, `payload.phase = 2`) lo registra el servidor al
+  guardar la respuesta que cierra el bloque, una sola vez por bloque y código (consulta `events` antes de insertar). Si el
+  bloque se vuelve a abrir porque aparece una pregunta condicional, no se repite. Con `complete: true` en la última
+  respuesta y sin preguntas visibles pendientes: `phase_done` (`phase: 2`, `payload.index` = índice completo), estado
+  `p2_done` y el correo con el informe completo (etapa 5; una vez por código, `kind: "report2"`).
+- **Validación de la fase 2** (`/api/answer` con `phase: 2`; `lib/phase2.ts`: `canEnterPhase2`, `validateAnswer2`): el
+  servidor exige correo en el código y la fase 1 terminada (si no, `403 phase2_locked` con `gate: email | phase1`), y que la
+  pregunta esté visible según la situación de la fase 1 y las respuestas ya guardadas. single: id de opción; multi: lista de
+  ids sin repetir. La vista previa valida contra el config y no guarda nada.
+- **Retomar** (`resumeTarget2`): la bienvenida `/x/[code]` lleva a la primera pregunta visible sin responder de la fase 2
+  si ya empezó, o al informe si terminó. El link de "Save and finish later" lleva directo a la fase 2 cuando ya empezó.
 - **Mini-hallazgo**: la primera regla del bloque que se cumple (`findings.<bloque>`, con una regla `"*"` obligatoria;
   `blockFinding`). Condiciones (`FindingWhen` en `lib/types.ts`): `answer` / `notAnswer` (fase 2), `p1` / `p1Not`
   (respuestas de la fase 1), `p1Lowest` (ese pilar de la fase 1 es ≤ a todos los demás, empates incluidos), `p1Below`
@@ -275,9 +283,10 @@ sessions        id, code, phase, started_at, completed_at, last_question_id, use
                 lang (en|es|null: idioma en que respondió)
 answers         session_id, question_id, value jsonb, answered_at        (PK: session_id+question_id)
 scores          session_id, pillars jsonb, need, potential, readiness, archetype,
-                monthly_at_stake, flags text[], verdict, computed_at
+                monthly_at_stake, flags text[], verdict, computed_at, scoring_version
+                (historial: foto al guardar cada respuesta; nunca se muestra como valor actual, ver §8)
 events          id, code, type (email_sent|link_opened|question_viewed|answered|phase_done|
-                booked|crm_synced|email_captured|gift_offered|gift_delivered), payload jsonb, at
+                booked|crm_synced|email_captured|gift_offered|gift_delivered|block_done), payload jsonb, at
 access_attempts id, ip_hash, at        (intentos fallidos de código; hash SHA-256 de la IP, nunca la IP)
 open_starts     id, ip_hash, at        (sesiones abiertas creadas, para el límite por IP; mismo hash)
 gifts           code (PK), kind (A|B), offered_at, due_at, delivered_at, delivered_by
@@ -304,7 +313,7 @@ Reglas de persistencia (fase 1):
 - **Borrado automático** (`GET /api/cron/cleanup`, Vercel Cron todos los días a las 09:00 UTC según `vercel.json`): exige `Authorization: Bearer <CRON_SECRET>` (comparación en tiempo constante; sin `CRON_SECRET` o con menos de 16 caracteres, nunca pasa) y llama a `cleanup_expired()`, que borra empresas `open` sin correo con más de 30 días desde su creación (en cascada) y `access_attempts` y `open_starts` de más de 24 horas. Responde y registra en el log cuántas filas borró.
 - **Entorno de pruebas sin indexar**: si `NEXT_PUBLIC_APP_URL` contiene `xray-test`, todas las páginas salen con `robots: noindex, nofollow` (metadata) y la cabecera `X-Robots-Tag: noindex, nofollow` (`lib/seo.ts`, `next.config.ts`).
 - **`question_viewed`**: al ver una pregunta en el navegador (desde el cliente, no al renderizar, para no contar prefetches), una vez por pregunta y carga de página; `payload.question_id`. El servidor valida el código y que la pregunta exista y se muestre con el rubro del código (`lib/flow.ts`: `isVisibleQuestion`). La vista previa no registra nada. Sirve para el abandono por pregunta (vista sin `answered` posterior).
-- **`answered`**: cada `POST /api/answer` válido. Upsert en `answers` (la calculadora se guarda como un objeto con los campos que el usuario movió), actualiza `last_question_id` y recalcula la fila de `scores`. La respuesta de la API nunca incluye puntajes.
+- **`answered`**: cada `POST /api/answer` válido. Upsert en `answers` (la calculadora se guarda como un objeto con los campos que el usuario movió), actualiza `last_question_id` y guarda la foto de puntajes en `scores` (historial con `scoring_version`; si falla, queda en el log y la respuesta sigue guardada). La respuesta de la API nunca incluye puntajes.
 - **`phase_done`**: con el botón "See my results" (`complete: true`), si no queda ninguna pregunta visible sin responder. Una sola vez por sesión: fija `completed_at` y el estado pasa a `p1_done`. El estado nunca retrocede.
 - **Correo del informe** (Resend): una sola vez por código (si ya hay un `email_sent` con `kind = "report"`, no se repite), al correo de `access_codes.email`, con el link a `/r/[code]`: al registrar `phase_done` si el código ya tenía correo, o al dejar el correo después en la pantalla del correo o en el parcial. Sale después de responder (no demora al prospecto). Sin correo en el código no se envía. Se registra `email_sent` con `payload.kind = "report"`.
 - **Pantalla del correo** (`/x/[code]/email`, docs/OPEN_ENTRY.md §1): al terminar la fase 1, si el código no tiene correo, resultados lleva primero a esta pantalla, en los dos caminos (`lib/flow.ts`: `needsEmailStep`). Nombra el regalo que tocaría con las respuestas. "Skip" lleva a resultados con `?skip=1`: en el camino abierto, al parcial; un invitado ve el resultado completo. Al dejar el correo se guarda solo si el código no tenía uno (nunca se reemplaza), con `email_consent_at` y `email_consent_version` (`EMAIL_CONSENT_VERSION` en `lib/email.ts`; se cambia cuando cambia el texto "By continuing…"), se registra `email_captured` (`payload.from`: `screen` | `partial` | `later`, `payload.open`, `payload.consent`) y sale el informe si la fase terminó.
@@ -390,9 +399,12 @@ de §3, sin registro.
 | 2026-11-10 | Tope por presupuesto (`LOW_BUDGET_READINESS_CAP`) | sin tope → con menos de $400 al mes, Readiness máximo 50 | En los casos de prueba, un negocio con presupuesto mínimo llegaba a 62 y pasaba a "Alta prioridad"; corte en $400 decidido por el dueño del producto | `bdf317c` |
 | 2026-11-10 | Umbral de "Alta prioridad" (Readiness ≥ 55) | 55 → 55 (sin cambio) | Revisado con 5 casos frente a la fórmula preliminar (`docs/PHASE2.md` §Readiness); se mantiene con el tope | `bdf317c` |
 
-> **Cómo se guardan hoy los puntajes.** Need, Potential, Readiness, el veredicto y las alertas se calculan con funciones
-> puras a partir de las respuestas guardadas. La tabla `scores` guarda además una **copia** que se recalcula con la
-> fórmula vigente cada vez que llega una respuesta (`lib/server/diagnostic.ts`). El detalle de un lead en `/admin`
-> recalcula al leer, desde las respuestas; la lista, el embudo y el CSV leen la copia de `scores`. Por eso, si cambia un
-> peso, las filas de los leads que no vuelven a responder conservan el valor anterior hasta que se recalculen. Esto se
-> resuelve en la etapa 3 de la fase 2 (persistencia).
+> **Cómo se guardan los puntajes** (desde la etapa 3 de la fase 2, 2026-11-11). Need, Potential, Readiness, el veredicto
+> y las alertas se calculan **al leer**, con funciones puras, desde las respuestas guardadas: la lista y el detalle de
+> `/admin` usan la misma función (`lib/lead-scores.ts`: `currentScores` / `scoresFrom`; un test compara las dos con las
+> muestras), y el panel nunca lee la tabla `scores` (un test revisa la consulta). El embudo usa solo los estados y el CSV
+> no tiene columnas de puntaje. Un cambio de pesos se ve de inmediato en todos los leads.
+> `scores` es **historial**: una foto al guardar cada respuesta, con `scoring_version` = `SCORING_VERSION` de
+> `lib/scoring.ts`, que es la fecha de la última fila de esta tabla (un test lo exige). Sirve para calibrar (qué decía el
+> puntaje cuando el lead agendó o cerró). Las fotos anteriores a la migración `20261111000000_phase2.sql` quedan con
+> `scoring_version` null.

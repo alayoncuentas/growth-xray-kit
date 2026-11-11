@@ -1,23 +1,26 @@
 import "server-only";
 import { splitAnswers, unanswered, type AnswerValue, type SavedState } from "@/lib/answers";
-import { phase1, type Lang } from "@/lib/config";
+import { phase1, phase2, type Lang } from "@/lib/config";
 import { isSampleId, sampleState } from "@/lib/preview";
 import type { DiagnosticState } from "@/lib/store";
 import type { Access } from "./access";
 import { INDUSTRY_QID } from "@/lib/flow";
-import { phase1Result, teamScores } from "@/lib/scoring";
+import { answersFromRows2, blockDone, unanswered2 } from "@/lib/phase2";
+import { phase1Result, phase2Result, SCORING_VERSION, teamScores } from "@/lib/scoring";
+import type { Answers } from "@/lib/types";
 import { after } from "next/server";
 import { db, must } from "./db";
 import { sendReportEmail } from "./email";
 import { appOrigin } from "./origin";
 
-// Sesión de la fase 1 en Supabase: abrir, leer para retomar, guardar respuestas y recalcular puntajes.
-// Quien llama ya validó el código con checkAccess.
+// Sesiones de las fases 1 y 2 en Supabase: abrir, leer para retomar, guardar respuestas y la foto de puntajes.
+// Quien llama ya validó el código con checkAccess (y, en la fase 2, la entrada: lib/phase2.ts canEnterPhase2).
 
 const PHASE = 1;
+type Phase = 1 | 2;
 const STATUS_ORDER = ["sent", "opened", "p1_done", "p2_done", "booked"] as const;
 type Status = (typeof STATUS_ORDER)[number];
-type EventType = "link_opened" | "question_viewed" | "answered" | "phase_done";
+type EventType = "link_opened" | "question_viewed" | "answered" | "phase_done" | "block_done";
 
 interface SessionRow {
   id: string;
@@ -29,25 +32,30 @@ export interface Phase1State extends SavedState {
   completed: boolean;
 }
 
-async function findSession(code: string): Promise<SessionRow | null> {
+async function findSession(code: string, phase: Phase = PHASE): Promise<SessionRow | null> {
   return must(
-    await db().from("sessions").select("id, completed_at").eq("code", code).eq("phase", PHASE).maybeSingle<SessionRow>(),
+    await db().from("sessions").select("id, completed_at").eq("code", code).eq("phase", phase).maybeSingle<SessionRow>(),
     "sessions select",
   );
 }
 
 /** Una sesión por código y fase; si dos peticiones llegan juntas, la restricción única deja una sola. */
 // Abrir el link no fija el idioma de la sesión (puede abrirlo alguien del equipo): lo fijan responder y el botón EN / ES.
-async function getOrCreateSession(code: string, userAgent: string | null, lang: Lang | null = null): Promise<{ session: SessionRow; created: boolean }> {
-  const existing = await findSession(code);
+async function getOrCreateSession(
+  code: string,
+  userAgent: string | null,
+  lang: Lang | null = null,
+  phase: Phase = PHASE,
+): Promise<{ session: SessionRow; created: boolean }> {
+  const existing = await findSession(code, phase);
   if (existing) return { session: existing, created: false };
   must(
     await db()
       .from("sessions")
-      .upsert({ code, phase: PHASE, user_agent: userAgent?.slice(0, 500) ?? null, lang }, { onConflict: "code,phase", ignoreDuplicates: true }),
+      .upsert({ code, phase, user_agent: userAgent?.slice(0, 500) ?? null, lang }, { onConflict: "code,phase", ignoreDuplicates: true }),
     "sessions insert",
   );
-  const session = await findSession(code);
+  const session = await findSession(code, phase);
   if (!session) throw new Error("Supabase (sessions): session missing after insert");
   return { session, created: true };
 }
@@ -134,26 +142,31 @@ export async function startOpenSession(code: string, userAgent: string | null, l
   await Promise.all([advanceStatus(code, "opened"), logEvent(code, "link_opened", { phase: PHASE, resumed: false, open: true })]);
 }
 
+/**
+ * Foto de los puntajes en `scores` (historial, con scoring_version; docs/SPEC.md §8). Nunca se muestra como valor actual:
+ * el panel calcula al leer. Si falla (p. ej. sin la migración de la fase 2), queda en el log y la respuesta sigue guardada.
+ */
+async function snapshotScores(row: Record<string, unknown>) {
+  const res = await db()
+    .from("scores")
+    .upsert({ ...row, scoring_version: SCORING_VERSION, computed_at: new Date().toISOString() });
+  if (res.error) console.error("[scores snapshot]", res.error.message);
+}
+
 async function saveScores(sessionId: string, s: SavedState) {
   const res = phase1Result(phase1, s.answers, s.calc);
   const team = teamScores(phase1, s.answers, res.pillars, res.avg, res.calc);
-  must(
-    await db()
-      .from("scores")
-      .upsert({
-        session_id: sessionId,
-        pillars: res.pillars,
-        need: team.need,
-        potential: team.potential,
-        readiness: team.readiness,
-        archetype: res.archetype,
-        monthly_at_stake: Math.round(res.calc.monthly),
-        flags: team.flags,
-        verdict: team.verdict,
-        computed_at: new Date().toISOString(),
-      }),
-    "scores upsert",
-  );
+  await snapshotScores({
+    session_id: sessionId,
+    pillars: res.pillars,
+    need: team.need,
+    potential: team.potential,
+    readiness: team.readiness,
+    archetype: res.archetype,
+    monthly_at_stake: Math.round(res.calc.monthly),
+    flags: team.flags,
+    verdict: team.verdict,
+  });
   return res;
 }
 
@@ -202,6 +215,93 @@ export async function saveAnswer(input: {
     // El correo con el informe sale después de responder: el prospecto no espera a Resend.
     const origin = await appOrigin();
     after(() => sendReportEmail(code, origin, lang).catch((e) => console.error("[email report]", code, e)));
+    return { completed: true };
+  }
+  return { completed: done };
+}
+
+// ---------- fase 2 ----------
+
+export interface Phase2State {
+  answers: Answers;
+  started: boolean;
+  completed: boolean;
+}
+
+/** Respuestas guardadas de la fase 2 para hidratar el cliente y decidir dónde retomar. No crea la sesión. */
+export async function loadPhase2(code: string): Promise<Phase2State> {
+  const session = await findSession(code, 2);
+  if (!session) return { answers: {}, started: false, completed: false };
+  return { answers: answersFromRows2(await loadRows(session.id)), started: true, completed: !!session.completed_at };
+}
+
+/** block_done una sola vez por bloque y código. Si falla (sin la migración), queda en el log. */
+async function logBlockDone(code: string, block: string) {
+  const seen = await db().from("events").select("id").eq("code", code).eq("type", "block_done").eq("payload->>block", block).limit(1);
+  if (seen.error) return console.error("[block_done]", seen.error.message);
+  if (seen.data?.length) return;
+  const res = await db().from("events").insert({ code, type: "block_done", payload: { phase: 2, block } });
+  if (res.error) console.error("[block_done]", res.error.message);
+}
+
+/**
+ * Guarda una respuesta de la fase 2 ya validada (lib/phase2.ts validateAnswer2), registra `answered`, `block_done` al
+ * cerrar un bloque por primera vez, y la foto de puntajes de las dos fases. Con `complete` y sin preguntas pendientes,
+ * cierra la fase 2: `phase_done` (phase 2) y estado `p2_done`.
+ */
+export async function saveAnswer2(input: {
+  code: string;
+  questionId: string;
+  value: string | string[];
+  complete: boolean;
+  userAgent: string | null;
+  lang: Lang;
+}): Promise<{ completed: boolean }> {
+  const { code, questionId, value, lang } = input;
+  const p1 = await findSession(code, 1);
+  if (!p1?.completed_at) throw new Error("Phase 2 answer without a completed Phase 1");
+  const { session } = await getOrCreateSession(code, input.userAgent, lang, 2);
+  const now = new Date().toISOString();
+
+  const [rows1, rows2] = await Promise.all([
+    loadRows(p1.id),
+    loadRows(session.id),
+    db()
+      .from("answers")
+      .upsert({ session_id: session.id, question_id: questionId, value, answered_at: now })
+      .then((r) => must(r, "answers upsert")),
+    db().from("sessions").update({ last_question_id: questionId, lang }).eq("id", session.id).then((r) => must(r, "sessions update")),
+    logEvent(code, "answered", { phase: 2, question_id: questionId, value }),
+  ]);
+
+  const s1 = splitAnswers(phase1, rows1);
+  // Las filas se leen en paralelo con el upsert: pueden traer ya el valor nuevo. "before" no incluye esta pregunta (si ya
+  // estaba respondida y el bloque cerrado, logBlockDone no lo repite: consulta events).
+  const before = answersFromRows2(rows2.filter((r) => r.question_id !== questionId));
+  const after: Answers = { ...before, [questionId]: value };
+  const res = phase2Result(phase1, s1.answers, s1.calc, phase2, after);
+  const sit = res.situation;
+
+  const block = phase2.questions.find((q) => q.id === questionId)?.block;
+  if (block && !blockDone(phase2, before, sit, block) && blockDone(phase2, after, sit, block)) await logBlockDone(code, block);
+
+  await snapshotScores({
+    session_id: session.id,
+    pillars: res.pillars,
+    need: res.team.need,
+    potential: res.team.potential,
+    readiness: res.team.readiness,
+    archetype: res.phase1.archetype,
+    monthly_at_stake: Math.round(res.phase1.calc.monthly),
+    flags: [...res.team.flags, ...res.team.phase2Flags],
+    verdict: res.team.verdict,
+  });
+
+  const done = !!session.completed_at;
+  if (input.complete && !done && unanswered2(phase2, after, sit).length === 0) {
+    must(await db().from("sessions").update({ completed_at: now }).eq("id", session.id).is("completed_at", null), "sessions complete");
+    await Promise.all([advanceStatus(code, "p2_done"), logEvent(code, "phase_done", { phase: 2, index: res.index })]);
+    // El correo con el informe completo llega en la etapa 5 (docs/SPEC.md §4).
     return { completed: true };
   }
   return { completed: done };
